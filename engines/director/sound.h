@@ -157,7 +157,7 @@ class DirectorSound {
 
 private:
 	Window *_window;
-	Common::Array<SoundChannel> _channels;
+	Common::HashMap<int, SoundChannel *> _channels;
 	Audio::SoundHandle _scriptSound;
 	Audio::Mixer *_mixer;
 	Audio::PCSpeaker *_speaker;
@@ -193,10 +193,6 @@ public:
 	void loadSampleSounds(uint type);
 	void unloadSampleSounds();
 
-	void setLastPlayedSound(uint8 soundChannel, SoundID soundId, bool stopOnZero = true);
-	bool isLastPlayedSound(uint8 soundChannel, const SoundID &soundId);
-	bool shouldStopOnZero(uint8 soundChannel);
-
 	bool isChannelPuppet(uint8 soundChannel);
 	void setPuppetSound(SoundID soundId, uint8 soundChannel);
 	void playPuppetSound(uint8 soundChannel);
@@ -209,13 +205,17 @@ public:
 	bool fadeChannel(uint8 soundChannel);
 
 	bool isChannelActive(uint8 soundChannel);
+	uint8 getChannelVolume(uint8 soundChannel);
 	void stopSound(uint8 soundChannel);
 	void stopSound();
 
 private:
-	uint8 getChannelVolume(uint8 soundChannel);
+	void setLastPlayedSound(uint8 soundChannel, SoundID soundId, bool stopOnZero = true);
+	bool isLastPlayedSound(uint8 soundChannel, const SoundID &soundId);
+	bool shouldStopOnZero(uint8 soundChannel);
+
 	void setSoundLevelInternal(uint8 soundChannel, uint8 soundLevel);
-	bool isChannelValid(uint8 soundChannel);
+	bool assertChannel(int soundChannel);
 	void cancelFade(uint8 soundChannel);
 };
 

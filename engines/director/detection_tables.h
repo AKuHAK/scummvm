@@ -117,6 +117,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "csi",				"CSI: Crime Scene Investigation" },
 	{ "csidarkmotives",		"CSI: Crime Scene Investigation - Dark Motives" },
 	{ "csimiami",			"CSI: Miami" },
+	{ "cutemachine",		"The Cute machine" },
 	{ "daedalus",			"The Daedalus Encounter" },
 	{ "darkeye",			"The Dark Eye" },
 	{ "dazzeloids",			"Dazzeloids" },
@@ -559,6 +560,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "isscommerce",		"International Space Station: Space Commercialization" },
 	{ "itc",				"Internet the City: A Guided Tour Through the Internet" },
 	{ "journey2life",		"The Journey to Life" },
+	{ "journey2source",		"Journey to the Source: An Expedition along the Yangtze River" },
 	{ "klondikegold",		"Klondike Gold - An Interactive History" },
 	{ "learningcoreldraw3",	"Learning CorelDRAW 3" },
 	{ "laughingbird",		"The Laughing Bird Restaurant" },
@@ -851,6 +853,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "dieveteranen",		"Die Veteranen: So nutzlos wie eine Fuge von Bach" },
 	{ "dudenmeyer",			"Duden/Meyer Multimedia sampler" },
 	{ "flaschenfahrrad",	"Das Verkehrs-Lernspiel: Fred und das Flaschenfahrrad" },
+	{ "frankiekaraoke",		"Frankie Tierwelt Karaoke" },
 	{ "girlspack",			"Girl's Pack!" },
 	{ "glitzerschuppen",	"Der Regenbogenfisch Die Suche Nach Den Glitzerschuppen" },
 	{ "globiabc",			"Globi's ABC" },
@@ -870,11 +873,14 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "max3",				"Max and the Haunted Castle" },
 	{ "mrmore",				"Mr. More Interaktive" },
 	{ "otelo",				"o.tel.o Online 01011" },
+	{ "ponkymath12",		"Durchstarten mit Ponky: Mathe 1. + 2. Klasse" },
 	{ "ravecard2001",		"Ravecard 2001" },
 	{ "ravensburger",		"Ravensburger Interactive Demo-Sampler" },
 	{ "raveshuttle",		"Rave Shuttle: The Cosmic Challenge" },
 	{ "ritterrost",			"Ritter Rost - Die Eiserne Burg" },
 	{ "sachabenteuer",		"Toggolino Sachabenteuer" },
+	{ "schulerhilfemath1",	"Schülerhilfe Mathe: Klasse 1." },
+	{ "schulerhilfemath2",	"Schülerhilfe Mathe: Klasse 2." },
 	{ "tkkgkit",			"TKKG: Identikit" },
 	{ "zwergnase",			"Zwerg Nase: Ein interaktives Märchen" },
 
@@ -1981,6 +1987,7 @@ static const DirectorGameDescription gameDescriptions[] = {
 	MACDEMO1_l("ganbareinuchan2", "Demo", "xn--n8jyc6a7frdqb0ywhp41xex4bh34xxa2b", "8ea9e9a699c61edddffd79ddd0c994d7", 290398, Common::JA_JPN, 402),
 
 	MACGAME1_l("ganbareinuchan2", "", "INUCHAN2", "0c7bbb4b24823e5ab871cb4c1d6f3710", 483187, Common::JA_JPN, 404),
+	WINGAME1t_l("ganbareinuchan2", "", "INUCHAN2.EXE", "9a2ad46629d992ba5ad9fbe3ae5554bc", 739941, Common::JA_JPN, 404),
 
 	WINGAME1_l("henachoco", "", "HENADB.EXE", "b1f5f97ce93cafe828621843ff05df76", 2366787, Common::JA_JPN, 400),
 
@@ -2453,6 +2460,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 
 	// Original filename is JOINT-net/DEMO
 	MACDEMO1_l("jointnet", "Demo", "JOINT-net-DEMO", "9f0bb7ec7720e4f680ee3aa3d22c1c9d", 895326, Common::JA_JPN, 300),
+
+	MACGAME1t("journey2source", "", "The Source Folder/Journey to the Source", "ea32bab5edb60ce30994f0e7e21bf5e6", 656387, 300),
 
 	// HyperCard game calls movie using external MacroMind Player
 	MACGAME2_l("jyajya", "", "MacroMind Player", "f5277c53bacd27936158dd3867e587e2", 390204,
@@ -4911,6 +4920,7 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME2_l("petel", "", "START.EXE", "t:df604411b447d6eea92f5451776b06d3", 690453,
 							"START.DIR", "t:a8495b1e4560b603e93ca1db48513db8", 10596, Common::HE_ISR, 404),
 
+	MACGAME1t_l("phibos", "", "PHIBOS", "099e1816b00984093ac17927f1f9cd2c", 501849, Common::JA_JPN, 404),
 	WINGAME1t_l("phibos", "", "PHIBOS.EXE", "298f47fd72d3f3cee220c25dd797dbb4", 747095, Common::JA_JPN, 404),
 
 	MACGAME1_l("planetdob", "", "Planet Dob", "01be45e7241194dad07938e7059b88e3", 484095, Common::JA_JPN, 404),
@@ -5825,6 +5835,9 @@ static const DirectorGameDescription gameDescriptions[] = {
 	MACGAME1("crystalskull",  "", "Crystal Skull", "c148f66ae3511fb88733102aa27efe7e", 719459,  501),
 	WINGAME1t("crystalskull", "", "CRYS32.EXE",	   "3f5fd025e808943e1fa9b91ce63ef9b7", 1410495, 501),
 
+	WINGAME1("cutemachine", "Windows 3.1", "CUTE.EXE", "2e62abdad839e42068afdcd0644d7dcf", 920035, 500),
+	WINGAME1("cutemachine", "Windows 95", "clickhere.exe", "3460ad87d2ba57104e2810a77b53c220", 1396405, 500),
+
 	WINGAME2("davidsonps", "v1.0", "DPS32.EXE",	  "3460ad87d2ba57104e2810a77b53c220", 1401517,
 								   "DPSHOT.DXR",  "d980c9272bc723c57238a31790b71f11", 1354686, 500),
 	// Developed by Wag the Dog Productions
@@ -6484,6 +6497,10 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME1t_l("rolypolys", "",	 "KOTOWZ32.EXE", "b2afd5fd125c07052c26a9210d1fbd69", 1411360, Common::JA_JPN, 501),
 	WINDEMO1t_l("rolypolys2", "Demo", "DEMO32.EXE",	 "a08e306c9beca27115c25f934f89dbda", 1411230, Common::JA_JPN, 501),
 	MACDEMO1_l("rolypolys2", "Banabana 1-go Demo", "xn--1-jguha2ab3kr732a", "1da813df08575abf9f94ec1151852005", 719664, Common::JA_JPN, 501),
+	MACGAME1t_l("rolypolys2", "", "xn--1-oguawb0115c", "e017d8408acb387c53add0be7f2733fc", 721947, Common::JA_JPN, 501),
+	// Decomposed variant of the above
+	MACGAME1t_l("rolypolys2", "", "xn--1-vdua9qb0ac7113e", "e017d8408acb387c53add0be7f2733fc", 721947, Common::JA_JPN, 501),
+	WINGAME1t_l("rolypolys2", "", "WINSTART/RP2.EXE", "7a37411203e932ab057ea73481354941", 1410466, Common::JA_JPN, 501),
 
 	// Original Mac filename is ロンロン
 	// Original Win filename is ロンロン.EXE
@@ -8167,6 +8184,10 @@ static const DirectorGameDescription gameDescriptions[] = {
 
 	WINGAME1("fractiondecimal", "", "Fd.exe", "e24d4bab978b1a5c2326d2c56cf4d781", 4775506, 800),
 
+	// Bundled with a German demo of Adibou 3
+	// TRAC report #14471
+	WINGAME1_l("frankiekaraoke", "", "FRANKIE TIERWELT - KARAOKE.EXE", "t:378fd2eba117bcaaa09da56e609e8c17", 2250316, Common::DE_DEU, 850),
+
 	// Found as mini-game on Chillin Out ECD from Smash Hits magazine
 	WINGAME1("freeallangels", "", "FREE ALL ANGELS.exe", "e24d4bab978b1a5c2326d2c56cf4d781", 2248678, 800),
 
@@ -8386,6 +8407,9 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME2_l("polis3", "", "launcher.exe", "0c81c84ca4966313ad27d47daba44537", 2860282,
 							 "polis3.dxr",	 "1a391250c502a1f55da5a4d0438b493d", 3533782, Common::ES_ESP, 851),
 
+	// TRAC report #14466
+	WINGAME1_l("ponkymath12", "", "Ponky.exe", "t:5b2098a2c502dfad2af75cf032add68f", 2947862, Common::DE_DEU, 800),
+
 	WINGAME1("poohb", "", "POOHBABY.EXE",		 "e24d4bab978b1a5c2326d2c56cf4d781", 2290422, 800),
 
 	MACGAME1("poohp", "", "PoohP.Mac",			 "4ea5fc09f79eee6dded94dc40f303779", 197191,  800),
@@ -8445,6 +8469,10 @@ static const DirectorGameDescription gameDescriptions[] = {
 	// Produced and developed by New Tier Inc., Scottsdale, Arizona
 	WINGAME1("saspurs2001", "", "Spurs.exe", "e24d4bab978b1a5c2326d2c56cf4d781", 5924396, 800),
 	WINGAME1("saspurs2005", "", "Spurs.exe", "98e75b2c5561f9be40aa745f35f22244", 5508840, 800),
+
+	// TRAC reports #14464-5
+	WINGAME1_l("schulerhilfemath1", "", "Lernen_M1.exe", "t:5289dab290c43955358aea9c3a1c153a", 2247878, Common::DE_DEU, 800),
+	WINGAME1_l("schulerhilfemath2", "", "Lernen_M2.exe", "t:018f01d3520a2f5f34cacfd592979985", 2246363, Common::DE_DEU, 800),
 
 	MACDEMO1("secretkeys", "Demo", "Secret Keys Demo", "a44511b8ff0e46b4f9c85dd1cb58d458", 155771, 851),
 	WINDEMO1("secretkeys", "Demo", "Secret Keys Demo.exe", "0c81c84ca4966313ad27d47daba44537", 2200706, 851),

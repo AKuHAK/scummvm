@@ -224,7 +224,7 @@ Common::Error DirectorEngine::run() {
 	_wm->setScreen(_surface);
 	_wm->addWindowInitialized(_stage);
 	_wm->setActiveWindow(_stage->getId());
-	setPalette(-1);
+	setPalette(CastMemberID(kClutSystemMac, -1));
 
 	_currentWindow = _stage;
 
@@ -290,12 +290,20 @@ Common::CodePage DirectorEngine::getPlatformEncoding() {
 	return getEncoding(getPlatform(), getLanguage());
 }
 
+Common::String DirectorEngine::getRawEXEName() const {
+	if (!_gameDescription->desc.filesDescriptions[0].fileName)
+		return Common::String();
+
+	// Returns raw executable name (without getting overloaded from --start-movie option)
+	return Common::Path(_gameDescription->desc.filesDescriptions[0].fileName).toString(g_director->_dirSeparator);
+}
+
 Common::String DirectorEngine::getEXEName() const {
 	StartMovie startMovie = getStartMovie();
 	if (startMovie.startMovie.size() > 0)
 		return startMovie.startMovie;
 
-	return Common::punycode_decodefilename(Common::lastPathComponent(_gameDescription->desc.filesDescriptions[0].fileName, '/'));
+	return getRawEXEName();
 }
 
 void DirectorEngine::parseOptions() {

@@ -1042,7 +1042,7 @@ Common::Error ScummEngine::init() {
 			// code in openResourceFile() (and in the Sound class, for MONSTER.SOU
 			// handling).
 			assert(_game.version >= 5 && _game.heversion == 0);
-			_fileHandle = new ScummFile();
+			_fileHandle = new ScummFile(this);
 			_containerFile = _filenamePattern.pattern;
 
 
@@ -1096,11 +1096,11 @@ Common::Error ScummEngine::init() {
 			if (!indexFile || indexFile->id != _game.id) {
 				error("Couldn't find index file description for Steam version");
 			} else {
-				_fileHandle = new ScummSteamFile(*indexFile);
+				_fileHandle = new ScummSteamFile(this, *indexFile);
 			}
 		} else {
 			// Regular access, no container file involved
-			_fileHandle = new ScummFile();
+			_fileHandle = new ScummFile(this);
 		}
 	}
 
@@ -1515,8 +1515,8 @@ void ScummEngine_v7::setupScumm(const Common::String &macResourceFile) {
 	// COMI demo is excluded from the count since it appears it can't be compressed
 	// DIG demo uses raw VOC files for speech instead of a MONSTER.SOU file
 	if ((_game.id == GID_CMI || _game.id == GID_DIG) && !(_game.features & GF_DEMO)) {
-		BundleDirCache *ch = new BundleDirCache();
-		BundleMgr *bnd = new BundleMgr(ch);
+		BundleDirCache *ch = new BundleDirCache(this);
+		BundleMgr *bnd = new BundleMgr(this, ch);
 		filesAreCompressed |= bnd->isExtCompBun(_game.id);
 		delete bnd;
 		delete ch;
@@ -2796,7 +2796,12 @@ void ScummEngine::scummLoop_handleSaveLoad() {
 		if (_game.version == 8 && VAR_GAME_LOADED != 0xFF)
 			VAR(VAR_GAME_LOADED) = 0;
 
+		// Launch the pre-save/load script for SAMNMAX, to properly save the cursor...
+		if (_game.version == 6 && VAR_PRE_SAVELOAD_SCRIPT != 0xFF && _currentRoom != 0)
+			runScript(VAR(VAR_PRE_SAVELOAD_SCRIPT), 0, 0, nullptr);
+
 		Common::String filename;
+
 		if (_saveLoadFlag == 1) {
 			success = saveState(_saveLoadSlot, _saveTemporaryState, filename);
 			if (!success) {
@@ -2820,13 +2825,11 @@ void ScummEngine::scummLoop_handleSaveLoad() {
 
 			if (success && (_saveTemporaryState || _game.version == 8) && VAR_GAME_LOADED != 0xFF)
 				VAR(VAR_GAME_LOADED) = (_game.version == 8) ? 1 : GAME_PROPER_LOAD;
-
-			// If we are here, it means that we are loading a game from the ScummVM menu;
-			// let's call the exit save/load script (only used in v6) to restore the cursor
-			// properly.
-			if (VAR_SAVELOAD_SCRIPT2 != 0xFF && _currentRoom != 0)
-				runScript(VAR(VAR_SAVELOAD_SCRIPT2), 0, 0, nullptr);
 		}
+
+		// ... and finally launch the post-save/load script for SAMNMAX, to restore the cursor.
+		if (_game.version == 6 && VAR_POST_SAVELOAD_SCRIPT != 0xFF && _currentRoom != 0)
+			runScript(VAR(VAR_POST_SAVELOAD_SCRIPT), 0, 0, nullptr);
 
 		if (!success) {
 			Common::U32String buf = Common::U32String::format(errMsg, filename.c_str());
@@ -3041,9 +3044,9 @@ void ScummEngine_v6::scummLoop_handleSaveLoad() {
 	// saved within the original GUI) that the cursor can remain invisible until
 	// an event changes it. The original save dialog calls the exit save/load script
 	// to reinstate the cursor correctly, so we do that manually for this edge case.
-	if (_loadFromLauncher && VAR_SAVELOAD_SCRIPT2 != 0xFF && _currentRoom != 0) {
+	if (_loadFromLauncher && VAR_POST_SAVELOAD_SCRIPT != 0xFF && _currentRoom != 0) {
 		_loadFromLauncher = false;
-		runScript(VAR(VAR_SAVELOAD_SCRIPT2), 0, 0, nullptr);
+		runScript(VAR(VAR_POST_SAVELOAD_SCRIPT), 0, 0, nullptr);
 	}
 
 	ScummEngine::scummLoop_handleSaveLoad();

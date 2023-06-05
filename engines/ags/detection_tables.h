@@ -263,6 +263,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	// Commercial games
 	{ "3geeks", "3 GEEKS" },
 	{ "aboardtheadventure","Aboard the Adventure" },
+	{ "abscission", "Abscission" },
 	{ "alemmo", "Al Emmo And The Lost Dutchman's Mine" },
 	{ "alemmoanozira", "Al Emmo's Postcards from Anozira" },
 	{ "alum", "Alum" },
@@ -289,6 +290,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "crimsondiamond","The Crimson Diamond" },
 	{ "crystalshardadventurebundle", "Crystal Shard Adventure Bundle" },
 	{ "danewguys2", "Da New Guys: Day of the Jackass" },
+	{ "detectivebhdino", "Detective Boiled-Hard - Case File: Death of the Space Dino Hunter" },
 	{ "detectivegallo", "Detective Gallo" },
 	{ "diamondsintherough", "Diamonds in the Rough" },
 	{ "docapocalypse", "Doc Apocalypse" },
@@ -334,13 +336,17 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "mybigsisterrm", "My Big Sister: Remastered" },
 	{ "nellycootalot-hd", "Nelly Cootalot: Spoonbeaks Ahoy! HD" },
 	{ "neofeud", "Neofeud" },
+	{ "nightmareframes", "Nightmare Frames" },
 	{ "odissea", "Odissea - An Almost True Story" },
+	{ "oldskies", "Old Skies" },
 	{ "oott", "Order of the Thorne: The King's Challenge" },
 	{ "perfecttides", "Perfect Tides" },
 	{ "perfidiouspetrolstation", "The Perfidious Petrol Station" },
+	{ "personalrocket", "Personal Rocket" },
 	{ "phantomfellows", "The Phantom Fellows" },
 	{ "primordia", "Primordia" },
 	{ "projectorface", "Projector Face" },
+	{ "puzzlebots", "Puzzle Bots" },
 	{ "qfi", "Quest for Infamy" },
 	{ "quantumnauts", "Quantumnauts" },
 	{ "quantumnauts2", "Quantumnauts 2" },
@@ -445,7 +451,6 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "abettermousetrap", "A Better Mouse Trap" },
 	{ "ablemabel", "Able Mabel gets a Job" },
 	{ "abominationobtainer", "Abomination Obtainer" },
-	{ "abscission", "Abscission" },
 	{ "absent", "Absent" },
 	{ "absentpart1", "Absent - Part I: Innocent Until Proven Guilty" },
 	{ "absin", "Absin - An Interactive Mystery" },
@@ -498,6 +503,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "agsawards2016", "AGS Awards Ceremony 2016" },
 	{ "agsawards2017", "AGS Awards Ceremony 2017" },
 	{ "agsawards2020", "AGS Awards Ceremony 2020" },
+	{ "agsawards2022", "AGS Awards Ceremony 2022" },
 	{ "agsawardsbp", "AGS Awards Backstage Pass" },
 	{ "agscamerastd", "AGS Cameras Tech Demo" },
 	{ "agschess", "AGS Chess" },
@@ -523,7 +529,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "aidaschristmas", "Aida's Strange Christmas" },
 	{ "aidashalloween", "Aida's Bizarre Halloween" },
 	{ "ainthegoffantabulousw", "Adventures in the Galaxy of Fantabulous Wonderment" },
-	{ "airwaveifoughtthelawandthelawone", "~airwave~ - I Fought the Law, And the Law One" },
+	{ "airwave", "~airwave~ - I Fought the Law, And the Law One" },
 	{ "alandlordsdream", "A Landlord's Dream" },
 	{ "alansaveschristmas", "Alan saves Christmas (and most of the world too)" },
 	{ "aliceinwonderlandis", "Lewis Carroll's Alice In Wonderland - an interactive storybook" },
@@ -1046,7 +1052,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "desertminer", "Desert Miner" },
 	{ "desmond", "Desmond: The 'Thing' from another world!" },
 	{ "desolate", "Desolate" },
-	{ "detectivebhmini", "Detective Boiled Hard Mini Case" },
+	{ "detectivebhmini", "Detective Boiled-Hard Mini Case" },
 	{ "detectiveobriced", "Detective O.Briced" },
 	{ "detectiverizal", "Detective Rizal and the Jaded Ruby" },
 	{ "detention", "Detention!" },
@@ -1068,6 +1074,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "disquiet", "Disquiet" },
 	{ "distancenoobject", "Distance no object" },
 	{ "djdeceased", "D. Jones: Deceased" },
+	{ "dobutsu", "Dobutsu no Costco" },
 	{ "doctormaze", "The Amazing Doctor Maze" },
 	{ "doctormuttonchop", "Doctor Muttonchop" },
 	{ "doctorwho", "Doctor Who: Time Snare" },
@@ -2159,7 +2166,6 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "niemandsland", "Das Niemandsland" },
 	{ "nightandday", "Night and Day" },
 	{ "nightmare", "Nightmare" },
-	{ "nightmareframes", "Nightmare Frames" },
 	{ "nightoftheravingfeminist", "Night of the Raving Feminist" },
 	{ "nightofthetesticle", "Night of the Testicle" },
 	{ "nightowl", "The Night Owl Murder" },
@@ -2210,7 +2216,6 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "ohitschristmas", "Oh, it's Christmas" },
 	{ "ohnonotagain", "Oh no not again!" },
 	{ "oldmansea", "The Old Man and the Sea" },
-	{ "oldskies", "Old Skies" },
 	{ "olol", "Olol" },  // aka Custard's 1 hour game
 	{ "omfgparadox", "OMFGPARADOX!" },
 	{ "omnipotenttarot", "Omnipotent Tarot" },
@@ -2318,7 +2323,6 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "perelman", "Perelman" },
 	{ "perilsofpoom", "Perils of Poom" },
 	{ "persephonediary", "Persephone's Diary: Secrets of the South" },
-	{ "personalrocket", "Personal Rocket" },
 	{ "pesterquest", "Pester Quest: From n00b to newb" },
 	{ "petshopincident", "The Pet Shop Incident" },
 	{ "petalrose", "Petals Around the Rose" },
@@ -2427,7 +2431,6 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "purposeretired", "Purpose : Retired" },
 	{ "pussiehunt", "Pussie Hunt" },
 	{ "puzzlepumice", "Puzzle of the Pulchritudinous Pumice" },
-	{ "puzzlebots", "Puzzle Bots" },
 	{ "pxenophobe", "Project Xenophobe" },
 	{ "qfheroes", "Quest for Heroes" },
 	{ "questblackdiamond", "The Quest for the Black Diamond" },
@@ -3775,8 +3778,6 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	// Commercial game that likely uses custom extensions. Not only does it seem
 	// to use AGSController plugin built-in, even when I hooked up AGSController for
 	// the stand-alone AGS 3.5 interpreter, it hangs just like in ScummVM
-	UNSUPPORTED_DEMO_ENTRY("untilihaveyou", "until i have you.exe", "cda1d7e36993dd55ba5513c1c43e5b2b", 457842687),
-	UNSUPPORTED_GAME_ENTRY("untilihaveyou", "until i have you.exe", "cda1d7e36993dd55ba5513c1c43e5b2b", 1089857773), // Steam
 	UNSUPPORTED_GAME_ENTRY("untilihaveyou", "until i have you.exe", "cda1d7e36993dd55ba5513c1c43e5b2b", 1072879555),
 	// 2.55 game, but uses a plugin agsflashlight. Also, even with AGS interpreter
 	// hacked to specify plugin, errors on loading room107 saying that
@@ -3900,6 +3901,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("cosmosquest3", "cq3.exe", "18b284c22010850f79bc5c20054a70c4", 8674790),
 	GAME_ENTRY_STEAM("crystalshardadventurebundle", "bundle.exe", "1c45d5c239d9eeef61e283983b6e6851", 4645713),  // Multilang
 	GAME_ENTRY_EN("danewguys2", "jackass.exe", "029aab0fef5e9fff7b95ddf5d79d7718", 23932842), // Humble Store
+	GAME_ENTRY_EN_STEAM("detectivebhdino", "Detective Boiled-Hard  Case File - Death of the Space Dino Hunter.exe", "4d5d25446373d4df71c6bda77a15230a", 49618396),
 	GAME_ENTRY_STEAM("detectivegallo", "dgbuild.exe", "2e0678b5642c64e057022a79742743fb", 90740554),  // Multilang
 	GAME_ENTRY_GOG("detectivegallo", "dgbuild.exe", "2e0678b5642c64e057022a79742743fb", 90740772),
 	GAME_ENTRY("detectivegallo", "dgbuild.exe", "2e0678b5642c64e057022a79742743fb", 90713626), // Big Box Limited Edition DVD
@@ -3918,6 +3920,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN_GOG("dreamswitchhouse", "Dreams in the Witch House.exe", "160d78e898924f5cb1347b13746cc935", 484783215),  // v1.04
 	GAME_ENTRY_EN_GOG("dreamswitchhouse", "Dreams in the Witch House.exe", "160d78e898924f5cb1347b13746cc935", 484795246),  // v1.05
 	GAME_ENTRY_EN_GOG("dreamswitchhouse", "Dreams in the Witch House.exe", "160d78e898924f5cb1347b13746cc935", 484837277),  // v1.06
+	GAME_ENTRY_EN_GOG("dreamswitchhouse", "Dreams in the Witch House.exe", "160d78e898924f5cb1347b13746cc935", 484844189),  // v1.07
 	GAME_ENTRY_EN_STEAM("dreamswitchhouse", "Dreams in the Witch House.exe", "160d78e898924f5cb1347b13746cc935", 484795038),  // v1.05
 	GAME_ENTRY_EN_STEAM("dustbowl", "dustbowl.exe", "aa349d52fd620cf9642935cd5bdec5d8", 63365026),
 	GAME_ENTRY_EN("dustbowl", "dustbowl.exe", "aa349d52fd620cf9642935cd5bdec5d8", 82185295),
@@ -3953,10 +3956,19 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY("geminirue", "ac2game.dat", "e8f1d07a6b363e9cc80dac5367f1b4ba", 72836785), // MacOS, Humble Bundle
 	GAME_ENTRY_EN_STEAM("ghostdream", "ghostdream.exe", "05594881531d62e4575545f3c8fd2576", 480856325),
 	GAME_ENTRY_EN_STEAM("ghostman", "Rebut And Ghostman.exe", "0241777c2537fc5d077c05cde10bfa9f", 10312749),
+	// Original release 2023-08-02
 	GAME_ENTRY("gobliiins5-1", "Gobliiins5-Part1.exe", "t:684f59952b168c26b45556d1560bb590", 174840675),
 	GAME_ENTRY("gobliiins5-2", "Gobliiins5-Part2.exe", "t:5f753c3b1df583397cf016d3bcf4bf64", 144263518),
 	GAME_ENTRY("gobliiins5-3", "Gobliiins5-Part3.exe", "t:a6d99497f108311308e812b5ba904d95", 176338687),
 	GAME_ENTRY("gobliiins5-4", "Gobliiins5-Part4.exe", "t:1f2401479d4104539d54a4d11a713044", 352399933),
+	// Bugfix release  2023-05-08
+	GAME_ENTRY("gobliiins5-1", "Gobliiins5-Part1.exe", "t:684f59952b168c26b45556d1560bb590", 174840596),
+	GAME_ENTRY("gobliiins5-2", "Gobliiins5-Part2.exe", "t:5f753c3b1df583397cf016d3bcf4bf64", 144263538),
+	GAME_ENTRY("gobliiins5-3", "Gobliiins5-Part3.exe", "t:a6d99497f108311308e812b5ba904d95", 176341869),
+	GAME_ENTRY("gobliiins5-4", "Gobliiins5-Part4.exe", "t:1f2401479d4104539d54a4d11a713044", 352414577),
+	// Bugfix release  2023-05-14
+	GAME_ENTRY("gobliiins5-3", "Gobliiins5-Part3.exe", "t:a6d99497f108311308e812b5ba904d95", 176342992),
+
 	GAME_ENTRY_EN_STEAM("goldenwake", "a-golden-wake.exe", "dbe281d93c914899886e77c09c3c65ec", 130844360), // Linux & Mac
 	GAME_ENTRY_EN_STEAM("goldenwake", "a-golden-wake.exe", "e7080df9729aae2a0097b752198f3cca", 130846774),
 	GAME_ENTRY_EN_STEAM("goldenwake", "a-golden-wake.exe", "409b71f7b73f30bef5098c6449505c1a", 130929070),  // Windows
@@ -4144,6 +4156,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("theantidote", "The Antidote.exe", "4017d881af6467d6aad9183e6e38a261", 325819947),
 	GAME_ENTRY_EN_STEAM("thebeardinthemirror", "the beard in the mirror.exe", "4d4b6d6e560cf32f440c39f8d3896da5", 40637501),
 	GAME_ENTRY_STEAM("thecastle", "maniac.exe", "3b96c2143d927f005715be73344e456c", 22362337),  // En-Es-It
+	GAME_ENTRY_STEAM("thecastle", "maniac.exe", "f39cba038b386d28fbcf869556c090c1", 23317965),  // En-De-Es-It
 	GAME_ENTRY_GOG("thecatlady", "thecatlady.exe", "0ea2b985dc5d7d27cb7c1b7da5eedea0", 1072316702),  // Multilang
 	GAME_ENTRY_STEAM("thecatlady", "thecatlady.exe", "0ea2b985dc5d7d27cb7c1b7da5eedea0", 53988582),
 	GAME_ENTRY("thecatlady", "Cat Lady.exe", "92320e20e3d4c70a94d89e2f797e65c1", 1061000756), // DVD
@@ -4165,6 +4178,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN_GOG("unavowed", "Unavowed.exe", "52c411caa3bfb65788ed8768ceaa0c30", 1756040362), // Linux/Windows v.1.0.0 (GOG v1.31)
 	GAME_ENTRY_EN_GOG("unavowed", "Unavowed.exe", "52c411caa3bfb65788ed8768ceaa0c30", 1756041833), // Linux/Windows v.1.0.1 (GOG v1.32)
 	GAME_ENTRY_EN_GOG("unavowed", "Unavowed.exe", "52c411caa3bfb65788ed8768ceaa0c30", 1756042001), // Linux/Windows v.1.0.2 (GOG v1.4)
+	GAME_ENTRY_EN_STEAM("untilihaveyou", "until i have you.exe", "cda1d7e36993dd55ba5513c1c43e5b2b", 1089857773), // Steam
 	GAME_ENTRY_EN_STEAM("waitingfortheloop", "waitingfortheloop.exe", "0241777c2537fc5d077c05cde10bfa9f", 51472537),
 	GAME_ENTRY_EN("waitingfortheloop", "waitingfortheloop.exe", "0241777c2537fc5d077c05cde10bfa9f", 51273604),
 	GAME_ENTRY("welcometosunnymunarvagir", "alpha4.ags", "392dbdd0697ae32af4cfe5212f9213c5", 23000263),
@@ -4227,6 +4241,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	DEMO_ENTRY_EN("aboardtheadventure", "Aboard.exe", "3c3f8f6c6fdcc519464477d3627b60f6", 125813308),
 	DEMO_ENTRY_EN("abscission", "Abscission.exe", "418a9aaa044bfc5b7a79ba96fe679b60", 54341372),  // v1.0.3
 	DEMO_ENTRY_EN("abscission", "Abscission Demo.exe", "418a9aaa044bfc5b7a79ba96fe679b60", 311033029),  // Steam
+	DEMO_ENTRY_EN("abscission", "Abscission Demo.exe", "7633f0919378749cebf6dacba61ca0e1", 313386788),  // Steam
 	DEMO_ENTRY_EN("absurdistan", "Absurdistan - Demo.exe", "4588012d3077d6b6791fce8cd4b15885", 35712363),  // v1.3
 	DEMO_ENTRY_EN("acaixa", "A caixa.exe", "f434ba41ed68ef8d5224254027aad1f4", 48866212),
 	DEMO_ENTRY_EN("acuriouspastime", "Curious.exe", "3e46b32a00fd4e6b9f68754f854695c5", 27346489),
@@ -4699,6 +4714,8 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	DEMO_ENTRY_LANG("tsomi2", "The Secret of Monkey Island 2.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 5075308, Common::ES_ESP),
 	DEMO_ENTRY_LANG("ultimalatinvii", "UltimaVIILatin1.0.exe", "63f8a60cc094996bd070e68cb3c4722c", 83843416, Common::ES_ESP),  // v1.00 demo/beta
 	GAME_ENTRY_LANG_PLATFORM("ultimalatinvii", "UltimaLauncher.exe", "63f8a60cc094996bd070e68cb3c4722c", 9065961, Common::ES_ESP, "Launcher"),
+	DEMO_ENTRY_EN("untilihaveyou", "until i have you.exe", "cda1d7e36993dd55ba5513c1c43e5b2b", 457842687),
+	DEMO_ENTRY_EN("untilihaveyou", "Until I Have You Demo.exe", "cda1d7e36993dd55ba5513c1c43e5b2b", 479749741),
 	DEMO_ENTRY_EN("updatequest", "U-Quest.exe", "06a03fe35791b0578068ab1873455463", 1776804),
 	DEMO_ENTRY_EN("valis", "valis 0.70.exe", "0710e2ec71042617f565c01824f0cf3c", 4348394),
 	DEMO_ENTRY_LANG("villard", "VMF_DEMO 2.0.1.exe", "534f936a0fac0c6f72b6ce6aaa6c9ce2", 653406938, Common::IT_ITA),
@@ -4822,6 +4839,9 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("agsawards2017", "AGS Awards 2017.exe", "78dd4ca028ee0156b6a093d6d780aa65", 799003462),
 	GAME_ENTRY_EN("agsawards2020", "AGS Awards 2020.exe", "1466cb5cd32c5ce4a4dbc6e4975f8991", 346110549),
 	GAME_ENTRY_EN("agsawards2020", "AGS Awards 2020.exe", "1466cb5cd32c5ce4a4dbc6e4975f8991", 346114803),
+	GAME_ENTRY_EN("agsawards2022", "AGS Awards 2022.exe", "e0c91ac3e4bbfad799b958afb5878d32", 926641116),  // Win
+	GAME_ENTRY_EN("agsawards2022", "AGS Awards 2022.ags", "2abf435d01917e3a598fc370dfe43af0", 923130246),  // Linux
+	GAME_ENTRY_EN("agsawards2022", "ac2game.dat", "2abf435d01917e3a598fc370dfe43af0", 923130246),  // Mac
 	GAME_ENTRY_EN("agsawardsbp", "AGS Awards Backstage Pass.exe", "82da2565c456dcfb265ded6fe3189c0b", 6458787),
 	GAME_ENTRY_EN("agscamerastd", "camdemo.exe", "17009da9820f5aa86d0588023d497db8", 26012159),  // Windows
 	GAME_ENTRY_EN("agscamerastd", "camdemo.ags", "4e6e999d090581aea259ee10428d5628", 22977515),  // Linux
@@ -4851,7 +4871,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("aidashalloween", "Aida's Bizarre Halloween.exe", "18f5fd85de78efca16c7bafce54e3f63", 23337412),
 	GAME_ENTRY_EN("ainthegoffantabulousw", "gfw.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 7991208),
 	GAME_ENTRY_EN("ainthegoffantabulousw", "gfw.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 7991393),
-	GAME_ENTRY_EN("airwaveifoughtthelawandthelawone", "~airwave~.exe", "18456f28d9bf843b087e80072c85beca", 22521544),
+	GAME_ENTRY_EN("airwave", "~airwave~.exe", "18456f28d9bf843b087e80072c85beca", 22521544),
 	GAME_ENTRY_EN_PLATFORM("alandlordsdream", "Game.exe", "0241777c2537fc5d077c05cde10bfa9f", 6212265, "MAGS"),  // v1.1
 	GAME_ENTRY("alandlordsdream", "Game.exe", "9cd9563150a69bc1d4eacda0ff3557f8", 7197801),  // v1.2 En-Es-It
 	GAME_ENTRY("alandlordsdream", "Game.exe", "7db052bc30700d1f30f5330f5814f519", 8060425),  // v1.4?
@@ -5534,6 +5554,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("distancenoobject", "Distance no object.exe", "5cca0f8af961d2bc1c6e475437d3b23b", 98011325),  // Windows
 	GAME_ENTRY_EN("distancenoobject", "Distance no object.ags", "60b1978b591c4ffcb63e81e69d425343", 94977705),  // Linux
 	GAME_ENTRY_EN("djdeceased", "RON.exe", "0710e2ec71042617f565c01824f0cf3c", 1175250),
+	GAME_ENTRY_EN("dobutsu", "Dobutsu no Costco.exe", "b781cc4ab0fbe647615fafa4830ec308", 29725433),
 	GAME_ENTRY_EN("doctormaze", "Maze.exe", "825ccacaabe2a3b0cd48d6f8deb42d72", 43934617),
 	GAME_ENTRY_EN("doctormuttonchop", "muttonchop.exe", "57e261dd3bb45761af4a002775e45710", 5781714),
 	GAME_ENTRY_EN("doctormuttonchop", "muttonchop.exe", "57e261dd3bb45761af4a002775e45710", 5847364),
@@ -5621,8 +5642,10 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("elegantmurdermystery", "DH.exe", "0b7529a76f38283d6e850b8d56526fc1", 2098899),
 	GAME_ENTRY_EN_PLATFORM("elevation", "Elevation.ags", "bf06b9759714464c095e1c1e597f1e86", 4362276, "Beta"),  // Linux
 	GAME_ENTRY_EN_PLATFORM("elevation", "Elevation.ags", "3063ec0d8db8305d1dc61d7862650f11", 4363999, "Beta"),
+	GAME_ENTRY_EN("elevation", "Elevation.ags", "46d792c62262d9f83e476f96a4bfb74b", 4490040),
 	GAME_ENTRY_EN_PLATFORM("elevation", "Elevation.exe", "2f2bc0b9c539d20529c0e343315d5f65", 7471160, "Beta"),  // Windows
 	GAME_ENTRY_EN_PLATFORM("elevation", "Elevation.exe", "2f2bc0b9c539d20529c0e343315d5f65", 7472883, "Beta"),
+	GAME_ENTRY_EN("elevation", "Elevation.exe", "82e7377dcb9236fc9b622e12baa64a49", 7605580),
 	GAME_ENTRY_EN("elevator", "Elevator.exe", "f10516e88ec858700804ee69d041aead", 29506915),
 	GAME_ENTRY_EN("elevatorriseabyss", "T_E_R.exe", "f120690b506dd63cd7d1112ea6af2f77", 13366126),
 	GAME_ENTRY_LANG("elfer", "socer.exe", "e88fd6a23a5e498d7b0d50e3bb914085", 1911767, Common::DE_DEU),

@@ -55,6 +55,9 @@ public:
 	void setPicture(PictureReference &picture);
 	void setPicture(Image::ImageDecoder &image, bool adjustSize);
 
+	Common::Point getRegistrationOffset() override;
+	Common::Point getRegistrationOffset(int16 width, int16 height) override;
+
 	Picture *_picture = nullptr;
 	Graphics::Surface *_ditheredImg;
 	Graphics::FloodFill *_matte;
@@ -64,10 +67,10 @@ public:
 	uint16 _regY;
 	uint16 _flags2;
 	uint16 _bytes;
-	int _clut;
-	int _ditheredTargetClut;
+	CastMemberID _clut;
+	CastMemberID _ditheredTargetClut;
 
-	uint16 _bitsPerPixel;
+	uint8 _bitsPerPixel;
 
 	uint32 _tag;
 	bool _noMatte;

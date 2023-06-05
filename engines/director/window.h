@@ -118,12 +118,12 @@ public:
 	// transitions.cpp
 	void exitTransition(TransParams &t, int step, Graphics::ManagedSurface *nextFrame, Common::Rect clipRect);
 	void stepTransition(TransParams &t, int step);
-	void playTransition(uint frame, uint16 transDuration, uint8 transArea, uint8 transChunkSize, TransitionType transType, int paletteId);
+	void playTransition(uint frame, uint16 transDuration, uint8 transArea, uint8 transChunkSize, TransitionType transType, CastMemberID paletteId);
 	void initTransParams(TransParams &t, Common::Rect &clipRect);
 	void dissolveTrans(TransParams &t, Common::Rect &clipRect, Graphics::ManagedSurface *tmpSurface);
 	void dissolvePatternsTrans(TransParams &t, Common::Rect &clipRect, Graphics::ManagedSurface *tmpSurface);
 	void transMultiPass(TransParams &t, Common::Rect &clipRect, Graphics::ManagedSurface *tmpSurface);
-	void transZoom(TransParams &t, Common::Rect &clipRect, Graphics::ManagedSurface *tmpSurface);
+	void transZoom(TransParams &t, Common::Rect &clipRect, Graphics::ManagedSurface *currentFrame, Graphics::ManagedSurface *nextFrame);
 
 	// window.cpp
 	Common::Point getMousePos();
@@ -139,9 +139,11 @@ public:
 
 	void setWindowType(int type) { _windowType = type; updateBorderType(); }
 	int getWindowType() const { return _windowType; }
-	void setTitleVisible(bool titleVisible) { _titleVisible = titleVisible; updateBorderType(); };
-	bool isTitleVisible() { return _titleVisible; };
+	void setTitleVisible(bool titleVisible) override;
 	Datum getStageRect();
+	bool setStageRect(Datum datum);
+	void setModal(bool modal);
+	bool getModal() { return _isModal; };
 
 	void updateBorderType();
 
@@ -214,7 +216,7 @@ private:
 	int16 _startFrame;
 
 	int _windowType;
-	bool _titleVisible;
+	bool _isModal;
 
 private:
 

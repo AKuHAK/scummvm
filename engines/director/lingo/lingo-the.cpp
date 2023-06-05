@@ -393,6 +393,9 @@ Datum Lingo::getTheEntity(int entity, Datum &id, int field) {
 	case kTheCast:
 		d = getTheCast(id, field);
 		break;
+	case kTheCastlibs: // D5
+		d = getCastlibsNum();
+		break;
 	case kTheCastMembers:
 		d = (int)(movie->getCast()->getCastSize() + (movie->_sharedCast ? movie->_sharedCast->getCastSize() : 0));
 		break;
@@ -801,12 +804,7 @@ Datum Lingo::getTheEntity(int entity, Datum &id, int field) {
 		{
 			switch (field) {
 			case kTheVolume:
-				{
-					SoundChannel *chan = _vm->getCurrentWindow()->getSoundManager()->getChannel(id.asInt());
-					if (chan) {
-						d = (int)chan->volume;
-					}
-				}
+				d = _vm->getCurrentWindow()->getSoundManager()->getChannelVolume(id.asInt());
 				break;
 			default:
 				warning("Lingo::getTheEntity(): Unprocessed getting field \"%s\" of entity %s", field2str(field), entity2str(entity));
@@ -897,6 +895,9 @@ Datum Lingo::getTheEntity(int entity, Datum &id, int field) {
 		break;
 	case kTheWindowList:
 		d = g_lingo->_windowList;
+		break;
+	case kTheXtras: // D5
+		d = getXtrasNum();
 		break;
 	default:
 		warning("Lingo::getTheEntity(): Unprocessed getting field \"%s\" of entity %s", field2str(field), entity2str(entity));
@@ -1225,6 +1226,14 @@ int Lingo::getMenuNum() {
 	return g_director->_wm->getMenu()->numberOfMenus();
 }
 
+int Lingo::getCastlibsNum() {
+	return _vm->getCurrentMovie()->getCasts()->size();
+}
+
+int Lingo::getXtrasNum() {
+	return _openXLibs.size();
+}
+
 int Lingo::getMenuItemsNum(Datum &d) {
 	if (d.type != MENUREF) {
 		warning("Datum of wrong type: Expected MENUREF, got '%d'", d.type);
@@ -1536,9 +1545,7 @@ void Lingo::setTheSprite(Datum &id1, int field, Datum &d) {
 			movie->getWindow()->addDirtyRect(channel->getBbox());
 			channel->_dirty = true;
 		}
-
-		channel->_currentPoint.x = d.asPoint().x;
-		channel->_currentPoint.y = d.asPoint().y;
+		channel->setPosition(d.asPoint().x, d.asPoint().y);
 		break;
 	case kTheLocH:
 		if (d.asInt() != channel->_currentPoint.x) {
@@ -1548,7 +1555,7 @@ void Lingo::setTheSprite(Datum &id1, int field, Datum &d) {
 				movie->getWindow()->addDirtyRect(channel->getBbox());
 				channel->_dirty = true;
 			}
-			channel->_currentPoint.x = d.asInt();
+			channel->setPosition(d.asInt(), channel->_currentPoint.y);
 		}
 		break;
 	case kTheLocV:
@@ -1557,7 +1564,7 @@ void Lingo::setTheSprite(Datum &id1, int field, Datum &d) {
 				movie->getWindow()->addDirtyRect(channel->getBbox());
 				channel->_dirty = true;
 			}
-			channel->_currentPoint.y = d.asInt();
+			channel->setPosition(channel->_currentPoint.x, d.asInt());
 		}
 		break;
 	case kTheMoveableSprite:

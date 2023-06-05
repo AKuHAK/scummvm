@@ -6,6 +6,7 @@ MODULE_OBJS := \
 	demo.o \
 	freescape.o \
 	games/castle.o \
+	games/dark/amiga.o \
 	games/dark/dark.o \
 	games/dark/dos.o \
 	games/dark/zx.o \
@@ -26,6 +27,7 @@ MODULE_OBJS := \
 	movement.o \
 	neo.o \
 	objects/geometricobject.o \
+	objects/group.o \
 	objects/sensor.o \
 	scr.o \
 	sound.o \

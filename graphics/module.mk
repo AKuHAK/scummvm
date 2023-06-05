@@ -27,6 +27,7 @@ MODULE_OBJS := \
 	macgui/macdialog.o \
 	macgui/macfontmanager.o \
 	macgui/macmenu.o \
+	macgui/macpopupmenu.o \
 	macgui/mactext.o \
 	macgui/mactextwindow.o \
 	macgui/macwidget.o \
@@ -65,7 +66,7 @@ MODULE_OBJS += \
 	scaler/downscalerARM.o
 endif
 
-ifdef USE_SV_BLITTER
+ifdef ATARI
 MODULE_OBJS += \
 	blit-atari.o
 endif

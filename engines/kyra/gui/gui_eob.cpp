@@ -126,7 +126,7 @@ void EoBCoreEngine::gui_drawCharPortraitWithStats(int index, bool screenUpdt) {
 			if (index == _exchangeCharacterId)
 				_screen->printText(_characterGuiStringsSt[0], x2 + 2, y2 + 2, guiSettings()->colors.guiColorDarkRed, guiSettings()->colors.fill);
 			else
-				_screen->printText(c->name, x2 + 2, y2 + (_flags.platform == Common::kPlatformFMTowns ? 1 : 2), txtCol1, _flags.use16ColorMode ? 0 : guiSettings()->colors.fill);
+				_screen->printText(c->name, x2 + 2, y2 + (_flags.platform == Common::kPlatformFMTowns ? 1 : 2), txtCol1, _flags.platform == Common::kPlatformPC98 ? 0 : guiSettings()->colors.fill);
 		}
 
 		_screen->setFont(_invFont2);
@@ -218,8 +218,9 @@ void EoBCoreEngine::gui_drawCharPortraitWithStats(int index, bool screenUpdt) {
 			_screen->updateScreen();
 
 		} else {
-			_screen->setFont(cf);
+			_screen->setFont(_invFont4);
 			gui_drawCharacterStatsPage();
+			_screen->setFont(cf);
 		}
 
 		_screen->_curPage = 0;
@@ -650,7 +651,7 @@ void EoBCoreEngine::gui_drawSpellbook() {
 	int numTab = (_flags.gameID == GI_EOB1) ? 5 : 6;
 	_screen->copyRegion(64, 121, 64, 121, 112, 56, 0, 2, Screen::CR_NO_P_CHECK);
 
-	Screen::FontId of = (_flags.gameID == GI_EOB1 && _flags.platform == Common::kPlatformPC98) ? _screen->setFont(Screen::FID_SJIS_SMALL_FNT) : _screen->_currentFont;
+	Screen::FontId of = _screen->setFont(_bookFont);
 
 	for (int i = 0; i < numTab; i++) {
 		int col1 = 0;
@@ -1512,9 +1513,11 @@ void EoBCoreEngine::gui_processInventorySlotClick(int slot) {
 	}
 }
 
-GUI_EoB::GUI_EoB(EoBCoreEngine *vm) : GUI(vm), _vm(vm), _screen(vm->_screen), _numSlotsVisible(vm->gameFlags().platform == Common::kPlatformSegaCD ? 5 : 6) {
-	_menuStringsPrefsTemp = new char*[4]();
+GUI_EoB::GUI_EoB(EoBCoreEngine *vm) : GUI(vm), _vm(vm), _screen(vm->_screen), _numSlotsVisible(vm->gameFlags().platform == Common::kPlatformSegaCD ? 5 : 6),
+	_menuFont(_vm->gameFlags().platform == Common::kPlatformPC98 ? Screen::FID_SJIS_FNT : (_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FID_CHINESE_FNT : Screen::FID_8_FNT)),
+	_menuFont2(_vm->gameFlags().use16ColorMode ? Screen::FID_SJIS_FNT : (_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FID_CHINESE_FNT : Screen::FID_8_FNT)) {
 
+	_menuStringsPrefsTemp = new char*[4]();
 	_saveSlotStringsTemp = new char*[6];
 	for (int i = 0; i < 6; i++) {
 		_saveSlotStringsTemp[i] = new char[52]();
@@ -2303,7 +2306,8 @@ void GUI_EoB::simpleMenu_flashSelection(const char *str, int x, int y, int color
 }
 
 void GUI_EoB::runCampMenu() {
-	Screen::FontId of = _screen->setFont(_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FID_CHINESE_FNT : _vm->_flags.use16ColorMode ? Screen::FID_SJIS_FNT : Screen::FID_8_FNT);
+	Screen::FontId of = _screen->setFont(_menuFont);
+	int cs = (_vm->gameFlags().platform == Common::kPlatformPC98 && !_vm->gameFlags().use16ColorMode) ? _screen->setFontStyles(_menuFont, Font::kStyleFat) : -1;
 
 	Button *highlightButton = 0;
 	Button *prevHighlightButton = 0;
@@ -2318,12 +2322,17 @@ void GUI_EoB::runCampMenu() {
 	Button *buttonList = 0;
 
 	for (bool runLoop = true; runLoop && !_vm->shouldQuit();) {
+		bool buttonsUnchanged = true;
+
 		if (newMenu != -1) {
 			drawCampMenu();
+
 			if (newMenu == 2) {
 				updateOptionsStrings();
 				if (_vm->gameFlags().platform == Common::kPlatformSegaCD)
 					keepButtons = false;
+				else
+					buttonsUnchanged = false;
 			}
 			if (!keepButtons) {
 				releaseButtons(buttonList);
@@ -2517,7 +2526,7 @@ void GUI_EoB::runCampMenu() {
 					else if (_vm->_configMusic)
 						_vm->snd_playSong(11);
 					else
-						_vm->snd_playSong(0);
+						_vm->snd_stopSound();
 				} else {
 					_vm->_configSounds ^= true;
 					_vm->_configMusic = _vm->_configSounds ? 1 : 0;
@@ -2565,8 +2574,11 @@ void GUI_EoB::runCampMenu() {
 		} else {
 			Common::Point p = _vm->getMousePos();
 			for (Button *b = buttonList; b; b = b->nextButton) {
-				if ((b->arg & 2) && _vm->posWithinRect(p.x, p.y, b->x, b->y, b->x + b->width, b->y + b->height))
+				if ((b->arg & 2) && _vm->posWithinRect(p.x, p.y, b->x, b->y, b->x + b->width, b->y + b->height)) {
+					if (highlightButton && highlightButton != b && !prevHighlightButton)
+						prevHighlightButton = highlightButton;
 					highlightButton = b;
+				}
 			}
 		}
 
@@ -2580,12 +2592,15 @@ void GUI_EoB::runCampMenu() {
 		_charSelectRedraw = redrawPortraits = false;
 
 		if (prevHighlightButton != highlightButton && newMenu == -1 && runLoop) {
-			drawMenuButton(prevHighlightButton, false, false, true);
+			drawMenuButton(prevHighlightButton, false, false, buttonsUnchanged);
 			drawMenuButton(highlightButton, false, true, false);
 			_screen->updateScreen();
 			prevHighlightButton = highlightButton;
 		}
 	}
+
+	if (cs != -1)
+		_screen->setFontStyles(_menuFont, cs);
 
 	_screen->setFont(of);
 	releaseButtons(buttonList);
@@ -2633,7 +2648,9 @@ bool GUI_EoB::runLoadMenu(int x, int y, bool fromMainMenu) {
 
 bool GUI_EoB::confirmDialogue2(int dim, int id, int deflt) {
 	int od = _screen->curDimIndex();
-	Screen::FontId of = _screen->setFont(_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FontId::FID_CHINESE_FNT : _vm->_flags.use16ColorMode ? Screen::FID_SJIS_FNT : Screen::FID_8_FNT);
+	Screen::FontId of = _screen->setFont(_menuFont);
+	int cs = (_vm->gameFlags().platform == Common::kPlatformPC98 && !_vm->gameFlags().use16ColorMode) ? _screen->setFontStyles(_menuFont, Font::kStyleFat) : -1;
+
 	_screen->setScreenDim(dim);
 
 	drawTextBox(dim, id);
@@ -2693,6 +2710,10 @@ bool GUI_EoB::confirmDialogue2(int dim, int id, int deflt) {
 	_screen->updateScreen();
 
 	_screen->copyRegion(0, _screen->_curDim->h, _screen->_curDim->sx << 3, _screen->_curDim->sy, _screen->_curDim->w << 3, _screen->_curDim->h, 2, 0, Screen::CR_NO_P_CHECK);
+
+	if (cs != -1)
+		_screen->setFontStyles(_menuFont, cs);
+
 	_screen->setFont(of);
 	_screen->setScreenDim(od);
 
@@ -2702,7 +2723,8 @@ bool GUI_EoB::confirmDialogue2(int dim, int id, int deflt) {
 void GUI_EoB::messageDialogue(int dim, int id, int buttonTextCol) {
 	int od = _screen->curDimIndex();
 	_screen->setScreenDim(dim);
-	Screen::FontId of = _screen->setFont(_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FontId::FID_CHINESE_FNT : _vm->_flags.use16ColorMode ? Screen::FID_SJIS_FNT : Screen::FID_8_FNT);
+	Screen::FontId of = _screen->setFont(_menuFont);
+	int cs = (_vm->gameFlags().platform == Common::kPlatformPC98 && !_vm->gameFlags().use16ColorMode) ? _screen->setFontStyles(_menuFont, Font::kStyleFat) : -1;
 
 	drawTextBox(dim, id);
 	const ScreenDim *dm = _screen->getScreenDim(dim);
@@ -2740,6 +2762,10 @@ void GUI_EoB::messageDialogue(int dim, int id, int buttonTextCol) {
 
 	_screen->copyRegion(0, dm->h, dm->sx << 3, dm->sy, dm->w << 3, dm->h, 2, 0, Screen::CR_NO_P_CHECK);
 	_screen->setScreenDim(od);
+
+	if (cs != -1)
+		_screen->setFontStyles(_menuFont, cs);
+
 	_screen->setFont(of);
 	dm = _screen->getScreenDim(dim);
 }
@@ -2886,7 +2912,7 @@ int GUI_EoB::getTextInput(char *dest, int x, int y, int destMaxLen, int textColo
 					if (_vm->_flags.platform == Common::kPlatformFMTowns && _keyPressed.ascii > 31 && _keyPressed.ascii < 123) {
 						Common::String s;
 						s.insertChar(in & 0xff, 0);
-						s = _vm->convertAsciiToSjis(s);
+						s = _vm->makeTwoByteString(s);
 						if (s.empty()) {
 							in = 0;
 						} else {
@@ -2931,9 +2957,9 @@ int GUI_EoB::getTextInput(char *dest, int x, int y, int destMaxLen, int textColo
 
 		} else if ((in > 31 && in < 126) || (in == 0x89)) {
 			if (!(in == 32 && pos == 0)) {
-				// The PC-98 version and the English Sega-CD version of EOB I are the only versions that allow small characters.
+				// The PC-98 versions of EOB I + II and the English Sega-CD version of EOB I are the only versions that allow small characters.
 				// For all other versions we convert to capital characters.
-				if (in >= 97 && in <= 122 && !(_vm->_flags.gameID == GI_EOB1 && (_vm->_flags.platform == Common::kPlatformPC98 || (_vm->_flags.platform == Common::kPlatformSegaCD && _vm->_flags.lang != Common::JA_JPN))))
+				if (in >= 97 && in <= 122 && _vm->_flags.platform != Common::kPlatformPC98 && !(_vm->_flags.platform == Common::kPlatformSegaCD && _vm->_flags.lang != Common::EN_ANY))
 					in -= 32;
 
 				if (pos < len) {
@@ -3214,7 +3240,7 @@ void GUI_EoB::createScreenThumbnail(Graphics::Surface &dst) {
 void GUI_EoB::simpleMenu_initMenuItemsMask(int menuId, int maxItem, int32 menuItemsMask, int itemOffset) {
 	if (menuItemsMask == -1) {
 		_menuNumItems = _screen->getScreenDim(19 + menuId)->h;
-		_menuCur = _screen->getScreenDim(19 + menuId)->unk8;
+		_menuCur = _screen->getScreenDim(19 + menuId)->col1;
 		return;
 	}
 
@@ -3948,7 +3974,8 @@ bool GUI_EoB::restParty() {
 	for (int l = 0; !res && restLoop && !_vm->shouldQuit();) {
 		l++;
 
-		int cs = (_vm->gameFlags().platform == Common::kPlatformSegaCD && _vm->gameFlags().lang == Common::JA_JPN) ? _screen->setFontStyles(_screen->_currentFont, Font::kStyleNarrow1) : -1;
+		int cs = (_vm->gameFlags().platform == Common::kPlatformSegaCD && _vm->gameFlags().lang == Common::JA_JPN) ? _screen->setFontStyles(_screen->_currentFont, Font::kStyleNarrow1) :
+			((_vm->gameFlags().platform == Common::kPlatformPC98 && !_vm->gameFlags().use16ColorMode) ? _screen->setFontStyles(_menuFont, Font::kStyleNone) : -1);
 
 		// Regenerate spells
 		for (int i = 0; i < 6; i++) {
@@ -4181,7 +4208,7 @@ void GUI_EoB::printScribeScrollSpellString(const int16 *menuItems, int id, bool 
 
 bool GUI_EoB::confirmDialogue(int id) {
 	int od = _screen->curDimIndex();
-	Screen::FontId of = _screen->setFont(_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FontId::FID_CHINESE_FNT : _vm->_flags.use16ColorMode ? Screen::FID_SJIS_FNT : Screen::FID_8_FNT);
+	Screen::FontId of = _screen->setFont(_menuFont);
 
 	Button *buttonList = initMenu(5);
 
@@ -4404,13 +4431,23 @@ int GUI_EoB::selectCharacterDialogue(int id) {
 void GUI_EoB::displayTextBox(int id, int, bool) {
 	int op = _screen->setCurPage(2);
 	int od = _screen->curDimIndex();
-	Screen::FontId of = _screen->setFont(_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FontId::FID_CHINESE_FNT : _vm->_flags.use16ColorMode ? Screen::FID_SJIS_FNT : Screen::FID_8_FNT);
+	Screen::FontId of = _screen->setFont(_menuFont);
+
 	_screen->setClearScreenDim(11);
 	const ScreenDim *dm = _screen->getScreenDim(11);
 
 	drawMenuButtonBox(dm->sx << 3, dm->sy, dm->w << 3, dm->h, false, false);
 	_screen->setTextMarginRight((dm->sx + dm->w) << 3);
-	_screen->printShadedText(getMenuString(id), (dm->sx << 3) + 5, dm->sy + 5, _vm->guiSettings()->colors.guiColorWhite, 0, _vm->guiSettings()->colors.guiColorBlack);
+
+	Common::String tmp(getMenuString(id));
+	Common::Point txtPos((dm->sx << 3) + 5, dm->sy + 5);
+	if (_vm->game() == GI_EOB2 && _vm->gameFlags().platform == Common::kPlatformPC98) {
+		for (size_t p = tmp.find("  "); p != Common::String::npos; p = tmp.find("  "))
+			tmp.deleteChar(p);		
+		txtPos = Common::Point(dm->sx << 3, (dm->sy + 16) & ~7);
+	}
+
+	_screen->printShadedText(tmp.c_str(), txtPos.x, txtPos.y, _vm->guiSettings()->colors.guiColorWhite, 0, _vm->guiSettings()->colors.guiColorBlack);
 	_screen->setTextMarginRight(Screen::SCREEN_W);
 	_screen->copyRegion(dm->sx << 3, dm->sy, dm->sx << 3, dm->sy, dm->w << 3, dm->h, 2, 0, Screen::CR_NO_P_CHECK);
 	_screen->updateScreen();
@@ -4542,9 +4579,11 @@ void GUI_EoB::drawMenuButtonBox(int x, int y, int w, int h, bool clicked, bool n
 void GUI_EoB::drawTextBox(int dim, int id) {
 	int od = _screen->curDimIndex();
 	_screen->setScreenDim(dim);
-	const ScreenDim *dm = _screen->getScreenDim(dim);
-	Screen::FontId of = _screen->setFont(_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FontId::FID_CHINESE_FNT : _vm->_flags.use16ColorMode ? Screen::FID_SJIS_FNT : Screen::FID_8_FNT);
 
+	Screen::FontId of = _screen->setFont(_menuFont);
+	int cs = (_vm->gameFlags().platform == Common::kPlatformPC98 && !_vm->gameFlags().use16ColorMode) ? _screen->setFontStyles(_menuFont, Font::kStyleFat) : -1;
+
+	const ScreenDim *dm = _screen->getScreenDim(dim);
 	if (dm->w <= 22 && dm->h <= 84)
 		_screen->copyRegion(dm->sx << 3, dm->sy, 0, dm->h, dm->w << 3, dm->h, 0, 2, Screen::CR_NO_P_CHECK);
 
@@ -4557,6 +4596,9 @@ void GUI_EoB::drawTextBox(int dim, int id) {
 	_screen->copyRegion(0, 0, dm->sx << 3, dm->sy, dm->w << 3, dm->h, 2, 0, Screen::CR_NO_P_CHECK);
 	_screen->updateScreen();
 	_screen->setScreenDim(od);
+
+	if (cs != -1)
+		_screen->setFontStyles(_screen->_currentFont, cs);
 	_screen->setFont(of);
 }
 
@@ -4608,20 +4650,20 @@ void GUI_EoB::memorizePrayMenuPrintString(int spellId, int bookPageIndex, int sp
 	if (bookPageIndex < 0)
 		return;
 
-	int x1 = _vm->_flags.lang == Common::ZH_TWN ? 4 + (bookPageIndex / 4) * 80 : 8;
-	int x2 = _vm->_flags.lang == Common::ZH_TWN ? x1 : 6;
+	int x = _vm->_flags.lang == Common::ZH_TWN ? 4 + (bookPageIndex / 4) * 80 : 8;
 	int y = _vm->_flags.lang == Common::ZH_TWN ? (bookPageIndex % 4) * 16 + 58 : bookPageIndex * 9 + 50;
 	int w = _vm->_flags.lang == Common::ZH_TWN ? 80 : 160;
 	int h = _vm->_flags.lang == Common::ZH_TWN ? 15 : 8;
 	int col1 = (_vm->_configRenderMode == Common::kRenderCGA) ? 1 : _vm->guiSettings()->colors.guiColorWhite;
 	_screen->set16bitShadingLevel(4);
+	Screen::FontId of = _screen->setFont(_menuFont2);
 
-	if (!spellId || _vm->_flags.lang == Common::ZH_TWN)
-		_screen->fillRect(x2, y, x1 + w, y + h,  _vm->guiSettings()->colors.fill);
+	if (!spellId || (_vm->_flags.lang == Common::ZH_TWN && !noFill))
+		_screen->fillRect(x - (_vm->_flags.lang == Common::ZH_TWN ? 1 : 2), y, x + w, y + h,  _vm->guiSettings()->colors.fill);
 
 	if (spellId) {
 		Common::String s;
-		if (_vm->_flags.lang == Common::JA_JPN) {
+		if (_vm->_flags.use16ColorMode || _vm->_flags.useHiColorMode) {
 			s = spellType ? _vm->_clericSpellList[spellId] : _vm->_mageSpellList[spellId];
 			for (int i = s.size() >> 1; i < 17; ++i)
 				s.insertChar(' ', s.size());
@@ -4631,11 +4673,12 @@ void GUI_EoB::memorizePrayMenuPrintString(int spellId, int bookPageIndex, int sp
 		}
 
 		if (noFill)
-			_screen->printText(s.c_str(), x1, y, highLight ? _vm->guiSettings()->colors.guiColorLightRed : col1, 0);
+			_screen->printText(s.c_str(), x, y, highLight ? _vm->guiSettings()->colors.guiColorLightRed : col1, 0);
 		else
-			_screen->printShadedText(s.c_str(), x1, y, highLight ? _vm->guiSettings()->colors.guiColorLightRed : col1, _vm->guiSettings()->colors.fill, _vm->guiSettings()->colors.guiColorBlack);
+			_screen->printShadedText(s.c_str(), x, y, highLight ? _vm->guiSettings()->colors.guiColorLightRed : col1, _vm->guiSettings()->colors.fill, _vm->guiSettings()->colors.guiColorBlack);
 	}
 
+	_screen->setFont(of);
 	_screen->set16bitShadingLevel(0);
 }
 
@@ -4781,7 +4824,7 @@ void GUI_EoB::sortSaveSlots() {
 }
 
 void GUI_EoB::restParty_updateRestTime(int hours, bool init) {
-	Screen::FontId of = _screen->setFont(_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FontId::FID_CHINESE_FNT : _vm->_flags.use16ColorMode ? Screen::FID_SJIS_FNT : Screen::FID_8_FNT);
+	Screen::FontId of = _screen->setFont(_menuFont);
 	int od = _screen->curDimIndex();
 	_screen->setScreenDim(10);
 

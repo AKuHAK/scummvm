@@ -96,6 +96,7 @@ public:
 	// Game selection
 	uint32 _variant;
 	Common::Language _language;
+	bool isSpaceStationOblivion() { return _targetName.hasPrefix("spacestationoblivion"); }
 	bool isDriller() { return _targetName.hasPrefix("driller") || _targetName.hasPrefix("spacestationoblivion"); }
 	bool isDark() { return _targetName.hasPrefix("darkside"); }
 	bool isEclipse() { return _targetName.hasPrefix("totaleclipse"); }
@@ -225,6 +226,7 @@ public:
 	virtual void pressedKey(const int keycode);
 	virtual bool onScreenControls(Common::Point mouse);
 	void move(CameraMovement direction, uint8 scale, float deltaTime);
+	void resolveCollisions(Math::Vector3d newPosition);
 	virtual void checkIfStillInArea();
 	void changePlayerHeight(int index);
 	void increaseStepSize();
@@ -275,7 +277,7 @@ public:
 	Common::Array<Common::String> _conditionSources;
 	Common::Array<FCLInstructionVector> _conditions;
 
-	bool checkCollisions(bool executeCode);
+	void runCollisionConditions(Math::Vector3d const lastPosition, Math::Vector3d const newPosition);
 	Math::Vector3d _objExecutingCodeSize;
 	virtual void executeMovementConditions();
 	void executeObjectConditions(GeometricObject *obj, bool shot, bool collided, bool activated);
@@ -285,6 +287,7 @@ public:
 	// Instructions
 	bool checkConditional(FCLInstruction &instruction, bool shot, bool collided, bool timer, bool activated);
 	bool checkIfGreaterOrEqual(FCLInstruction &instruction);
+	void executeExecute(FCLInstruction &instruction);
 	void executeIncrementVariable(FCLInstruction &instruction);
 	void executeDecrementVariable(FCLInstruction &instruction);
 	void executeSetVariable(FCLInstruction &instruction);
@@ -425,6 +428,8 @@ enum DrillerReleaseFlags {
 		GF_CPC_RETAIL2 = (1 << 6),
 		GF_CPC_BUDGET = (1 << 7),
 		GF_CPC_VIRTUALWORLDS = (1 << 8),
+		GF_ATARI_RETAIL = (1 << 9),
+		GF_ATARI_BUDGET = (1 << 10),
 };
 
 class DrillerEngine : public FreescapeEngine {
@@ -507,6 +512,8 @@ private:
 
 	uint32 getPixel8bitTitleImage(int index);
 	void renderPixels8bitTitleImage(Graphics::ManagedSurface *surface, int &i, int &j, int pixels);
+
+	Common::SeekableReadStream *decryptFileAtari(const Common::String filename);
 };
 
 class DarkEngine : public FreescapeEngine {
@@ -529,6 +536,7 @@ public:
 
 	void loadAssetsDOSFullGame() override;
 	void loadAssetsDOSDemo() override;
+	void loadAssetsAmigaFullGame() override;
 
 	void loadAssetsZXDemo() override;
 
@@ -546,6 +554,7 @@ private:
 	void addECDs(Area *area);
 	void addECD(Area *area, const Math::Vector3d position, int index);
 	void addWalls(Area *area);
+	Common::SeekableReadStream *decryptFile(const Common::String filename);
 };
 
 class EclipseEngine : public FreescapeEngine {
