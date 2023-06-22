@@ -113,6 +113,34 @@ static const VCruiseGameDescription gameDescriptions[] = {
 		GID_REAH,
 		Common::EN_ANY,
 	},
+	{ // Reah: Face the Unknown, English digital (GOG) version + Russian VO/subtitles community patch
+		{
+			"reah",
+			"English Digital + Russian Community Patch",
+			AD_ENTRY3s("Reah.exe", "60ec19c53f1323cc7f0314f98d396283", 304128,
+					   "0170_b.wav", "4632023ed0bab3fc800abfa5ef65ceaf", 119850,
+					   "Speech01.txt", "a4eaace1299de1d70805532fc0643a77", 72689),
+			Common::RU_RUS,
+			Common::kPlatformWindows,
+			ADGF_TESTING | VCRUISE_GF_WANT_MP3 | VCRUISE_GF_FORCE_LANGUAGE,
+			GUIO0()
+		},
+		GID_REAH,
+		Common::RU_RUS,
+	},
+	{ // Reah: Face the Unknown, Polish demo
+		{
+			"reah",
+			"Polish Demo",
+			AD_ENTRY1s("Reah.exe", "4667d7e3d886f01ec28040a9022b1b56", 281600),
+			Common::UNK_LANG,
+			Common::kPlatformWindows,
+			ADGF_TESTING,
+			GUIO0()
+		},
+		GID_REAH,
+		Common::PL_POL,
+	},
 
 	{ // Schizm: Mysterious Journey, English CD Version
 		{
@@ -142,7 +170,34 @@ static const VCruiseGameDescription gameDescriptions[] = {
 		GID_SCHIZM,
 		Common::DE_DEU,
 	},
-		
+
+
+	{ // Schizm: Mysterious Journey, English DVD Version (NL release)
+		{
+			"schizm",
+			"English DVD",
+			AD_ENTRY1s("disk1.pak", "41bd7514a7d783c555f3783c9417bf9e", 272405273),
+			Common::UNK_LANG,
+			Common::kPlatformWindows,
+			ADGF_TESTING | VCRUISE_GF_WANT_OGG_VORBIS | VCRUISE_GF_NEED_JPEG | VCRUISE_GF_GENTEE_PACKAGE,
+			GUIO0()
+		},
+		GID_SCHIZM,
+		Common::EN_GRB,
+	},
+	{ // Schizm: Mysterious Journey, English DVD Version
+		{
+			"schizm",
+			"English DVD",
+			AD_ENTRY1s("setup.pak", "eaaed2f6655342b4c320bdeb6f5ccfb9", 272655597),
+			Common::UNK_LANG,
+			Common::kPlatformWindows,
+			ADGF_TESTING | VCRUISE_GF_WANT_OGG_VORBIS | VCRUISE_GF_NEED_JPEG | VCRUISE_GF_GENTEE_PACKAGE,
+			GUIO0()
+		},
+		GID_SCHIZM,
+		Common::EN_GRB,
+	},
 	{ // Schizm: Mysterious Journey, Polish DVD Version
 		{
 			"schizm",

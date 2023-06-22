@@ -1543,6 +1543,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "interdimensionalcs", "Interdimensional Community Service" },
 	{ "intergalacticspacepancake", "Intergalactic Space Pancake!" },
 	{ "interstellarborders", "Interstellar Borders" },
+	{ "interstellarinterruption", "Interstellar Interruption" },
 	{ "intestinator", "Intestinator!" },
 	{ "intothelight", "Into The Light" },
 	{ "intraworld", "Intra-World" },
@@ -2210,6 +2211,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "odow", "One Dungeon One Week" },
 	{ "odr3", "Outrage Dreamer Roads 3" },
 	{ "odr4", "Outrage Dreamer Roads 4" },
+	{ "officereturned", "Office of the Returned" },
 	{ "officeshenanigans", "Office Shenanigans" },
 	{ "offtheclock", "Off The Clock" },
 	{ "ohdulieber", "Oh du lieber Augustin" },
@@ -2628,6 +2630,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "shamrockhg", "Shamrock High Graduation" },
 	{ "shapeshift", "Shapeshift for Cheese" },
 	{ "shapevillage", "Shape Village" },
+	{ "shardsofgod", "Shards of God" },
 	{ "sharethis", "Share This With Your Friends" },
 	{ "sharkysthree", "Sharky's 3: The Heist" },
 	{ "shawshank", "The Shawshank Redemption" },
@@ -2669,6 +2672,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "slaythedragon2", "Slay the Dragon II" },
 	{ "slaythedragon3", "Slay the Dragon III" },
 	{ "sleepingbeauty", "Sleeping Beauty" },
+	{ "sleepingcastle", "The Sleeping Castle" },
 	{ "sleepyisland", "The Sleepy Island" },
 	{ "sleuth2020remake", "SLEUTH Remake" },
 	{ "sleuthch1", "Sleuth - Chapter One" },
@@ -3013,6 +3017,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "thepaparazziprince", "The Paparazzi Prince; and the Quest for Headlines" },
 	{ "thepark", "The Park" },
 	{ "theparrotsnatchers", "The Parrot Snatchers" },
+	{ "thepassenger", "The Passenger" },
 	{ "thepathpumpkin", "The Path of the Pumpkin" },
 	{ "thepenthouse", "The Penthouse" },
 	{ "theperfectmurder", "The Perfect Murder" },
@@ -3863,13 +3868,17 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN_GOG("blackwell3", "convergence.exe", "2260c1a21aba7ac00baf0100d4ca54f1", 172575801),
 	GAME_ENTRY_EN_GOG("blackwell3", "convergence.exe", "1fbaa55037f7f1c8c5e59b2dacc994e2", 173960270),  // v2.2.1
 	GAME_ENTRY_EN_GOG("blackwell3", "convergence.exe", "1fbaa55037f7f1c8c5e59b2dacc994e2", 173960749),  // v2.3
+	GAME_ENTRY_EN_GOG("blackwell3", "convergence.exe", "1fbaa55037f7f1c8c5e59b2dacc994e2", 173960748),  // v2.3b Win-Linux
 	GAME_ENTRY_EN_GOG("blackwell3", "ac2game.dat", "0b99002018dcf6d3db95925006da01bb", 170769466), // Mac
 	GAME_ENTRY_EN_GOG("blackwell3", "ac2game.dat", "0b6f9ba727ce934a515dcff9af9c3b9e", 170769945), // Mac v2.3
+	GAME_ENTRY_EN_GOG("blackwell3", "ac2game.dat", "613c49405b24b367a961a7e14a3849d0", 170769944), // Mac v2.3b
 	GAME_ENTRY_PLUGIN_STEAM_EN("blackwell3", "convergence.exe", "2260c1a21aba7ac00baf0100d4ca54f1", 172578803, AGSTEAM_WADJETEYE),
 	GAME_ENTRY_PLUGIN_STEAM_EN("blackwell3", "convergence.exe", "2260c1a21aba7ac00baf0100d4ca54f1", 171969680, AGSTEAM_WADJETEYE),
 	GAME_ENTRY_PLUGIN_STEAM_EN("blackwell3", "convergence.exe", "f261c2505f98503a1ec9f1dff7f13bda", 173873229, AGSTEAM_WADJETEYE),
 	GAME_ENTRY_PLUGIN_STEAM_EN("blackwell3", "convergence.exe", "1fbaa55037f7f1c8c5e59b2dacc994e2", 173960270, AGSTEAM_WADJETEYE),
+	GAME_ENTRY_PLUGIN_STEAM_EN("blackwell3", "convergence.exe", "1fbaa55037f7f1c8c5e59b2dacc994e2", 173960518, AGSTEAM_WADJETEYE),  // Win-Linux
 	GAME_ENTRY_PLUGIN_STEAM_EN("blackwell3", "ac2game.dat", "2844e3823d74652d282b8173bbde2b8b", 170703726, AGSTEAM_WADJETEYE), // Linux & Mac
+	GAME_ENTRY_PLUGIN_STEAM_EN("blackwell3", "ac2game.dat", "0b99002018dcf6d3db95925006da01bb", 170769466, AGSTEAM_WADJETEYE), // Mac
 	GAME_ENTRY_EN("blackwell3", "convergence.exe", "2260c1a21aba7ac00baf0100d4ca54f1", 172578032), // Humble Bundle (Windows, v1.1)
 	GAME_ENTRY_EN("blackwell3", "ac2game.dat", "c894f6005f479ba8f12e87223920aa6a", 170700456), // Humble Bundle (Linux)
 	GAME_ENTRY_EN("blackwell3", "ac2game.dat", "2260c1a21aba7ac00baf0100d4ca54f1", 173301005), // Android
@@ -4182,8 +4191,8 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN_STEAM("waitingfortheloop", "waitingfortheloop.exe", "0241777c2537fc5d077c05cde10bfa9f", 51472537),
 	GAME_ENTRY_EN("waitingfortheloop", "waitingfortheloop.exe", "0241777c2537fc5d077c05cde10bfa9f", 51273604),
 	GAME_ENTRY("welcometosunnymunarvagir", "alpha4.ags", "392dbdd0697ae32af4cfe5212f9213c5", 23000263),
-	GAME_ENTRY_PLUGIN_STEAM_NOLAUNCHLOAD("whispersofamachine", "whispers.exe", "b4962a0a9c9c33954e185a137125f527", 159084291, AGSSPRITEFONT_CLIFFTOP),  // Multilang
-	GAME_ENTRY_PLUGIN_GOG_NOLAUNCHLOAD("whispersofamachine", "whispers.exe", "b8416ff5242d6540980f922f03a01a5f", 159085573, AGSSPRITEFONT_CLIFFTOP),
+	DETECTION_ENTRY_GUIO("whispersofamachine", "whispers.exe", "b4962a0a9c9c33954e185a137125f527", 159084291, Common::UNK_LANG, "Steam", GUIO3(GUIO_NOLANG, GUIO_NOLAUNCHLOAD, GAMEOPTION_NO_SAVE_THUMBNAIL), AGSSPRITEFONT_CLIFFTOP, ADGF_NO_FLAGS),  // Multilang
+	DETECTION_ENTRY_GUIO("whispersofamachine", "whispers.exe", "b8416ff5242d6540980f922f03a01a5f", 159085573, Common::UNK_LANG, "GOG.com", GUIO3(GUIO_NOLANG, GUIO_NOLAUNCHLOAD, GAMEOPTION_NO_SAVE_THUMBNAIL), AGSSPRITEFONT_CLIFFTOP, ADGF_NO_FLAGS),
 	GAME_ENTRY_EN_STEAM("wolfterritory", "wolf.exe", "78dd4ca028ee0156b6a093d6d780aa65", 3957156),
 	GAME_ENTRY_EN_STEAM("yetilastescape", "Big-run.exe", "1e003cdad70709b5bd3d0d957f637e58", 31372723),
 	GAME_ENTRY_STEAM("zniwadventure", "ctgame.exe", "8a2d48ee8d92bad3c5cacd8b883c5871", 100036465),  // Win Eng-Pol
@@ -4634,6 +4643,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	DEMO_ENTRY("shadowsoftheempire", "sote_td.exe", "b8cd640b45c5a79c33c7a8a8fe32ebe2", 63299246),  //v1.1  En-De-It
 	DEMO_ENTRY_EN("shardlight", "shardlight demo.exe", "ee801fba52d252249677a9170bd2db96", 642405010), // Steam
 	DEMO_ENTRY_EN("shardlight", "shardlight demo.exe", "ee801fba52d252249677a9170bd2db96", 642366257),
+	DEMO_ENTRY_EN("shardsofgod", "Shards of God.ags", "b181201165d078ac786fa474ef8c14fd", 36754512),
 	DEMO_ENTRY_EN("shivah", "shivahdemo.exe", "6e3d6225dee662ff6450a3bfa942773b", 20897850),
 	DEMO_ENTRY_EN("shivahkosher", "shivah-demo.exe", "0aaf5445a3544a631d6e7dd4561fc7ae", 23987292),
 	DEMO_ENTRY_EN("signalecho", "Signal & Echo - Iris is Missing (demo).exe", "f9e3e0193fbc975daa3a7c95edf04e0a", 39177267),
@@ -6107,6 +6117,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("interdimensionalcs", "ICS.exe", "8d1ff95c16500befbdc72260d461d73f", 15656530),
 	GAME_ENTRY_EN("intergalacticspacepancake", "space.exe", "97d700529f5cc826f230c27acf81adfd", 1797309),
 	GAME_ENTRY_EN("interstellarborders", "Interstellar Borders New.exe", "23a67b6de10ec35e9f5a4dfc7d928222", 13864633),
+	GAME_ENTRY_EN("interstellarinterruption", "Interstellar Interruption.ags", "5bb241c71681dadc3be75a9795ea9be7", 6222268),
 	GAME_ENTRY_EN("intestinator", "intestinator.exe", "3421b46ff95c5885603086c39a038a20", 1722265),
 	GAME_ENTRY_EN_PLATFORM("intestinator", "ac2game.ags", "af8c785b9c462228b1c134ac79f83986", 423817, "Beta"),
 	GAME_ENTRY_EN("intothelight", "ITL.exe", "3b7cceb3e4bdb031dc5d8f290936e94b", 12145887),
@@ -6895,6 +6906,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("odow", "ODOW.exe", "6e6f33162242d74dd1fa042429f16562", 3968102),
 	GAME_ENTRY_EN("odr3", "ODR3.exe", "af11e94f91b66e11450e8daf51d09292", 7637876),
 	GAME_ENTRY_EN("odr4", "ODR4.exe", "510be04e5eec2aa92bb78b060f138d64", 24227828),
+	GAME_ENTRY_EN("officereturned", "OfficeofTheReturned.ags", "fda695d784c029b3b13a63c7ee989d9a", 3722245),
 	GAME_ENTRY_EN("officeshenanigans", "OfficeShenanigans.exe", "25976a689b0f4d73eac69b1728377ecb", 6111931),
 	DETECTION_ENTRY_GUIO("offtheclock", "Off The Clock.ags", "8918895c5c695bae90af13ea4f1a9807", 495345700, Common::EN_ANY, nullptr, GUIO2(GUIO_NOLANG, GUIO_NOLAUNCHLOAD), nullptr, ADGF_NO_FLAGS),  // Linux
 	DETECTION_ENTRY_GUIO("offtheclock", "Off The Clock.exe", "b2eb107c1f9784b7fc4f58c2a7678dea", 498392456, Common::EN_ANY, nullptr, GUIO2(GUIO_NOLANG, GUIO_NOLAUNCHLOAD), nullptr, ADGF_NO_FLAGS),  // Win
@@ -7436,6 +7448,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("slaythedragon2", "Dragon2.exe", "84dc3d6bee474e039aace3c1f37b6c7d", 5682711),
 	GAME_ENTRY_EN("slaythedragon3", "Dragon III.exe", "7ddb9e776648faed5a51170d087074e9", 36162059),
 	GAME_ENTRY_EN("sleepingbeauty", "SleepingBeauty.exe", "495d45fb8adfd49690ae3b97921feec6", 607993972),
+	GAME_ENTRY_EN("sleepingcastle", "sleeping.exe", "1a2f8dacfa7ab2d30579a49d2ae64e05", 1076403478),
 	GAME_ENTRY_EN("sleepyisland", "Sleepy Island.exe", "465f972675db2da6040518221af5b0ba", 20270790),
 	GAME_ENTRY_EN("sleuth2020remake", "SLEUTH.exe", "615e73fc1874e92d60a1996c2330ea36", 11422136),
 	GAME_ENTRY_EN("sleuthch1", "Sleuth.exe", "23a67b6de10ec35e9f5a4dfc7d928222", 34770218),
@@ -7876,6 +7889,8 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("thepaparazziprince", "Willy.exe", "f3a13b2d6c2e0fe04c6f466062920e23", 3403804),
 	GAME_ENTRY_EN("thepark", "park.exe", "97d700529f5cc826f230c27acf81adfd", 709265),
 	GAME_ENTRY("theparrotsnatchers", "r.exe", "a524cbb1c51589903c4043b98917f1d9", 11945759),  // En-Pol
+	GAME_ENTRY_EN("thepassenger", "The Passenger.exe", "ae2e93ae61a612dd8cad1290bd5f7443", 4367776),
+	GAME_ENTRY_EN("thepassenger", "The Passenger.ags", "39af4e69a003d070a96bface061b819e", 1255820),
 	GAME_ENTRY("thepathpumpkin", "The path of a pumpkin(The story of Skar).exe", "2c8f16a69b659ddfad4a043a24d8aa49", 264732994),  // En-Ita
 	GAME_ENTRY_EN("thepenthouse", "Penthouse.exe", "0564de07d3fd5c16e6947a647061913c", 13596940),
 	GAME_ENTRY("thephantominheritance", "Phantom.exe", "ec04c7917c003d9e07d4514ff25bf365", 27558669),  // Eng-Esp

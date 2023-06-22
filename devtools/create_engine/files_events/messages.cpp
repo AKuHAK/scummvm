@@ -19,22 +19,23 @@
  *
  */
 
-#ifndef HPL1_STD_PAIR_H
-#define HPL1_STD_PAIR_H
+#include "xyzzy/messages.h"
 
-namespace Hpl1 {
-namespace Std {
+namespace Xyzzy {
 
-template<typename T1, typename T2>
-struct pair {
-	pair(const T1 &f, const T2 &s) : first(f), second(s) {}
+MouseMessage::MouseMessage(Common::EventType type,
+		const Common::Point &pos) : Message(), _pos(pos) {
+	switch (type) {
+	case Common::EVENT_RBUTTONUP:
+		_button = MB_RIGHT;
+		break;
+	case Common::EVENT_MBUTTONUP:
+		_button = MB_MIDDLE;
+		break;
+	default:
+		_button = MB_LEFT;
+		break;
+	}
+}
 
-	T1 first;
-	T2 second;
-};
-
-} // namespace Std
-
-} // namespace Hpl1
-
-#endif
+} // namespace Xyzzy

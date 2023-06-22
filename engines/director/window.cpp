@@ -178,6 +178,7 @@ bool Window::render(bool forceRedraw, Graphics::ManagedSurface *blitTo) {
 		uint32 width = font->getStringWidth(msg);
 
 		blitTo->fillRect(Common::Rect(blitTo->w - 3 - width, 1, blitTo->w - 1, font->getFontHeight() + 1), _wm->_colorBlack);
+		font->drawString(blitTo, msg, blitTo->w - 1 - width, 3, width , _wm->_colorBlack);
 		font->drawString(blitTo, msg, blitTo->w - 2 - width, 2, width , _wm->_colorWhite);
 	}
 
@@ -189,6 +190,7 @@ bool Window::render(bool forceRedraw, Graphics::ManagedSurface *blitTo) {
 				blitTo->frameRect(bbox, g_director->_wm->_colorWhite);
 
 				const Graphics::Font *font = FontMan.getFontByUsage(Graphics::FontManager::kConsoleFont);
+				font->drawString(blitTo, Common::String::format("m: %d, ch: %d", channel->_sprite->_castId.member, i), bbox.left + 3, bbox.top + 3, 128, g_director->_wm->_colorBlack);
 				font->drawString(blitTo, Common::String::format("m: %d, ch: %d", channel->_sprite->_castId.member, i), bbox.left + 2, bbox.top + 2, 128, g_director->_wm->_colorWhite);
 			}
 		}
@@ -257,7 +259,7 @@ void Window::setModal(bool modal) {
 		_wm->setLockedWidget(this);
 		_isModal = true;
 	}
-	
+
 	setVisible(true); // Activate this window on top
 }
 
@@ -354,8 +356,7 @@ void Window::loadNewSharedCast(Cast *previousSharedCast) {
 	}
 
 	// Clean up the previous sharedCast
-	if (!previousSharedCastPath.empty()) {
-		g_director->_allOpenResFiles.erase(previousSharedCastPath);
+	if (previousSharedCast) {
 		delete previousSharedCast;
 	}
 
@@ -379,11 +380,12 @@ bool Window::loadNextMovie() {
 	delete _currentMovie;
 	_currentMovie = nullptr;
 
-	Archive *mov = openArchive(_currentPath + Common::lastPathComponent(_nextMovie.movie, g_director->_dirSeparator));
+	Archive *mov = g_director->openArchive(_currentPath + Common::lastPathComponent(_nextMovie.movie, g_director->_dirSeparator));
 
 	if (!mov)
 		return false;
 
+	probeResources(mov);
 	_currentMovie = new Movie(this);
 	_currentMovie->setArchive(mov);
 

@@ -39,6 +39,7 @@
 #include "director/lingo/xlibs/batqt.h"
 #include "director/lingo/xlibs/blitpict.h"
 #include "director/lingo/xlibs/cdromxobj.h"
+#include "director/lingo/xlibs/colorxobj.h"
 #include "director/lingo/xlibs/darkenscreen.h"
 #include "director/lingo/xlibs/developerStack.h"
 #include "director/lingo/xlibs/dialogsxobj.h"
@@ -46,6 +47,7 @@
 #include "director/lingo/xlibs/dpwqtw.h"
 #include "director/lingo/xlibs/draw.h"
 #include "director/lingo/xlibs/ednox.h"
+#include "director/lingo/xlibs/eventq.h"
 #include "director/lingo/xlibs/fedracul.h"
 #include "director/lingo/xlibs/feimasks.h"
 #include "director/lingo/xlibs/feiprefs.h"
@@ -165,6 +167,7 @@ static struct XLibProto {
 	{ BatQT::fileNames,					BatQT::open,				BatQT::close,				kXObj,					400 },	// D4
 	{ BlitPict::fileNames,				BlitPict::open,				BlitPict::close,			kXObj,					400 },	// D4
 	{ CDROMXObj::fileNames,				CDROMXObj::open,			CDROMXObj::close,			kXObj,					200 },	// D2
+	{ ColorXObj::fileNames,				ColorXObj::open,			ColorXObj::close,			kXObj,					400 },	// D4
 	{ DarkenScreen::fileNames,			DarkenScreen::open,			DarkenScreen::close,		kXObj,					300 },	// D3
 	{ DeveloperStack::fileNames,		DeveloperStack::open,		DeveloperStack::close,		kXObj,					300 },	// D3
 	{ DialogsXObj::fileNames,			DialogsXObj::open,			DialogsXObj::close,			kXObj,					400 },	// D4
@@ -172,6 +175,7 @@ static struct XLibProto {
 	{ DPwQTw::fileNames,				DPwQTw::open,				DPwQTw::close,				kXObj,					400 },	// D4
 	{ DrawXObj::fileNames,				DrawXObj::open,				DrawXObj::close,			kXObj,					400 },	// D4
 	{ Ednox::fileNames,					Ednox::open,				Ednox::close,				kXObj,					300 },	// D3
+	{ EventQXObj::fileNames,			EventQXObj::open,			EventQXObj::close,			kXObj,					400 },	// D4
 	{ FEDraculXObj::fileNames,			FEDraculXObj::open,			FEDraculXObj::close,		kXObj,					400 },	// D4
 	{ FEIMasksXObj::fileNames,			FEIMasksXObj::open,			FEIMasksXObj::close,		kXObj,					400 },	// D4
 	{ FEIPrefsXObj::fileNames,			FEIPrefsXObj::open,			FEIPrefsXObj::close,		kXObj,					400 },	// D4
@@ -182,7 +186,7 @@ static struct XLibProto {
 	{ FlushXObj::fileNames,				FlushXObj::open,			FlushXObj::close,			kXObj,					300 },	// D3
 	{ FPlayXObj::fileNames,				FPlayXObj::open,			FPlayXObj::close,			kXObj,					200 },	// D2
 	{ GpidXObj::fileNames,				GpidXObj::open,				GpidXObj::close,			kXObj,					400 },	// D4
-	{ HitMap::fileNames,				HitMap::open,				HitMap::close,			kXObj,					400 },	// D4
+	{ HitMap::fileNames,				HitMap::open,				HitMap::close,				kXObj,					400 },	// D4
 	{ IsCD::fileNames,					IsCD::open,					IsCD::close,				kXObj,					300 },	// D3
 	{ IsPippin::fileNames,				IsPippin::open,				IsPippin::close,			kXObj,					400 },	// D4
 	{ JITDraw3XObj::fileNames,			JITDraw3XObj::open,			JITDraw3XObj::close,		kXObj,					400 },	// D4
@@ -235,25 +239,23 @@ void Lingo::cleanupXLibs() {
 }
 
 Common::String Lingo::normalizeXLibName(Common::String name) {
+	// Normalize to remove machintosh path delimiters (':', '@:')
+	name = convertPath(name);
+
+	size_t pos = name.findLastOf(g_director->_dirSeparator);
+	if (pos != Common::String::npos)
+		name = name.substr(pos + 1, name.size());
+
 	Common::Platform platform = _vm->getPlatform();
 	if (platform == Common::kPlatformMacintosh || platform == Common::kPlatformMacintoshII) {
-		size_t pos = name.findLastOf(':');
-		if (pos != Common::String::npos)
-			name = name.substr(pos + 1, name.size());
 		if (name.hasSuffixIgnoreCase(".xlib"))
 			name = name.substr(0, name.size() - 5);
 	} else if (platform == Common::kPlatformWindows) {
-		size_t pos = name.findLastOf("\\");
-		if (pos != Common::String::npos)
-			name = name.substr(pos + 1, name.size());
 		if (name.hasSuffixIgnoreCase(".dll"))
 			name = name.substr(0, name.size() - 4);
 	}
 
 	name.trim();
-
-	// Normalize to remove machintosh path delimiters (':', '@:')
-	name = convertPath(name);
 
 	return name;
 }

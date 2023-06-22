@@ -69,6 +69,7 @@ DirectorEngine::DirectorEngine(OSystem *syst, const DirectorGameDescription *gam
 
 	// Setup mixer
 	syncSoundSettings();
+	_defaultVolume = _mixer->getVolumeForSoundType(Audio::Mixer::kSFXSoundType);
 
 	// Load Palettes
 	loadDefaultPalettes();
@@ -109,10 +110,16 @@ DirectorEngine::DirectorEngine(OSystem *syst, const DirectorGameDescription *gam
 		SearchMan.addSubDirectoryMatching(_gameDataDir, directoryGlob, 0, 5);
 	}
 
-	if (debugChannelSet(-1, kDebug32bpp))
+	if (debugChannelSet(-1, kDebug32bpp)) {
+#ifdef USE_RGB_COLOR
 		_colorDepth = 32;
-	else
+#else
+		warning("32-bpp color dept is not supported, forcing 8-bit");
+		_colorDepth = 8;
+#endif
+	} else {
 		_colorDepth = 8;	// 256-color
+	}
 
 	switch (getPlatform()) {
 	case Common::kPlatformMacintoshII:
@@ -143,8 +150,8 @@ DirectorEngine::~DirectorEngine() {
 	delete _wm;
 	delete _surface;
 
-	for (Common::HashMap<Common::String, Archive *, Common::IgnoreCase_Hash, Common::IgnoreCase_EqualTo>::iterator it = _allOpenResFiles.begin(); it != _allOpenResFiles.end(); ++it) {
-		delete it->_value;
+	for (auto &it : _allOpenResFiles) {
+		delete it._value;
 	}
 
 	for (uint i = 0; i < _winCursor.size(); i++)
@@ -198,8 +205,10 @@ Common::Error DirectorEngine::run() {
 	if (!debugChannelSet(-1, kDebugDesktop))
 		_wmMode |= Graphics::kWMModeFullscreen | Graphics::kWMModeNoDesktop;
 
+#ifdef USE_RGB_COLOR
 	if (debugChannelSet(-1, kDebug32bpp))
 		_wmMode |= Graphics::kWMMode32bpp;
+#endif
 
 	_wm = new Graphics::MacWindowManager(_wmMode, &_director3QuickDrawPatterns, getLanguage());
 	_wm->setEngine(this);

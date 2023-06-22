@@ -7,6 +7,9 @@ Umfangreichere Informationen über die Änderungen des aktuellen Codes findest D
    - Unterstützung für die macOS-Versionen von Syberia und Syberia II hinzugefügt.
    - Unterstützung für The Vampire Diaries und Nancy Drew: Secrets Can Kill hinzugefügt.
    - Unterstützung für Reah: Face the Unknown und Schizm: Mysterious Journey hinzugefügt.
+   - Unterstützung für Might and Magic Book One hinzugefügt.
+   - Unterstützung für Muppet Tresure Island hinzugefügt.
+   - Unterstützung für Primordia, Shardlight und Technobabylon hinzugefügt.
 
  Neue Plattformen:
    - Vollständig erneute Portierung für libretro hinzugefügt.
@@ -16,6 +19,9 @@ Umfangreichere Informationen über die Änderungen des aktuellen Codes findest D
    - libvpx wurde als neue, optionale Abhängigkeit hinzugefügt. 
    - libmikmod wurde als neue, optionale Abhängigkeit hinzugefügt.
    - Unterstützung für PC98-Font-ROMs hinzugefügt.
+
+ AGS:
+   - Code-Basis mit dem offiziellen AGS-Code in Version 3.6.0.48 synchronisiert.
 
  Asylum:
    - Unterstützung für die chinesische Version von Sanitarium hinzugefügt.
@@ -61,6 +67,8 @@ Umfangreichere Informationen über die Änderungen des aktuellen Codes findest D
 
  Xeen:
    - Die Engine "xeen" wurde für Might & Magic zu "mm" umbenannt.
+   - Neue Engine-Option hinzugefügt, mit der die Gesundheits-Edelsteine durch
+     eine HP/SP-Leiste ersetzt werden können.
 
 
 #### 2.7.1 (2023-XX-XX)

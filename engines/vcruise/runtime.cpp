@@ -1189,8 +1189,6 @@ bool Runtime::runFrame() {
 			moreActions = bootGame(true);
 			break;
 		case kGameStateQuit:
-			// Flush any settings changes made in-game
-			ConfMan.flushToDisk();
 			return false;
 		case kGameStateIdle:
 			moreActions = runIdle();
@@ -1304,7 +1302,14 @@ bool Runtime::bootGame(bool newGame) {
 	_trayCompassGraphic = loadGraphic("Select_1", true);
 	_trayCornerGraphic = loadGraphic("Select_2", true);
 
-	Common::Language lang = Common::parseLanguage(ConfMan.get("language"));
+	Common::Language lang = _defaultLanguage;
+
+	if (ConfMan.hasKey("language")) {
+		lang = Common::parseLanguage(ConfMan.get("language"));
+		debug(2, "Using user-selected language %s", Common::getLanguageDescription(lang));
+	} else {
+		debug(2, "Defaulted language to %s", Common::getLanguageDescription(lang));
+	}
 
 	_languageIndex = 1;
 	_defaultLanguageIndex = 1;
@@ -1382,6 +1387,8 @@ bool Runtime::bootGame(bool newGame) {
 		}
 	}
 
+	debug(2, "Language index: %u   Default language index: %u", _languageIndex, _defaultLanguageIndex);
+
 	Common::CodePage codePage = Common::CodePage::kASCII;
 	resolveCodePageForLanguage(lang, codePage, _charSet);
 
@@ -1408,6 +1415,8 @@ bool Runtime::bootGame(bool newGame) {
 			}
 		}
 	}
+
+	debug(2, "Final language selection: %s   Code page: %i   Language index: %u", Common::getLanguageDescription(lang), static_cast<int>(codePage), _languageIndex);
 
 	if (subtitlesLoadedOK)
 		debug(1, "Localization data loaded OK");
@@ -2703,18 +2712,6 @@ Common::SharedPtr<SoundInstance> Runtime::loadWave(const Common::String &soundNa
 			return activeSound;
 	}
 
-	Common::SeekableReadStream *stream = archiveMemberPtr->createReadStream();
-	if (!stream) {
-		warning("Couldn't open read stream for sound '%s'", soundName.c_str());
-		return nullptr;
-	}
-
-	Audio::SeekableAudioStream *audioStream = Audio::makeWAVStream(stream, DisposeAfterUse::YES);
-	if (!audioStream) {
-		warning("Couldn't open audio stream for sound '%s'", soundName.c_str());
-		return nullptr;
-	}
-
 	Common::SharedPtr<SoundInstance> soundInstance(new SoundInstance());
 
 	soundInstance->name = soundName;
@@ -3503,7 +3500,7 @@ void Runtime::changeAnimation(const AnimationDef &animDef, uint initialFrame, bo
 				return;
 			}
 		} else {
-			warning("Animation file %i is missing", animFile);
+			error("Animation file %i is missing", animFile);
 			delete aviFile;
 		}
 
@@ -4725,10 +4722,9 @@ Common::SharedPtr<Graphics::Surface> Runtime::loadGraphic(const Common::String &
 		return nullptr;
 	}
 
-	Common::SharedPtr<Graphics::Surface> surf(new Graphics::Surface());
+	Common::SharedPtr<Graphics::Surface> surf(new Graphics::Surface(), Graphics::SurfaceDeleter());
 	surf->copyFrom(*bmpDecoder.getSurface());
-	surf.reset(surf->convertTo(Graphics::createPixelFormat<8888>()));
-
+	surf = Common::SharedPtr<Graphics::Surface>(surf->convertTo(Graphics::createPixelFormat<8888>()), Graphics::SurfaceDeleter());
 	return surf;
 }
 

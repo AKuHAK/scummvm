@@ -19,6 +19,7 @@
  *
  */
 
+#include "common/config-manager.h"
 #include "common/memstream.h"
 #include "ags/engine/ac/game.h"
 #include "ags/shared/ac/common.h"
@@ -880,7 +881,11 @@ void save_game(int slotn, const char *descript) {
 	VALIDATE_STRING(descript);
 	String nametouse = get_save_game_path(slotn);
 	std::unique_ptr<Bitmap> screenShot;
-	if (_GP(game).options[OPT_SAVESCREENSHOT] != 0)
+
+	// WORKAROUND: AGS originally only creates savegames if the game flags
+	// that it supports it. But we want it all the time for ScummVM GMM,
+	// unless explicitly disabled through gameflag
+	if ((/*_GP(game).options[OPT_SAVESCREENSHOT] != 0*/ true) && _G(saveThumbnail))
 		screenShot.reset(create_savegame_screenshot());
 
 	std::unique_ptr<Stream> out(StartSavegame(nametouse, descript, screenShot.get()));

@@ -59,6 +59,7 @@ MODULE_OBJS = \
 	lingo/xlibs/batqt.o \
 	lingo/xlibs/blitpict.o \
 	lingo/xlibs/cdromxobj.o \
+	lingo/xlibs/colorxobj.o \
 	lingo/xlibs/darkenscreen.o \
 	lingo/xlibs/developerStack.o \
 	lingo/xlibs/dialogsxobj.o \
@@ -66,6 +67,7 @@ MODULE_OBJS = \
 	lingo/xlibs/dpwqtw.o \
 	lingo/xlibs/draw.o \
 	lingo/xlibs/ednox.o \
+	lingo/xlibs/eventq.o \
 	lingo/xlibs/fedracul.o \
 	lingo/xlibs/feimasks.o \
 	lingo/xlibs/feiprefs.o \

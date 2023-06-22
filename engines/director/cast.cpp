@@ -88,12 +88,6 @@ Cast::~Cast() {
 		for (Common::HashMap<int, const Stxt *>::iterator it = _loadedStxts->begin(); it != _loadedStxts->end(); ++it)
 			delete it->_value;
 
-	if (_castArchive) {
-		_castArchive->close();
-		delete _castArchive;
-		_castArchive = nullptr;
-	}
-
 	if (_loadedCast)
 		for (Common::HashMap<int, CastMember *>::iterator it = _loadedCast->begin(); it != _loadedCast->end(); ++it)
 			if (it->_value) {
@@ -183,6 +177,14 @@ const Stxt *Cast::getStxt(int castId) {
 
 int Cast::getCastSize() {
 	return _loadedCast->size();
+}
+
+int Cast::getCastMaxID() {
+	int result = 0;
+	for (auto &it : *_loadedCast) {
+		result = MAX(result, it._key);
+	}
+	return result;
 }
 
 Common::Rect Cast::getCastMemberInitialRect(int castId) {
@@ -487,11 +489,7 @@ void Cast::loadCast() {
 	Common::SeekableReadStreamEndian *r = nullptr;
 
 	// Font Directory
-	if (_castArchive->hasResource(MKTAG('F', 'O', 'N', 'D'), -1)) {
-		debug("Cast::loadCast(): Movie has fonts. Loading....");
-
-		_vm->_wm->_fontMan->loadFonts(_castArchive->getPathName());
-	}
+	_vm->_wm->_fontMan->loadFonts(_castArchive->getPathName());
 
 	// CastMember Information Array
 	if (_castArchive->hasResource(MKTAG('V', 'W', 'C', 'R'), -1)) {
@@ -522,17 +520,6 @@ void Cast::loadCast() {
 	if ((r = _castArchive->getMovieResourceIfPresent(MKTAG('V', 'W', 'T', 'L'))) != nullptr) {
 		loadVWTL(*r);
 		delete r;
-	}
-
-	// Time code
-	// TODO: Is this a score resource?
-	if (_castArchive->hasResource(MKTAG('V', 'W', 't', 'c'), -1)) {
-		debug("STUB: Unhandled VWtc resource");
-	}
-
-	// Tape Key resource. Used as a lookup for labels in early Directors, later dropped
-	if (_castArchive->hasResource(MKTAG('V', 'W', 't', 'k'), -1)) {
-		debugC(4, kDebugLoading, "VWtk resource skipped");
 	}
 
 	// External sound files
@@ -828,15 +815,7 @@ void Cast::loadExternalSound(Common::SeekableReadStreamEndian &stream) {
 
 	Common::String resPath = g_director->getCurrentPath() + str;
 
-	if (!g_director->_allOpenResFiles.contains(resPath)) {
-		MacArchive *resFile = new MacArchive();
-
-		if (resFile->openFile(resPath)) {
-			g_director->_allOpenResFiles.setVal(resPath, resFile);
-		} else {
-			delete resFile;
-		}
-	}
+	g_director->openArchive(resPath);
 }
 
 static void readEditInfo(EditInfo *info, Common::ReadStreamEndian *stream) {

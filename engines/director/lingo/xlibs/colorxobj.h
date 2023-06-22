@@ -19,25 +19,35 @@
  *
  */
 
-#ifndef BACKENDS_GRAPHICS_ATARI_VIDEL_RESOLUTIONS_H
-#define BACKENDS_GRAPHICS_ATARI_VIDEL_RESOLUTIONS_H
+#ifndef DIRECTOR_LINGO_XLIBS_COLORXOBJ_H
+#define DIRECTOR_LINGO_XLIBS_COLORXOBJ_H
 
-#include "common/scummsys.h"
+namespace Director {
 
-constexpr int SCP_SIZE = 158;
+namespace ColorXObj {
 
-extern const byte scp_320x200x8_rgb[SCP_SIZE];
-extern const byte scp_320x200x8_rgb60[SCP_SIZE];
-extern       byte scp_320x200x8_vga[SCP_SIZE];
+extern const char *xlibName;
+extern const char *fileNames[];
 
-extern const byte scp_320x240x8_rgb[SCP_SIZE];
-extern       byte scp_320x240x8_vga[SCP_SIZE];
+void open(int type);
+void close(int type);
 
-extern const byte scp_640x400x8_rgb[SCP_SIZE];
-extern const byte scp_640x400x8_rgb60[SCP_SIZE];
-extern       byte scp_640x400x8_vga[SCP_SIZE];
+void m_new(int nargs);
+void m_dispose(int nargs);
+void m_setOurColors(int nargs);
+void m_restoreColors(int nargs);
+void m_getSysColor(int nargs);
+void m_setSysColor(int nargs);
+void m_setSysColorRGB(int nargs);
+void m_setSysColorIndex(int nargs);
 
-extern const byte scp_640x480x8_rgb[SCP_SIZE];
-extern       byte scp_640x480x8_vga[SCP_SIZE];
+} // End of namespace ColorXObj
+
+class ColorXObject : public Object<ColorXObject> {
+public:
+	ColorXObject(ObjectType objType);
+};
+
+} // End of namespace Director
 
 #endif

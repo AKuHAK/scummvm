@@ -568,7 +568,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "learnworks2",		"Video Professor: Learn Works for Windows 95, Level 2" },
 	{ "leonardo",			"Leonardo the Inventor" },
 	{ "lewisclark",			"Lewis & Clark Interactive Picture CD" },
-	{ "lifemysteries",		"Life's Greatest Mysteries" },
+	{ "lifemysteries",		"Bob Winkle Solves Life's Greatest Mysteries" },
 	{ "lifeuniverse",		"Life in the Universe" },
 	{ "louvre",				"Le Louvre: The palace & its paintings" },
 	{ "lovedisk",			"Lovedisk 95" },
@@ -4623,6 +4623,10 @@ static const DirectorGameDescription gameDescriptions[] = {
 
 	// Original filename is もみの木の下で.予告編
 	MACDEMO1_l("mominoki", "Demo", "Mominoki no shita de.Trailer", "0666ae690e459d3d0d91800ebd94de46", 290398, Common::JA_JPN, 402),
+	// Original filename is "はじめる"
+	MACGAME1t_l("mominoki", "", "xn--78j2bxcxb", "6e88b1e59774da8d73a5a5dc1b4016c1", 306802, Common::JA_JPN, 403),
+	// Decomposed variant of the above
+	MACGAME1t_l("mominoki", "", "xn--68j4bvcxb0d", "6e88b1e59774da8d73a5a5dc1b4016c1", 306802, Common::JA_JPN, 403),
 
 	MACGAME1_l("monja", "", "monja", "cd6695c8488c2ad352336af5afdcf5bd", 481803, Common::JA_JPN, 404),
 	WINGAME1t_l("monja", "", "MONJA.EXE", "5bc2c8a824528ec4de0f8d8feb8f004e", 212008995, Common::JA_JPN, 404),
@@ -5005,7 +5009,7 @@ static const DirectorGameDescription gameDescriptions[] = {
 	MACGAME1_l("pippi", "v1.3.3", "Pippi Start", "5f48d38b0c9b9c8790796d1eb1525713", 517216, Common::EN_ANY, 404),
 	WINGAME1t_l("pippi", "v1.3.3", "PIPPI.EXE", "2f3533b95406015d03d5dcd8ba7d961f", 691043, Common::EN_ANY, 404),
 
-	MACGAME1("planetarizona", "", "Planet Arizona", "0c7bbb4b24823e5ab871cb4c1d6f3710", 488433, 400),
+	MACGAME1("planetarizona", "", "Manual Installation/Planet Arizona", "0c7bbb4b24823e5ab871cb4c1d6f3710", 488433, 400),
 	WINGAME1("planetarizona", "", "ARIZONA.EXE", "a23462ec87eff973d2cdb2ddfd4a59fa", 698651, 400),
 
 	// Mac demo from MacFormat #44

@@ -19,28 +19,17 @@
  *
  */
 
-#ifndef AGS_STD_MATH_H
-#define AGS_STD_MATH_H
+#ifndef XYZZY_VIEWS_H
+#define XYZZY_VIEWS_H
 
-#include "common/hashmap.h"
-#include "ags/lib/std/utility.h"
+#include "xyzzy/view1.h"
 
-namespace AGS3 {
-namespace std {
+namespace Xyzzy {
 
-// Not all platforms define INFINITY
-#ifndef INFINITY
-#define INFINITY   ((float)(1e+300 * 1e+300)) // This must overflow
-#endif
+struct Views {
+	View1 _view1;
+};
 
-#define FLOAT_UNASSIGNED (float)999999.0
-
-template<class T>
-inline bool isUndefined(T val) {
-	return val == FLOAT_UNASSIGNED;
-}
-
-} // namespace std
-} // namespace AGS3
+} // namespace Xyzzy
 
 #endif

@@ -68,7 +68,7 @@ struct SaveInfoSection {
 
 #define SaveInfoSectionSize (4+4+4 + 4+4 + 4+2)
 
-#define CURRENT_VER 108
+#define CURRENT_VER 109
 #define INFOSECTION_VERSION 2
 
 #pragma mark -
@@ -1442,7 +1442,11 @@ void ScummEngine::saveLoadWithSerializer(Common::Serializer &s) {
 	// Post-load fix for broken SAMNMAX savegames which contain invalid
 	// cursor values; the value we're setting here should not count since
 	// it's being replaced by the post-load script, as long as it's not zero.
-	if (_game.version == 6 && (_cursor.width == 0 || _cursor.height == 0)) {
+	// The same also happens for the Mac version of INDY3: the cursor was being
+	// handled directly with a CursorMan.replaceCursor() without specifying any
+	// values for the _cursor object (#14498). Let's fix that with the proper values.
+	if ((_game.version == 6 || (_game.id == GID_INDY3 && _macScreen)) &&
+		(_cursor.width == 0 || _cursor.height == 0)) {
 		_cursor.width = 15;
 		_cursor.height = 15;
 		_cursor.hotspotX = 7;
@@ -1803,6 +1807,23 @@ void ScummEngine::saveLoadWithSerializer(Common::Serializer &s) {
 			// We need to restore the internal state of the Amiga palette for Indy4
 			// Amiga. This might lead to graphics glitches!
 			setAmigaPaletteFromPtr(_currentPalette);
+		}
+	}
+
+	// Before version 109, palette cycling for v4 games was handled in a different
+	// way (which is, by retrofitting v5 code, which caused a class of bugs like #10854).
+	// The proper v4 code has now been implemented from disasm (specifically, only the
+	// LOOM CD and MI1 VGA executables have said code).
+	//
+	// Given that the previous implementation mangled the cycling data during the init
+	// phase, we have to resort to the following post-load fix, otherwise the color
+	// cycling will not occur on game load.
+	if (_game.version == 4 && (_game.id == GID_LOOM || _game.id == GID_MONKEY_VGA) &&
+		s.getVersion() < VER(109)) {
+		byte *roomptr = getResourceAddress(rtRoom, _roomResource);
+		const byte *ptr = findResourceData(MKTAG('C', 'Y', 'C', 'L'), roomptr);
+		if (ptr) {
+			initCycl(ptr);
 		}
 	}
 
