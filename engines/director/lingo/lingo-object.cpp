@@ -40,9 +40,11 @@
 #include "director/lingo/xlibs/blitpict.h"
 #include "director/lingo/xlibs/cdromxobj.h"
 #include "director/lingo/xlibs/colorxobj.h"
+#include "director/lingo/xlibs/consumer.h"
 #include "director/lingo/xlibs/darkenscreen.h"
 #include "director/lingo/xlibs/developerStack.h"
 #include "director/lingo/xlibs/dialogsxobj.h"
+#include "director/lingo/xlibs/dirutil.h"
 #include "director/lingo/xlibs/dpwavi.h"
 #include "director/lingo/xlibs/dpwqtw.h"
 #include "director/lingo/xlibs/draw.h"
@@ -168,9 +170,11 @@ static struct XLibProto {
 	{ BlitPict::fileNames,				BlitPict::open,				BlitPict::close,			kXObj,					400 },	// D4
 	{ CDROMXObj::fileNames,				CDROMXObj::open,			CDROMXObj::close,			kXObj,					200 },	// D2
 	{ ColorXObj::fileNames,				ColorXObj::open,			ColorXObj::close,			kXObj,					400 },	// D4
+	{ ConsumerXObj::fileNames,			ConsumerXObj::open,			ConsumerXObj::close,		kXObj,					400 },	// D4
 	{ DarkenScreen::fileNames,			DarkenScreen::open,			DarkenScreen::close,		kXObj,					300 },	// D3
 	{ DeveloperStack::fileNames,		DeveloperStack::open,		DeveloperStack::close,		kXObj,					300 },	// D3
 	{ DialogsXObj::fileNames,			DialogsXObj::open,			DialogsXObj::close,			kXObj,					400 },	// D4
+	{ DirUtilXObj::fileNames,			DirUtilXObj::open,			DirUtilXObj::close,			kXObj,					400 },	// D4
 	{ DPwAVI::fileNames,				DPwAVI::open,				DPwAVI::close,				kXObj,					400 },	// D4
 	{ DPwQTw::fileNames,				DPwQTw::open,				DPwQTw::close,				kXObj,					400 },	// D4
 	{ DrawXObj::fileNames,				DrawXObj::open,				DrawXObj::close,			kXObj,					400 },	// D4
@@ -294,16 +298,16 @@ void Lingo::closeXLib(Common::String name) {
 }
 
 void Lingo::closeOpenXLibs() {
-	for (OpenXLibsHash::iterator it = _openXLibs.begin(); it != _openXLibs.end(); ++it) {
-		closeXLib(it->_key);
+	for (auto &it : _openXLibs) {
+		closeXLib(it._key);
 	}
 }
 
 void Lingo::reloadOpenXLibs() {
 	OpenXLibsHash openXLibsCopy = _openXLibs;
-	for (OpenXLibsHash::iterator it = openXLibsCopy.begin(); it != openXLibsCopy.end(); ++it) {
-		closeXLib(it->_key);
-		openXLib(it->_key, it->_value);
+	for (auto &it : openXLibsCopy) {
+		closeXLib(it._key);
+		openXLib(it._key, it._value);
 	}
 }
 
@@ -329,13 +333,13 @@ ScriptContext::ScriptContext(Common::String name, ScriptType type, int id)
 ScriptContext::ScriptContext(const ScriptContext &sc) : Object<ScriptContext>(sc) {
 	_scriptType = sc._scriptType;
 	_functionNames = sc._functionNames;
-	for (SymbolHash::iterator it = sc._functionHandlers.begin(); it != sc._functionHandlers.end(); ++it) {
-		_functionHandlers[it->_key] = it->_value;
-		_functionHandlers[it->_key].ctx = this;
+	for (auto &it : sc._functionHandlers) {
+		_functionHandlers[it._key] = it._value;
+		_functionHandlers[it._key].ctx = this;
 	}
-	for (Common::HashMap<uint32, Symbol>::iterator it = sc._eventHandlers.begin(); it != sc._eventHandlers.end(); ++it) {
-		_eventHandlers[it->_key] = it->_value;
-		_eventHandlers[it->_key].ctx = this;
+	for (auto &it : sc._eventHandlers) {
+		_eventHandlers[it._key] = it._value;
+		_eventHandlers[it._key].ctx = this;
 	}
 	_constants = sc._constants;
 	_properties = sc._properties;
@@ -601,6 +605,8 @@ Datum Window::getField(int field) {
 		return getStageRect();
 	case kTheModal:
 		return getModal();
+	case kTheFileName:
+		return getFileName();
 	default:
 		warning("Window::getField: unhandled field '%s'", g_lingo->field2str(field));
 		return Datum();
@@ -625,6 +631,9 @@ bool Window::setField(int field, const Datum &value) {
 		return setStageRect(value);
 	case kTheModal:
 		setModal((bool)value.asInt());
+		return true;
+	case kTheFileName:
+		setFileName(value.asString());
 		return true;
 	default:
 		warning("Window::setField: unhandled field '%s'", g_lingo->field2str(field));
@@ -655,13 +664,13 @@ void LM::m_forget(int nargs) {
 		windowList->arr.remove_at(i);
 
 	// remove me from global vars
-	for (DatumHash::iterator it = g_lingo->_globalvars.begin(); it != g_lingo->_globalvars.end(); ++it) {
-		if (it->_value.type != OBJECT || it->_value.u.obj->getObjType() != kWindowObj)
+	for (auto &it : g_lingo->_globalvars) {
+		if (it._value.type != OBJECT || it._value.u.obj->getObjType() != kWindowObj)
 			continue;
 
 		Window *window = static_cast<Window *>(windowList->arr[i].u.obj);
 		if (window == me)
-			g_lingo->_globalvars[it->_key] = 0;
+			g_lingo->_globalvars[it._key] = 0;
 	}
 }
 

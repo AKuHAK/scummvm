@@ -192,6 +192,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "goferwinkel",		"Goferwinkel's Adventures: The Lavender Land" },
 	{ "goldilocks",			"Goldilocks Gamebook" },
 	{ "gordak",				"Gord@k" },
+	{ "gothos",				"Gothos" },
 	{ "grammarplaytime2",	"Grammar Playtime Vol.2: Asking Questions" },
 	{ "gundam0079",			"Gundam 0079: The War for Earth" },
 	{ "guscarn",			"Gus Goes to the Kooky Carnival" },
@@ -463,6 +464,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "wallobeetemple",		"The temple of Monakumba: Starring Wallobee Jack" },
 	{ "warlock",			"Spaceship Warlock" },
 	{ "wiggles1",			"A Day with the Wiggles" },
+	{ "willywabbit",		"Willy Wabbit & His Magical Books" },
 	{ "winniewitch",		"Winnie the Witch" },
 	{ "wishbone", 			"Wishbone and the Amazing Odyssey" },
 	{ "wrath",				"Wrath of the Gods" },
@@ -942,6 +944,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "erikotamuraoz",		"Eriko Tamura: Oz" },
 	{ "fantazion",			"World Engine Fantazion" },
 	{ "ffa",				"ファンキー ファニー エイリアンズ" },					// Funky Funny Aliens
+	{ "firstpc",			"First PC" },
 	{ "garyukeiba",			"我流競馬" },										// "My style horse racing"
 	{ "ganbareinuchan",		"がんばれ! いぬちゃん ロケンロール編" },				// Ganbare! Inu-chan: Rock'n Roll Edition
 	{ "ganbareinuchan2",	"がんばれ! いぬちゃん 世界の旅へん" },				// Ganbare! Inu-chan: Tour Around the World
@@ -3041,6 +3044,11 @@ static const DirectorGameDescription gameDescriptions[] = {
 	// Produced by Microsoft; designed by AdWare Inc, Los Gatos, California (1992)
 	WINDEMO1("wfw31", "Demo", "WFWDEMO.EXE", "d98c3f5c1b7ea3039c47cc63d238a60d", 253540, 300),
 
+	// Mac version is D4
+	WINGAME2t("willywabbit", "North American release",
+			  "WILLY.EXE", "d5a5389a2c9fcae112f1d5772d2d6fd3", 375280,
+			  "LANDMRKS.MMM", "4ad136593e943df6e05021616eae990a", 8830134, 310),
+
 	// Designed and produced by AdWare Inc, Los Gatos, California (1992)
 	WINDEMO2t("windows31", "Demo", "WINDEMO.EXE", "7d007410fece051b819735a282da7601", 255447,
 								   "WINDEMO.MMM", "0c13c2c5768cd54b01e5b9b1ef093f28", 2824822, 300),
@@ -5010,7 +5018,7 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME1t_l("pippi", "v1.3.3", "PIPPI.EXE", "2f3533b95406015d03d5dcd8ba7d961f", 691043, Common::EN_ANY, 404),
 
 	MACGAME1("planetarizona", "", "Manual Installation/Planet Arizona", "0c7bbb4b24823e5ab871cb4c1d6f3710", 488433, 400),
-	WINGAME1("planetarizona", "", "ARIZONA.EXE", "a23462ec87eff973d2cdb2ddfd4a59fa", 698651, 400),
+	WINGAME1("planetarizona", "", "INSTALL/ARIZONA.EXE", "a23462ec87eff973d2cdb2ddfd4a59fa", 698651, 400),
 
 	// Mac demo from MacFormat #44
 	// Win demo from Computer Buyer v17n68 (January 1997)
@@ -5487,6 +5495,9 @@ static const DirectorGameDescription gameDescriptions[] = {
 
 	WINGAME1t("williamsbts", "", "BEHIND.EXE", "0a432cb988c9865c478bdc195429d3fd", 693077, 404),
 	MACGAME1("williamsbts", "", "Behind the Scenes", "5442b05b2d320eb2e2ec3c74fa41f953", 483490, 404),
+
+	// Windows version is D3
+	MACGAME1t("willywabbit", "North American release", "Willy Wabbit(Click me)", "04e5a9a6c98f48aaef7fe7115b3606ca", 304029, 400),
 
 	WINDEMO1("windows95", "Demo", "W95DEMO.EXE", "508a025373f0e8f6ae514578cf97c281", 24814094, 404),
 
@@ -5978,6 +5989,10 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME2("explorespace5", "", "WIN95.EXE",			 "1a7acbba10a7246ba58c1d53fc7203f5", 1411387,
 								  "PROGRAM/459MAIN.DXR", "3868e98be38c2fbff814e2b8f1663fc9", 376868, 501),
 
+	// Original filename is "ファースト ＰＣ"
+	MACGAME1t_l("firstpc", "", "xn-- -ceu6cuc2c5my703k7ca",	  "ea9e1c1489dee20fe0a949facbf62c0e", 719664, Common::JA_JPN, 501),
+	WINGAME1t_l("firstpc", "", "FIRSTPC.EXE", "969770de110b5dcea469d4153780578b", 1411736, Common::JA_JPN, 501),
+
 	// Developed by Brilliant Interactive Ideas, published by Brainstorm
 	MACGAME1("flipper", "", "Flipper!",	  "6e7e31d05709e1d38d63f4df6a59eec0", 718381, 501),
 	WINGAME1("flipper", "", "FLIP32.EXE", "3460ad87d2ba57104e2810a77b53c220", 1398201, 500),
@@ -6048,6 +6063,9 @@ static const DirectorGameDescription gameDescriptions[] = {
 								  "DATA/TAMURA.Dxr", "401a9dcb7a3d874bc3798bdef929ead2", 155168, Common::JA_JPN, 501),
 	WINGAME2t_l("glassyocean", "", "START.EXE",		  "c5dcc03aca7e0bed95844afdd86f866c", 1410529,
 								   "DATA/TAMURA.DXR", "a7bd15f6f42162fed7f32e0a739617ec", 155168, Common::JA_JPN, 501),
+
+	WINGAME1("gothos", "", "gothos.exe", "6199bb7cabc7f636394cacffd6a71fa9", 1788333, 501),
+	MACGAME1("gothos", "", "MACINST/GOTHOS", "1d08e56a4c7ba60a67417c7988cd3ffe", 718097, 501),
 
 	// Green Eggs and Hamulator mini-game
 	// Demo for a Living Books game that is supported in MOHAWK engine

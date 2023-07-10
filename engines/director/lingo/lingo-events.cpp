@@ -119,7 +119,7 @@ void Movie::queueSpriteEvent(Common::Queue<LingoEvent> &queue, LEvent event, int
 	 * When more than one movie script [...]
 	 * [D4 docs] */
 
-	Frame *currentFrame = _score->_frames[_score->getCurrentFrame()];
+	Frame *currentFrame = _score->_currentFrame;
 	assert(currentFrame != nullptr);
 	Sprite *sprite = _score->getSpriteById(spriteId);
 
@@ -157,11 +157,11 @@ void Movie::queueFrameEvent(Common::Queue<LingoEvent> &queue, LEvent event, int 
 	 */
 
 	// if (event == kEventPrepareFrame || event == kEventIdle) {
-	// 	entity = score->getCurrentFrame();
+	// 	entity = score->getCurrentFrameNum();
 	// } else {
 
-	assert(_score->_frames[_score->getCurrentFrame()] != nullptr);
-	CastMemberID scriptId = _score->_frames[_score->getCurrentFrame()]->_actionId;
+	assert(_score->_currentFrame != nullptr);
+	CastMemberID scriptId = _score->_currentFrame->_actionId;
 	if (!scriptId.member)
 		return;
 
@@ -184,19 +184,17 @@ void Movie::queueMovieEvent(Common::Queue<LingoEvent> &queue, LEvent event, int 
 
 	// FIXME: shared cast movie scripts could come before main movie ones
 	LingoArchive *mainArchive = getMainLingoArch();
-	for (ScriptContextHash::iterator it = mainArchive->scriptContexts[kMovieScript].begin();
-			it != mainArchive->scriptContexts[kMovieScript].end(); ++it) {
-		if (it->_value->_eventHandlers.contains(event)) {
-			queue.push(LingoEvent(event, eventId, kMovieScript, CastMemberID(it->_key, DEFAULT_CAST_LIB), false));
+	for (auto &it : mainArchive->scriptContexts[kMovieScript]) {
+		if (it._value->_eventHandlers.contains(event)) {
+			queue.push(LingoEvent(event, eventId, kMovieScript, CastMemberID(it._key, DEFAULT_CAST_LIB), false));
 			return;
 		}
 	}
 	LingoArchive *sharedArchive = getSharedLingoArch();
 	if (sharedArchive) {
-		for (ScriptContextHash::iterator it = sharedArchive->scriptContexts[kMovieScript].begin();
-				it != sharedArchive->scriptContexts[kMovieScript].end(); ++it) {
-			if (it->_value->_eventHandlers.contains(event)) {
-				queue.push(LingoEvent(event, eventId, kMovieScript, CastMemberID(it->_key, DEFAULT_CAST_LIB), false));
+		for (auto &it : sharedArchive->scriptContexts[kMovieScript]) {
+			if (it._value->_eventHandlers.contains(event)) {
+				queue.push(LingoEvent(event, eventId, kMovieScript, CastMemberID(it._key, DEFAULT_CAST_LIB), false));
 				return;
 			}
 		}

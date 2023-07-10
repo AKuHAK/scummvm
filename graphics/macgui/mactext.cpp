@@ -71,6 +71,8 @@ bool MacFontRun::equals(MacFontRun &to) {
 }
 
 Common::CodePage MacFontRun::getEncoding() {
+	if (wm->_mode & kWMModeWin95)
+		return Common::kUtf8;
 	return wm->_fontMan->getFontEncoding(fontId);
 }
 
@@ -1012,8 +1014,6 @@ int MacText::getLineWidth(int line, bool enforce, int col) {
 	int height = 0;
 	int charwidth = 0;
 
-	bool hastext = false;
-
 	for (uint i = 0; i < _textLines[line].chunks.size(); i++) {
 		if (enforce && _macFontMode)
 			_textLines[line].chunks[i].font = nullptr;
@@ -1033,7 +1033,6 @@ int MacText::getLineWidth(int line, bool enforce, int col) {
 		if (!_textLines[line].chunks[i].text.empty()) {
 			width += getStringWidth(_textLines[line].chunks[i], _textLines[line].chunks[i].text);
 			charwidth += _textLines[line].chunks[i].text.size();
-			hastext = true;
 		}
 
 		height = MAX(height, _textLines[line].chunks[i].getFont()->getFontHeight());

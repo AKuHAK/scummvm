@@ -39,6 +39,7 @@ public:
 
 	virtual void initSurface() override;
 	virtual void deinitSurface() override;
+	virtual void resizeSurface() override;
 
 	virtual AndroidCommonGraphics::State getState() const override;
 	virtual bool setState(const AndroidCommonGraphics::State &state) override;
@@ -122,6 +123,8 @@ public:
 	void touchControlNotifyChanged() override;
 	void touchControlDraw(int16 x, int16 y, int16 w, int16 h, const Common::Rect &clip) override;
 
+	void syncVirtkeyboardState(bool virtkeybd_on) override;
+
 protected:
 	void updateScreenRect();
 	void updateCursorScaling();
@@ -133,8 +136,6 @@ protected:
 	void setSystemMousePosition(int x, int y) {}
 
 	bool loadVideoMode(uint requestedWidth, uint requestedHeight, const Graphics::PixelFormat &format);
-
-	void refreshScreen();
 
 private:
 	void initOverlay();
@@ -153,6 +154,8 @@ private:
 	bool _fullscreen;
 	bool _ar_correction;
 	bool _force_redraw;
+
+	bool _virtkeybd_on;
 
 	// Game layer
 	GLESTexture *_game_texture;

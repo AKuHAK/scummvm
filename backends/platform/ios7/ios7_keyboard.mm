@@ -21,6 +21,7 @@
 
 #include "backends/platform/ios7/ios7_keyboard.h"
 #include "common/keyboard.h"
+#include "common/config-manager.h"
 
 @interface UITextInputTraits
 - (void)setAutocorrectionType:(int)type;
@@ -49,6 +50,7 @@
 	softKeyboard = keyboard;
 
 	[self setAutocorrectionType:UITextAutocorrectionTypeNo];
+	[self setSpellCheckingType:UITextSpellCheckingTypeNo];
 	[self setAutocapitalizationType:UITextAutocapitalizationTypeNone];
 	[self setEnablesReturnKeyAutomatically:NO];
 #if TARGET_OS_IOS
@@ -252,7 +254,7 @@
 //	self.inputAccessoryView = scrollView;
 //	[self reloadInputViews];
 	// We need at least a width of 1024 pt for the toolbar. If we add more buttons this may need to be increased.
-	toolbar.frame = CGRectMake(0, 0, MAX(1024, [[UIScreen mainScreen] bounds].size.width), toolbar.frame.size.height);
+	toolbar.frame = CGRectMake(0, 0, MAX(CGFloat(1024), [[UIScreen mainScreen] bounds].size.width), toolbar.frame.size.height);
 	toolbar.bounds = toolbar.frame;
 	toolbar.selectedItem = nil;
 #if TARGET_OS_IOS
@@ -391,16 +393,72 @@
 @end
 
 
-@implementation SoftKeyboard
+@implementation SoftKeyboard {
+	BOOL _keyboardVisible;
+}
+
+#if TARGET_OS_IOS
+- (void)resizeParentFrame:(NSNotification*)notification keyboardDidShow:(BOOL)didShow
+{
+	NSDictionary* userInfo = [notification userInfo];
+	CGRect keyboardFrame = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+	keyboardFrame = [self.superview convertRect:keyboardFrame fromView:nil];
+
+	// Base the new frame size on the current parent frame size
+	CGRect newFrame = self.superview.frame;
+	newFrame.size.height += (keyboardFrame.size.height) * (didShow ? -1 : 1);
+
+	// Resize with a fancy animation
+	NSNumber *rate = notification.userInfo[UIKeyboardAnimationDurationUserInfoKey];
+	[UIView animateWithDuration:rate.floatValue animations:^{
+		self.superview.frame = newFrame;
+	}];
+}
+
+- (void)keyboardDidShow:(NSNotification*)notification
+{
+	// NotificationCenter might notify multiple times
+	// when keyboard did show because the accessoryView
+	// affect the keyboard height. However since we use
+	// UIKeyboardFrameEndUserInfoKey to get the keyboard
+	// it will always have the same value. Make sure to
+	// only handle one notification.
+	if (!_keyboardVisible) {
+		[self resizeParentFrame:notification keyboardDidShow:YES];
+		_keyboardVisible = YES;
+	}
+}
+
+- (void)keyboardDidHide:(NSNotification*)notification
+{
+	// NotificationCenter will only call this once
+	// when keyboard did hide.
+	[self resizeParentFrame:notification keyboardDidShow:NO];
+	_keyboardVisible = NO;
+}
+#endif
 
 - (id)initWithFrame:(CGRect)frame {
 	self = [super initWithFrame:frame];
+
+#if TARGET_OS_IOS
+	[[NSNotificationCenter defaultCenter] addObserver:self
+	 selector:@selector(keyboardDidShow:)
+	 name:UIKeyboardDidShowNotification
+	 object:nil];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+	 selector:@selector(keyboardDidHide:)
+	 name:UIKeyboardDidHideNotification
+	 object:nil];
+#endif
+
 	inputDelegate = nil;
 	inputView = [[TextInputHandler alloc] initWithKeyboard:self];
 	inputView.delegate = self;
 	inputView.clearsOnBeginEditing = YES;
 	[inputView layoutIfNeeded];
-
+	_keyboardVisible = NO;
 	return self;
 }
 
@@ -422,7 +480,8 @@
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
-	[inputView attachAccessoryView];
+	if (ConfMan.getBool("keyboard_fn_bar"))
+		[inputView attachAccessoryView];
 }
 - (void)textFieldDidEndEditing:(UITextField *)textField {
 	[inputView detachAccessoryView];

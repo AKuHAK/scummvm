@@ -178,7 +178,10 @@ int MidiPlayer::open() {
 		_dataType = MT_MT32;
 	}
 
-	if (_dataType == MT_MT32 && _deviceType == MT_GM) {
+	// Check for MT-32 playback on a GM device and show a warning.
+	// Elvira 1 PC-98xx driver remaps MT-32 instruments to GM like the
+	// original driver does, so no warning needed in that case.
+	if (_dataType == MT_MT32 && _deviceType == MT_GM && !_pc98) {
 		// Not a real MT32 / no MUNT
 		::GUI::MessageDialog dialog(_(
 			"You appear to be using a General MIDI device,\n"
@@ -362,7 +365,22 @@ int MidiPlayer::open() {
 					ConfMan.getBool("multi_midi")) {
 				// The DOS floppy version can use AdLib MIDI SFX with MT-32
 				// music.
-				_driverMsSfx = createMidiDriverSimon1AdLib("MT_FM.IBK", oplType);
+				if (Common::File::exists("MT_FM.IBK")) {
+					_driverMsSfx = createMidiDriverSimon1AdLib("MT_FM.IBK", oplType);
+				} else {
+					// Fallback in case AdLib instrument definitions are missing.
+					GUI::MessageDialog dialog(
+						Common::U32String::format(
+							_("Could not find AdLib instrument definition file\n"
+							  "%s. Without this file,\n"
+							  "the sound effects will not sound the same as the original game."),
+							"MT_FM.IBK"),
+						_("OK"));
+					dialog.runModal();
+
+					_driverMsSfx = new MidiDriver_ADLIB_Multisource(oplType);
+					_driverMsSfx->setInstrumentRemapping(MidiDriver::_mt32ToGm);
+				}
 			}
 
 			break;
@@ -463,7 +481,7 @@ int MidiPlayer::open() {
 		_driver = _driverMsMusic;
 
 		// Create the MIDI parser(s) for the format used by the platform.
-		if (_vm->getPlatform() == Common::kPlatformDOS) {
+		if (_vm->getPlatform() == Common::kPlatformDOS || (usesMT32Data() && (_vm->getFeatures() & GF_MT32_XMIDI))) {
 			// DOS uses Miles XMIDI.
 			_parserMusic = MidiParser::createParser_XMIDI(MidiParser::defaultXMidiCallback, 0, 0);
 		} else {

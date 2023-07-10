@@ -60,7 +60,8 @@ Common::Error Window::loadInitialMovie() {
 		return Common::kPathNotFile;
 
 	loadINIStream();
-	_mainArchive = g_director->openArchive(movie);
+	Common::Path path = findPath(movie);
+	_mainArchive = g_director->openArchive(path);
 
 	if (!_mainArchive) {
 		warning("Cannot open main movie");
@@ -69,7 +70,8 @@ Common::Error Window::loadInitialMovie() {
 	probeResources(_mainArchive);
 
 	// Load multiple-resources based executable file (Projector)
-	ProjectorArchive *multiArchive = new ProjectorArchive(_vm->getRawEXEName());
+	Common::String rawEXE = _vm->getRawEXEName();
+	ProjectorArchive *multiArchive = new ProjectorArchive(findPath(rawEXE));
 	if (multiArchive->isLoaded()) {
 		// A valid projector archive, add to SearchMan
 		SearchMan.add(_vm->getRawEXEName(), multiArchive);
@@ -79,8 +81,8 @@ Common::Error Window::loadInitialMovie() {
 
 	_currentMovie = new Movie(this);
 	_currentPath = getPath(movie, _currentPath);
-	Common::String sharedCastPath = getSharedCastPath();
-	if (!sharedCastPath.empty() && !sharedCastPath.equalsIgnoreCase(movie))
+	Common::Path sharedCastPath = getSharedCastPath();
+	if (!sharedCastPath.empty() && !(sharedCastPath == path))
 		_currentMovie->loadSharedCastsFrom(sharedCastPath);
 
 	// load startup movie
@@ -121,8 +123,8 @@ void Window::probeResources(Archive *archive) {
 
 		if (archive->hasResource(MKTAG('v', 'e', 'r', 's'), -1)) {
 			Common::Array<uint16> vers = archive->getResourceIDList(MKTAG('v', 'e', 'r', 's'));
-			for (Common::Array<uint16>::iterator iterator = vers.begin(); iterator != vers.end(); ++iterator) {
-				Common::SeekableReadStreamEndian *vvers = archive->getResource(MKTAG('v', 'e', 'r', 's'), *iterator);
+			for (auto &iterator : vers) {
+				Common::SeekableReadStreamEndian *vvers = archive->getResource(MKTAG('v', 'e', 'r', 's'), iterator);
 				Common::MacResManager::MacVers *v = Common::MacResManager::parseVers(vvers);
 
 				debug(0, "Detected vers %d.%d %s.%d region %d '%s' '%s'", v->majorVer, v->minorVer, v->devStr.c_str(),
@@ -147,9 +149,9 @@ void Window::probeResources(Archive *archive) {
 				error("No strings in Projector file");
 
 			Common::String sname = decodePlatformEncoding(name->readPascalString());
-			Common::String moviePath = pathMakeRelative(sname);
-			if (testPath(moviePath)) {
-				_nextMovie.movie = moviePath;
+			Common::Path moviePath = findMoviePath(sname);
+			if (!moviePath.empty()) {
+				_nextMovie.movie = moviePath.toString(g_director->_dirSeparator);
 				warning("Replaced score name with: %s (from %s)", _nextMovie.movie.c_str(), sname.c_str());
 
 				if (_currentMovie) {
@@ -157,7 +159,7 @@ void Window::probeResources(Archive *archive) {
 					_currentMovie = nullptr;
 				}
 
-				Archive *subMovie = g_director->openArchive(moviePath);
+				Archive *subMovie = g_director->openArchive(moviePath.toString());
 				if (subMovie) {
 					probeResources(subMovie);
 				}
@@ -173,27 +175,28 @@ void Window::probeResources(Archive *archive) {
 		// fork of the file to state which XObject or HyperCard XCMD/XFCNs
 		// need to be loaded in.
 		MacArchive *resFork = new MacArchive();
-		if (resFork->openFile(archive->getPathName())) {
+		Common::String resForkPathName = archive->getPathName();
+		if (resFork->openFile(findPath(resForkPathName).toString())) {
 			if (resFork->hasResource(MKTAG('X', 'C', 'O', 'D'), -1)) {
 				Common::Array<uint16> xcod = resFork->getResourceIDList(MKTAG('X', 'C', 'O', 'D'));
-				for (Common::Array<uint16>::iterator iterator = xcod.begin(); iterator != xcod.end(); ++iterator) {
-					Resource res = resFork->getResourceDetail(MKTAG('X', 'C', 'O', 'D'), *iterator);
+				for (auto &iterator : xcod) {
+					Resource res = resFork->getResourceDetail(MKTAG('X', 'C', 'O', 'D'), iterator);
 					debug(0, "Detected XObject '%s'", res.name.c_str());
 					g_lingo->openXLib(res.name, kXObj);
 				}
 			}
 			if (resFork->hasResource(MKTAG('X', 'C', 'M', 'D'), -1)) {
 				Common::Array<uint16> xcmd = resFork->getResourceIDList(MKTAG('X', 'C', 'M', 'D'));
-				for (Common::Array<uint16>::iterator iterator = xcmd.begin(); iterator != xcmd.end(); ++iterator) {
-					Resource res = resFork->getResourceDetail(MKTAG('X', 'C', 'M', 'D'), *iterator);
+				for (auto &iterator : xcmd) {
+					Resource res = resFork->getResourceDetail(MKTAG('X', 'C', 'M', 'D'), iterator);
 					debug(0, "Detected XCMD '%s'", res.name.c_str());
 					g_lingo->openXLib(res.name, kXObj);
 				}
 			}
 			if (resFork->hasResource(MKTAG('X', 'F', 'C', 'N'), -1)) {
 				Common::Array<uint16> xfcn = resFork->getResourceIDList(MKTAG('X', 'F', 'C', 'N'));
-				for (Common::Array<uint16>::iterator iterator = xfcn.begin(); iterator != xfcn.end(); ++iterator) {
-					Resource res = resFork->getResourceDetail(MKTAG('X', 'F', 'C', 'N'), *iterator);
+				for (auto &iterator : xfcn) {
+					Resource res = resFork->getResourceDetail(MKTAG('X', 'F', 'C', 'N'), iterator);
 					debug(0, "Detected XFCN '%s'", res.name.c_str());
 					g_lingo->openXLib(res.name, kXObj);
 				}
@@ -203,14 +206,23 @@ void Window::probeResources(Archive *archive) {
 	}
 }
 
-Archive *DirectorEngine::openArchive(const Common::String path) {
-	debug(1, "DirectorEngine::openArchive(\"%s\")", path.c_str());
+void DirectorEngine::addArchiveToOpenList(const Common::Path &path) {
+	// First, remove it if it is present
+	_allOpenResFiles.remove(path);
+
+	// And add it to the list front
+	_allOpenResFiles.push_front(path);
+}
+
+Archive *DirectorEngine::openArchive(const Common::Path &path) {
+	debug(1, "DirectorEngine::openArchive(\"%s\")", path.toString().c_str());
 
 	// If the archive is already open, don't reopen it;
 	// just init from the existing archive. This prevents errors that
 	// can happen when trying to load the same archive more than once.
-	if (_allOpenResFiles.contains(path)) {
-		return _allOpenResFiles.getVal(path);
+	if (_allSeenResFiles.contains(path)) {
+		addArchiveToOpenList(path);
+		return _allSeenResFiles.getVal(path);
 	}
 
 	Archive *result = nullptr;
@@ -226,8 +238,10 @@ Archive *DirectorEngine::openArchive(const Common::String path) {
 			return nullptr;
 		}
 	}
-	result->setPathName(path);
-	_allOpenResFiles.setVal(path, result);
+	result->setPathName(path.toString(g_director->_dirSeparator));
+	_allSeenResFiles.setVal(path, result);
+
+	addArchiveToOpenList(path);
 
 	return result;
 }
@@ -251,11 +265,10 @@ void Window::loadINIStream() {
 	}
 }
 
-Archive *DirectorEngine::loadEXE(const Common::String movie) {
-	Common::Path path(movie, g_director->_dirSeparator);
-	Common::SeekableReadStream *exeStream = SearchMan.createReadStreamForMember(path);
+Archive *DirectorEngine::loadEXE(const Common::Path &movie) {
+	Common::SeekableReadStream *exeStream = SearchMan.createReadStreamForMember(movie);
 	if (!exeStream) {
-		debugC(5, kDebugLoading, "DirectorEngine::loadEXE(): Failed to open file '%s'", movie.c_str());
+		debugC(5, kDebugLoading, "DirectorEngine::loadEXE(): Failed to open file '%s'", movie.toString().c_str());
 		return nullptr;
 	}
 
@@ -269,14 +282,14 @@ Archive *DirectorEngine::loadEXE(const Common::String movie) {
 		result = new RIFFArchive();
 
 		if (!result->openStream(exeStream, 0)) {
-			debugC(5, kDebugLoading, "Window::loadEXE(): Failed to load RIFF from '%s'", movie.c_str());
+			debugC(5, kDebugLoading, "Window::loadEXE(): Failed to load RIFF from '%s'", movie.toString().c_str());
 			delete result;
 			return nullptr;
 		}
 	} else {
-		Common::WinResources *exe = Common::WinResources::createFromEXE(path.toString());
+		Common::WinResources *exe = Common::WinResources::createFromEXE(movie.toString());
 		if (!exe) {
-			debugC(5, kDebugLoading, "DirectorEngine::loadEXE(): Failed to open EXE '%s'", path.toString().c_str());
+			debugC(5, kDebugLoading, "DirectorEngine::loadEXE(): Failed to open EXE '%s'", movie.toString().c_str());
 			delete exeStream;
 			return nullptr;
 		}
@@ -318,13 +331,13 @@ Archive *DirectorEngine::loadEXE(const Common::String movie) {
 		}
 
 		if (result)
-			result->setPathName(movie);
+			result->setPathName(movie.toString(g_director->_dirSeparator));
 
 		return result;
 	}
 
 	if (result)
-		result->setPathName(movie);
+		result->setPathName(movie.toString(g_director->_dirSeparator));
 	else
 		delete exeStream;
 
@@ -403,7 +416,6 @@ Archive *DirectorEngine::loadEXEv3(Common::SeekableReadStream *stream) {
 		warning("DirectorEngine::loadEXEv3(): Failed to load RIFF from EXE");
 		delete result;
 		result = nullptr;
-		delete stream;
 	}
 
 	result = createArchive();
@@ -491,7 +503,7 @@ Archive *DirectorEngine::loadEXERIFX(Common::SeekableReadStream *stream, uint32 
 	return result;
 }
 
-Archive *DirectorEngine::loadMac(const Common::String movie) {
+Archive *DirectorEngine::loadMac(const Common::Path &movie) {
 	Archive *result = nullptr;
 	if (g_director->getVersion() < 400) {
 		// The data is part of the resource fork of the executable
@@ -500,17 +512,17 @@ Archive *DirectorEngine::loadMac(const Common::String movie) {
 		if (!result->openFile(movie)) {
 			delete result;
 			result = nullptr;
-			debugC(5, kDebugLoading, "DirectorEngine::loadMac(): Could not open '%s'", movie.c_str());
+			debugC(5, kDebugLoading, "DirectorEngine::loadMac(): Could not open '%s'", movie.toString().c_str());
 		}
 	} else {
 		// The RIFX is located in the data fork of the executable
-		Common::SeekableReadStream *dataFork = Common::MacResManager::openFileOrDataFork(Common::Path(movie, g_director->_dirSeparator));
+		Common::SeekableReadStream *dataFork = Common::MacResManager::openFileOrDataFork(movie);
 		if (!dataFork) {
-			debugC(5, kDebugLoading, "DirectorEngine::loadMac(): Failed to open Mac binary '%s'", movie.c_str());
+			debugC(5, kDebugLoading, "DirectorEngine::loadMac(): Failed to open Mac binary '%s'", movie.toString().c_str());
 			return nullptr;
 		}
 		result = new RIFXArchive();
-		result->setPathName(movie);
+		result->setPathName(movie.toString(g_director->_dirSeparator));
 
 		// First we need to detect PPC vs. 68k
 
@@ -541,7 +553,7 @@ void Window::loadStartMovieXLibs() {
 	g_lingo->openXLib("SerialPort", kXObj);
 }
 
-ProjectorArchive::ProjectorArchive(Common::String path)
+ProjectorArchive::ProjectorArchive(Common::Path path)
 	: _path(path), _files() {
 
 	// Buffer 100K into memory
@@ -560,10 +572,9 @@ ProjectorArchive::ProjectorArchive(Common::String path)
 Common::SeekableReadStream *ProjectorArchive::createBufferedReadStream() {
 	const uint32 READ_BUFFER_SIZE = 1024 * 100;
 
-	Common::Path path(_path, g_director->_dirSeparator);
-	Common::SeekableReadStream *stream = SearchMan.createReadStreamForMember(path);
+	Common::SeekableReadStream *stream = SearchMan.createReadStreamForMember(_path);
 	if (!stream) {
-		warning("ProjectorArchive::createBufferedReadStream(): Cannot open %s", path.toString().c_str());
+		warning("ProjectorArchive::createBufferedReadStream(): Cannot open %s", _path.toString().c_str());
 		return nullptr;
 	}
 
@@ -600,7 +611,7 @@ bool ProjectorArchive::loadArchive(Common::SeekableReadStream *stream) {
 	stream->seek(rifxOffset);
 	tag = stream->readUint32BE();
 
-	debugC(1, kDebugLoading, "File: %s off: 0x%x, tag: %s rifx: 0x%x", _path.c_str(), off, tag2str(tag), rifxOffset);
+	debugC(1, kDebugLoading, "File: %s off: 0x%x, tag: %s rifx: 0x%x", _path.toString().c_str(), off, tag2str(tag), rifxOffset);
 
 	// Try to locate the very next Dict tag(byte-by-byte)
 	tag = stream->readUint32BE();
@@ -686,14 +697,16 @@ bool ProjectorArchive::loadArchive(Common::SeekableReadStream *stream) {
 			size = SWAP_BYTES_32(size);
 		}
 
-		debugC(1, kDebugLoading, "Entry: %s offset %lX tag %s size %d", arr[i].c_str(), long(stream->pos() - 8), tag2str(tag), size);
+		Common::Path path = toSafePath(arr[i]);
+
+		debugC(1, kDebugLoading, "Entry: %s offset %lX tag %s size %d", path.toString().c_str(), long(stream->pos() - 8), tag2str(tag), size);
 
 		Entry entry;
 
 		// subtract 8 since we want to include tag and size as well
 		entry.offset = static_cast<uint32>(stream->pos() - 8);
 		entry.size = size + 8;
-		_files[arr[i]] = entry;
+		_files[path.toString()] = entry;
 
 		// Align size for the next seek.
 		size += (size % 2);

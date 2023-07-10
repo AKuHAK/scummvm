@@ -367,15 +367,24 @@ void DirectorSound::loadSampleSounds(uint type) {
 	uint id = 0xFF;
 	Archive *archive = nullptr;
 
-	for (Common::HashMap<Common::String, Archive *, Common::IgnoreCase_Hash, Common::IgnoreCase_EqualTo>::iterator it = g_director->_allOpenResFiles.begin(); it != g_director->_allOpenResFiles.end(); ++it) {
-		Common::Array<uint16> idList = it->_value->getResourceIDList(tag);
+	for (auto &it : g_director->_allOpenResFiles) {
+		if (!g_director->_allSeenResFiles.contains(it)) {
+			warning("DirectorSound::loadSampleSounds(): file %s not found in allSeenResFiles, skipping", it.toString().c_str());
+			break;
+		}
+		Common::Array<uint16> idList = g_director->_allSeenResFiles[it]->getResourceIDList(tag);
 		for (uint j = 0; j < idList.size(); j++) {
-			if ((idList[j] & 0xFF) == type) {
+			if (static_cast<uint>(idList[j] & 0xFF) == type) {
 				id = idList[j];
-				archive = it->_value;
+				archive = g_director->_allSeenResFiles[it];
 				break;
 			}
 		}
+	}
+
+	if (!archive) {
+		warning("DirectorSound::loadSampleSounds(): could not find a valid archive");
+		return;
 	}
 
 	if (id == 0xFF) {
@@ -573,10 +582,10 @@ void DirectorSound::playFPlaySound() {
 	Archive *archive = nullptr;
 
 	// iterate opened ResFiles
-	for (Common::HashMap<Common::String, Archive *, Common::IgnoreCase_Hash, Common::IgnoreCase_EqualTo>::iterator it = g_director->_allOpenResFiles.begin(); it != g_director->_allOpenResFiles.end(); ++it) {
-		id = it->_value->findResourceID(tag, sndName, true);
+	for (auto &it : g_director->_allOpenResFiles) {
+		id = g_director->_allSeenResFiles[it]->findResourceID(tag, sndName, true);
 		if (id != 0xFFFF) {
-			archive = it->_value;
+			archive = g_director->_allSeenResFiles[it];
 			break;
 		}
 	}
@@ -852,11 +861,9 @@ Audio::AudioStream *AudioFileDecoder::getAudioStream(bool looping, bool forPuppe
 	if (_path.empty())
 		return nullptr;
 
-	Common::Path filePath = Common::Path(pathMakeRelative(_path), g_director->_dirSeparator);
-
-	Common::SeekableReadStream *copiedStream = Common::MacResManager::openFileOrDataFork(filePath);
-
-	if (copiedStream == nullptr) {
+	Common::Path newPath = findAudioPath(_path);
+	Common::SeekableReadStream *copiedStream = Common::MacResManager::openFileOrDataFork(newPath);
+	if (!copiedStream) {
 		warning("Failed to open %s", _path.c_str());
 		return nullptr;
 	}

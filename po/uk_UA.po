@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 1.9.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2023-06-22 09:26+0000\n"
+"POT-Creation-Date: 2023-07-08 19:01+0000\n"
 "PO-Revision-Date: 2023-05-17 15:40+0000\n"
 "Last-Translator: Eugene Sandulenko <sev@scummvm.org>\n"
 "Language-Team: Ukrainian <https://translations.scummvm.org/projects/scummvm/"
@@ -159,7 +159,7 @@ msgid "Now, open this link in your browser:"
 msgstr "А зараз відкрийте наступну лінку у вашому переглядачі:"
 
 #: gui/cloudconnectionwizard.cpp:264 gui/cloudconnectionwizard.cpp:319
-#: gui/message.cpp:218 gui/message.cpp:222
+#: gui/message.cpp:246 gui/message.cpp:250
 msgid "Open URL"
 msgstr "Відкрити URL"
 
@@ -273,7 +273,7 @@ msgstr "Інше хмарне середовище вже є активним. �
 #: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/grim/grim.cpp:360
 #: engines/kyra/gui/saveload_eob.cpp:598 engines/kyra/gui/saveload_eob.cpp:631
 #: engines/parallaction/metaengine.cpp:145
-#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3822
+#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3837
 #: engines/toon/toon.cpp:1501
 msgid "Yes"
 msgstr "Так"
@@ -286,7 +286,7 @@ msgstr "Так"
 #: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/grim/grim.cpp:360
 #: engines/kyra/gui/saveload_eob.cpp:598 engines/kyra/gui/saveload_eob.cpp:631
 #: engines/parallaction/metaengine.cpp:151
-#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3822
+#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3837
 #: engines/toon/toon.cpp:1501
 msgid "No"
 msgstr "Ні"
@@ -309,19 +309,20 @@ msgstr ""
 #: gui/saveload-dialog.cpp:1221 dists/android.strings.xml.cpp:32
 #: engines/engine.cpp:544 engines/engine.cpp:567
 #: backends/platform/wii/options.cpp:46 engines/agos/animation.cpp:577
-#: engines/agos/midi.cpp:424 engines/buried/saveload.cpp:69
-#: engines/director/lingo/lingo-builtins.cpp:1836
+#: engines/agos/midi.cpp:320 engines/agos/midi.cpp:378
+#: engines/agos/midi.cpp:457 engines/buried/saveload.cpp:69
+#: engines/director/lingo/lingo-builtins.cpp:1882
 #: engines/drascula/saveload.cpp:48 engines/grim/inputdialog.cpp:83
 #: engines/groovie/script.cpp:660 engines/mtropolis/mtropolis.cpp:115
 #: engines/mtropolis/mtropolis.cpp:125 engines/parallaction/saveload.cpp:270
 #: engines/saga/music.cpp:102 engines/sci/engine/kgraphics.cpp:75
-#: engines/sci/graphics/controls32.cpp:926 engines/scumm/scumm.cpp:1152
-#: engines/scumm/scumm.cpp:1178 engines/scumm/scumm.cpp:1200
-#: engines/scumm/scumm.cpp:1553 engines/scumm/scumm.cpp:2024
-#: engines/scumm/scumm.cpp:2040 engines/sky/compact.cpp:140
+#: engines/sci/graphics/controls32.cpp:926 engines/scumm/scumm.cpp:1160
+#: engines/scumm/scumm.cpp:1186 engines/scumm/scumm.cpp:1208
+#: engines/scumm/scumm.cpp:1561 engines/scumm/scumm.cpp:2032
+#: engines/scumm/scumm.cpp:2048 engines/sky/compact.cpp:140
 #: engines/sword1/animation.cpp:529 engines/sword1/animation.cpp:560
 #: engines/sword1/animation.cpp:568 engines/sword1/control.cpp:888
-#: engines/sword1/logic.cpp:1634 engines/sword2/animation.cpp:426
+#: engines/sword1/logic.cpp:1641 engines/sword2/animation.cpp:426
 #: engines/sword2/animation.cpp:456 engines/sword2/animation.cpp:466
 #: engines/vcruise/vcruise.cpp:92 engines/vcruise/vcruise.cpp:102
 #: engines/zvision/file/save_manager.cpp:225
@@ -457,8 +458,8 @@ msgstr "Завантаження закінчено, завантажено %d �
 #. I18N: Close dialog button
 #: gui/downloadpacksdialog.cpp:293 gui/downloadpacksdialog.cpp:384
 #: gui/gui-manager.cpp:162 gui/textviewer.cpp:53 gui/unknown-game-dialog.cpp:53
-#: backends/platform/android/options.cpp:359
-#: backends/platform/ios7/ios7_options.mm:128 engines/scumm/help.cpp:123
+#: backends/platform/android/options.cpp:492
+#: backends/platform/ios7/ios7_options.mm:182 engines/scumm/help.cpp:123
 #: engines/scumm/help.cpp:138 engines/scumm/help.cpp:163
 #: engines/scumm/help.cpp:189 engines/scumm/help.cpp:207
 msgid "Close"
@@ -541,8 +542,10 @@ msgstr ""
 #: gui/options.cpp:1675 gui/options.cpp:1691 gui/options.cpp:2091
 #: gui/options.cpp:2513 gui/options.cpp:2566 gui/options.cpp:2784
 #: gui/options.cpp:3250 audio/null.cpp:45
-#: backends/platform/android/options.cpp:137
-#: backends/platform/android/options.cpp:138 engines/ags/dialogs.cpp:63
+#: backends/platform/android/options.cpp:150
+#: backends/platform/android/options.cpp:151
+#: backends/platform/android/options.cpp:179
+#: backends/platform/ios7/ios7_options.mm:101 engines/ags/dialogs.cpp:63
 msgid "<default>"
 msgstr "<за умовчанням>"
 
@@ -1357,7 +1360,7 @@ msgstr "не вдалося змінити режим vsync"
 msgid "the shader could not be changed"
 msgstr "шейдер не може бути змінено"
 
-#: gui/options.cpp:1417 backends/platform/ios7/ios7_options.mm:68
+#: gui/options.cpp:1417 backends/platform/ios7/ios7_options.mm:80
 msgid "Touchpad mouse mode"
 msgstr "Режим тачпаду"
 
@@ -2569,7 +2572,7 @@ msgstr ""
 "Кроки 2 та 3 необхідно повторити для кожної з ваших ігор."
 
 #: base/main.cpp:663 base/main.cpp:684
-#: engines/director/lingo/lingo-builtins.cpp:1229
+#: engines/director/lingo/lingo-builtins.cpp:1266
 #: engines/director/lingo/xlibs/jitdraw3.cpp:123
 #: engines/director/lingo/xlibs/jitdraw3.cpp:131
 msgid "Ok"
@@ -2918,7 +2921,7 @@ msgstr ""
 msgid "Achievement unlocked!"
 msgstr "Досягнення є!"
 
-#: engines/advancedDetector.cpp:235
+#: engines/advancedDetector.cpp:237
 msgid "Illegitimate game copy detected. We provide no support in such cases"
 msgstr "Знайдено нелегальну копію. В такому разі ми не надаємо підтримку"
 
@@ -3112,7 +3115,7 @@ msgid "ERROR: Could not copy the savegame to a new slot"
 msgstr "ПОМИЛКА: Не вдалося скопіювати збереження ігри у новий слот"
 
 #: engines/engine.cpp:630 engines/savestate.cpp:98
-#: backends/platform/ios7/ios7_osys_main.cpp:256 engines/mm/xeen/saves.cpp:293
+#: backends/platform/ios7/ios7_osys_main.cpp:291 engines/mm/xeen/saves.cpp:293
 #: engines/sky/metaengine.cpp:216
 msgid "Autosave"
 msgstr "Автозбереження"
@@ -3264,7 +3267,7 @@ msgstr "Автозбереження увімкнено"
 msgid "Autosave off"
 msgstr "Автозбереження вимкнено"
 
-#: graphics/renderer.cpp:33 backends/graphics/opengl/opengl-graphics.cpp:179
+#: graphics/renderer.cpp:33 backends/graphics/opengl/opengl-graphics.cpp:178
 msgid "OpenGL"
 msgstr "OpenGL"
 
@@ -3547,37 +3550,37 @@ msgstr "Вибрати нову папку"
 msgid "Toggle aspect ratio correction"
 msgstr "Перемикання корекції співвідношення сторін"
 
-#: backends/graphics/opengl/opengl-graphics.cpp:258
+#: backends/graphics/opengl/opengl-graphics.cpp:257
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:72
 #: backends/graphics3d/openglsdl/openglsdl-graphics3d.cpp:241
 #: engines/twine/metaengine.cpp:360
 msgid "Center"
 msgstr "По центру"
 
-#: backends/graphics/opengl/opengl-graphics.cpp:259
+#: backends/graphics/opengl/opengl-graphics.cpp:258
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:73
 #: backends/graphics3d/openglsdl/openglsdl-graphics3d.cpp:242
 msgid "Pixel-perfect scaling"
 msgstr "Піксельне ідеальне масштабування"
 
-#: backends/graphics/opengl/opengl-graphics.cpp:260
+#: backends/graphics/opengl/opengl-graphics.cpp:259
 #: backends/graphics3d/openglsdl/openglsdl-graphics3d.cpp:243
 msgid "Even pixels scaling"
 msgstr "Піксельне рівномірне масштабування"
 
-#: backends/graphics/opengl/opengl-graphics.cpp:261
+#: backends/graphics/opengl/opengl-graphics.cpp:260
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:74
 #: backends/graphics3d/openglsdl/openglsdl-graphics3d.cpp:244
 msgid "Fit to window"
 msgstr "В розміри вікна"
 
-#: backends/graphics/opengl/opengl-graphics.cpp:262
+#: backends/graphics/opengl/opengl-graphics.cpp:261
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:75
 #: backends/graphics3d/openglsdl/openglsdl-graphics3d.cpp:245
 msgid "Stretch to window"
 msgstr "Розтягнути до вікна"
 
-#: backends/graphics/opengl/opengl-graphics.cpp:263
+#: backends/graphics/opengl/opengl-graphics.cpp:262
 #: backends/graphics/surfacesdl/surfacesdl-graphics.cpp:76
 #: backends/graphics3d/openglsdl/openglsdl-graphics3d.cpp:246
 msgid "Fit to window (4:3)"
@@ -4250,50 +4253,89 @@ msgstr "Режим збільшення вимкнено. Вмикаю режи�
 msgid "Magnify Mode Off"
 msgstr "Режим збільшення вимкнено"
 
-#: backends/platform/android/options.cpp:118
+#: backends/platform/android/options.cpp:131
 msgid "Show On-screen control"
 msgstr "Показувати екранне керування"
 
-#: backends/platform/android/options.cpp:119
+#: backends/platform/android/options.cpp:132
 msgid "Choose the preferred touch mode:"
 msgstr "Оберіть уподобаний режим дотику:"
 
-#: backends/platform/android/options.cpp:121
+#: backends/platform/android/options.cpp:134
+#: backends/platform/android/options.cpp:165
+#: backends/platform/ios7/ios7_options.mm:87
 msgid "In menus"
 msgstr "В меню"
 
-#: backends/platform/android/options.cpp:123
-#: backends/platform/android/options.cpp:141
-#: backends/platform/android/options.cpp:142
+#: backends/platform/android/options.cpp:136
+#: backends/platform/android/options.cpp:154
+#: backends/platform/android/options.cpp:155
 msgid "Touchpad emulation"
 msgstr "Емуляція тачпаду"
 
-#: backends/platform/android/options.cpp:124
-#: backends/platform/android/options.cpp:144
-#: backends/platform/android/options.cpp:145
+#: backends/platform/android/options.cpp:137
+#: backends/platform/android/options.cpp:157
+#: backends/platform/android/options.cpp:158
 msgid "Direct mouse"
 msgstr "Віртуальна миша"
 
-#: backends/platform/android/options.cpp:125
-#: backends/platform/android/options.cpp:147
-#: backends/platform/android/options.cpp:148
+#: backends/platform/android/options.cpp:138
+#: backends/platform/android/options.cpp:160
+#: backends/platform/android/options.cpp:161
 msgid "Gamepad emulation"
 msgstr "Емуляція геймпаду"
 
-#: backends/platform/android/options.cpp:131
+#: backends/platform/android/options.cpp:144
 msgid "In 2D games"
 msgstr "У 2D іграх"
 
-#: backends/platform/android/options.cpp:133
+#: backends/platform/android/options.cpp:146
 msgid "In 3D games"
 msgstr "У 3D іграх"
 
+#: backends/platform/android/options.cpp:163
+#: backends/platform/ios7/ios7_options.mm:85
+msgid "Select the orientation:"
+msgstr ""
+
+#: backends/platform/android/options.cpp:167
+#: backends/platform/android/options.cpp:182
+#: backends/platform/ios7/ios7_options.mm:89
+#: backends/platform/ios7/ios7_options.mm:104
+#, fuzzy
+#| msgid "Automatic drilling"
+msgid "Automatic"
+msgstr "Автоматичне свердління"
+
+#: backends/platform/android/options.cpp:168
+#: backends/platform/android/options.cpp:183
+#: backends/platform/ios7/ios7_options.mm:90
+#: backends/platform/ios7/ios7_options.mm:105
+msgid "Portrait"
+msgstr ""
+
+#: backends/platform/android/options.cpp:169
+#: backends/platform/android/options.cpp:184
+#: backends/platform/ios7/ios7_options.mm:91
+#: backends/platform/ios7/ios7_options.mm:106
+#, fuzzy
+#| msgid "Escape"
+msgid "Landscape"
+msgstr "Втікти"
+
+#: backends/platform/android/options.cpp:175
+#: backends/platform/ios7/ios7_options.mm:97
+#, fuzzy
+#| msgid "In 2D games"
+msgid "In games"
+msgstr "У 2D іграх"
+
 #. I18N: This button opens a list of all folders added for Android Storage Attached Framework
-#: backends/platform/android/options.cpp:153
+#: backends/platform/android/options.cpp:189
 msgid "Remove folder authorizations..."
 msgstr "Видалити авторизацію для папок..."
 
-#: backends/platform/android/options.cpp:360
+#: backends/platform/android/options.cpp:493
 msgid "Remove"
 msgstr "Видалити"
 
@@ -4309,25 +4351,29 @@ msgstr "Хардварне масштабування (швидко, але ни
 msgid "Software scale (good quality, but slower)"
 msgstr "Програмне масштабування (хороша якість, але повільніше)"
 
-#: backends/platform/ios7/ios7_options.mm:67
+#: backends/platform/ios7/ios7_options.mm:79
 #, fuzzy
 #| msgid "Show On-screen control"
 msgid "Show On-screen control (iOS 15 and later)"
 msgstr "Показувати екранне керування"
 
-#: backends/platform/ios7/ios7_options.mm:69
+#: backends/platform/ios7/ios7_options.mm:81
 #, fuzzy
 #| msgid "Mouse-click-and-drag mode enabled."
 msgid "Mouse-click-and-drag mode"
 msgstr "Режим миші клікнути-та-тягнути увімкнено."
 
-#: backends/platform/ios7/ios7_options.mm:71
+#: backends/platform/ios7/ios7_options.mm:82
+msgid "Show keyboard function bar"
+msgstr ""
+
+#: backends/platform/ios7/ios7_options.mm:109
 #, fuzzy
 #| msgid "Controls"
 msgid "Controls Help"
 msgstr "Керування"
 
-#: backends/platform/ios7/ios7_options.mm:102
+#: backends/platform/ios7/ios7_options.mm:156
 msgid ""
 "Gestures and controls:\n"
 "\n"
@@ -4344,7 +4390,7 @@ msgid ""
 "Keyboard spacebar: Pause"
 msgstr ""
 
-#: backends/platform/ios7/ios7_options.mm:115
+#: backends/platform/ios7/ios7_options.mm:169
 msgid ""
 "Using the Apple TV remote control:\n"
 "\n"
@@ -4360,19 +4406,19 @@ msgid ""
 "Keyboard spacebar: Pause"
 msgstr ""
 
-#: backends/platform/ios7/ios7_osys_events.cpp:466
+#: backends/platform/ios7/ios7_osys_events.cpp:443
 msgid "Mouse-click-and-drag mode enabled."
 msgstr "Режим миші клікнути-та-тягнути увімкнено."
 
-#: backends/platform/ios7/ios7_osys_events.cpp:468
+#: backends/platform/ios7/ios7_osys_events.cpp:445
 msgid "Mouse-click-and-drag mode disabled."
 msgstr "Режим миші клікнути-та-тягнути вимкнено."
 
-#: backends/platform/ios7/ios7_osys_events.cpp:489
+#: backends/platform/ios7/ios7_osys_events.cpp:466
 msgid "Touchpad mode enabled."
 msgstr "Режим тачпаду увімкнено."
 
-#: backends/platform/ios7/ios7_osys_events.cpp:491
+#: backends/platform/ios7/ios7_osys_events.cpp:468
 msgid "Touchpad mode disabled."
 msgstr "Режим тачпаду вимкнено."
 
@@ -4841,7 +4887,7 @@ msgstr "Відновити"
 msgid "Quick load or save game isn't supported in this location"
 msgstr "Швидке завантаження або збереження не підтримується в цій локації"
 
-#: engines/agos/saveload.cpp:161 engines/scumm/scumm.cpp:2821
+#: engines/agos/saveload.cpp:161 engines/scumm/scumm.cpp:2836
 #, c-format
 msgid ""
 "Failed to load saved game from file:\n"
@@ -4852,7 +4898,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: engines/agos/saveload.cpp:196 engines/scumm/scumm.cpp:2808
+#: engines/agos/saveload.cpp:196 engines/scumm/scumm.cpp:2823
 #, c-format
 msgid ""
 "Failed to save game to file:\n"
@@ -4863,7 +4909,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: engines/agos/saveload.cpp:204 engines/scumm/scumm.cpp:2841
+#: engines/agos/saveload.cpp:204 engines/scumm/scumm.cpp:2856
 #, c-format
 msgid ""
 "Successfully saved game in file:\n"
@@ -4926,7 +4972,7 @@ msgstr "Не затемнювати екран під час кожного пе
 msgid "AGOS 2 support is not compiled in"
 msgstr "Підтримку для AGOS 2 не скомпільовано"
 
-#: engines/agos/midi.cpp:184 engines/kyra/sound/sound_pc_midi.cpp:76
+#: engines/agos/midi.cpp:187 engines/kyra/sound/sound_pc_midi.cpp:76
 msgid ""
 "You appear to be using a General MIDI device,\n"
 "but your game only supports Roland MT32 MIDI.\n"
@@ -4940,7 +4986,37 @@ msgstr ""
 "MT32 на General MIDI. Але в результаті може\n"
 "статися, що деякі треки будуть грати неправильно."
 
-#: engines/agos/midi.cpp:420
+#: engines/agos/midi.cpp:316
+#, fuzzy, c-format
+#| msgid ""
+#| "Could not find AdLib instrument definition files\n"
+#| "%s and %s. Without these files,\n"
+#| "the music will not sound the same as the original game."
+msgid ""
+"Could not find AdLib instrument definition file\n"
+"%s. Without this file,\n"
+"the music will not sound the same as the original game."
+msgstr ""
+"Не можу знайти файли з інструментами Adlib\n"
+"%s та %s. Без цих файлів музика\n"
+"не звучатиме так, як задумано в оригіналі."
+
+#: engines/agos/midi.cpp:374
+#, fuzzy, c-format
+#| msgid ""
+#| "Could not find AdLib instrument definition files\n"
+#| "%s and %s. Without these files,\n"
+#| "the music will not sound the same as the original game."
+msgid ""
+"Could not find AdLib instrument definition file\n"
+"%s. Without this file,\n"
+"the sound effects will not sound the same as the original game."
+msgstr ""
+"Не можу знайти файли з інструментами Adlib\n"
+"%s та %s. Без цих файлів музика\n"
+"не звучатиме так, як задумано в оригіналі."
+
+#: engines/agos/midi.cpp:453
 #, fuzzy, c-format
 #| msgid ""
 #| "Could not find AdLib instrument definition files\n"
@@ -6234,13 +6310,13 @@ msgstr "Підтримку для Eye of Beholder не скомпільован�
 
 #: engines/kyra/engine/eobcommon.cpp:368 engines/kyra/engine/lol.cpp:472
 #: engines/ultima/ultima4/metaengine.cpp:224
-#: engines/ultima/ultima8/metaengine.cpp:142
+#: engines/ultima/ultima8/metaengine.cpp:145
 msgid "Interact via Left Click"
 msgstr "Взаємодія через лівий клік"
 
 #: engines/kyra/engine/eobcommon.cpp:369 engines/kyra/engine/lol.cpp:473
 #: engines/ultima/ultima4/metaengine.cpp:230
-#: engines/ultima/ultima8/metaengine.cpp:148
+#: engines/ultima/ultima8/metaengine.cpp:151
 msgid "Interact via Right Click"
 msgstr "Взаємодія через правий клік"
 
@@ -7150,7 +7226,7 @@ msgstr ""
 msgid "Unable to locate the '%s' engine data file"
 msgstr "Не вдалося знайти файл даних движка '%s'"
 
-#: engines/myst3/detection.cpp:179 engines/myst3/detection.cpp:193
+#: engines/myst3/detection.cpp:181 engines/myst3/detection.cpp:195
 msgid "PS2 version is not yet supported"
 msgstr "Версія для PS2 ще не підтримується"
 
@@ -7786,7 +7862,7 @@ msgid "Your Name:"
 msgstr "Назва:"
 
 #. I18N: Button, start hosting online multiplayer game
-#: engines/scumm/dialog-createsession.cpp:49 engines/scumm/scumm.cpp:3828
+#: engines/scumm/dialog-createsession.cpp:49 engines/scumm/scumm.cpp:3843
 msgid "Host"
 msgstr "Розпочати"
 
@@ -7796,7 +7872,7 @@ msgid "Querying games..."
 msgstr "Вичитую список ігор..."
 
 #. I18N: Join online multiplayer game
-#: engines/scumm/dialog-sessionselector.cpp:64 engines/scumm/scumm.cpp:3828
+#: engines/scumm/dialog-sessionselector.cpp:64 engines/scumm/scumm.cpp:3843
 msgid "Join"
 msgstr "Приєднатись"
 
@@ -8645,7 +8721,7 @@ msgstr "Перемкнути зброю"
 msgid "Win the bike fight cheat"
 msgstr "Чіт вигравання бою на мотиках"
 
-#: engines/scumm/scumm.cpp:282
+#: engines/scumm/scumm.cpp:290
 msgid ""
 "You have enabled 'aspect ratio correction'. However, FM-TOWNS' natural "
 "resolution is 320x240, which doesn't allow aspect ratio correction.\n"
@@ -8657,7 +8733,7 @@ msgstr ""
 "Корекцію співвідношення сторін можна отримати, обрізавши роздільну здатність "
 "до 320x200, на вкладці \"движок\"."
 
-#: engines/scumm/scumm.cpp:1151
+#: engines/scumm/scumm.cpp:1159
 msgid ""
 "Could not find the 'Indy' Macintosh executable. High-resolution fonts will\n"
 "be disabled."
@@ -8665,7 +8741,7 @@ msgstr ""
 "Не вдалося знайти файл програми 'Indy' Macintosh. Шрифти високої\n"
 "роздільності буде вимкнено."
 
-#: engines/scumm/scumm.cpp:1177
+#: engines/scumm/scumm.cpp:1185
 msgid ""
 "Could not find the 'Loom' Macintosh executable. Music and high-resolution\n"
 "versions of font and cursor will be disabled."
@@ -8673,7 +8749,7 @@ msgstr ""
 "Не вдалося знайти файл програми 'Loom' Macintosh. Музику та шрифти\n"
 "високої роздільності буде вимкнено."
 
-#: engines/scumm/scumm.cpp:1199
+#: engines/scumm/scumm.cpp:1207
 msgid ""
 "Could not find the 'Monkey Island' Macintosh executable to read the\n"
 "instruments from. Music will be disabled."
@@ -8681,7 +8757,7 @@ msgstr ""
 "Не вдалося знайти файл програми 'Monkey Island' Macintosh аби прочитати\n"
 "з нього інструменти. Музику було вимкнено."
 
-#: engines/scumm/scumm.cpp:1550
+#: engines/scumm/scumm.cpp:1558
 msgid ""
 "Audio files compressed with ScummVM Tools were detected; *.BUN/*.SOU\n"
 "compression is not supported anymore for this game, audio will be disabled.\n"
@@ -8692,7 +8768,7 @@ msgstr ""
 "виключено.\n"
 "Будь-ласка скопіюйте наново файли з оригінальних дисків без компресії."
 
-#: engines/scumm/scumm.cpp:2022
+#: engines/scumm/scumm.cpp:2030
 #, c-format
 msgid ""
 "Native MIDI support requires the Roland Upgrade from LucasArts,\n"
@@ -8701,7 +8777,7 @@ msgstr ""
 "Режим \"рідного\" MIDI потребує поновлення Roland Upgrade від\n"
 "LucasArts, проте %s відсутній. Перемикаюсь на AdLib."
 
-#: engines/scumm/scumm.cpp:2038
+#: engines/scumm/scumm.cpp:2046
 msgid ""
 "This particular version of Monkey Island 1 is known to miss some\n"
 "required resources for MT-32. Using AdLib instead."
@@ -8709,7 +8785,7 @@ msgstr ""
 "Ця версія Monkey Island 1 бракує деякі ресурси, необхідні\n"
 "для роботи MT-32. Перемикаюсь на AdLib."
 
-#: engines/scumm/scumm.cpp:3717
+#: engines/scumm/scumm.cpp:3732
 msgid ""
 "Usually, Maniac Mansion would start now. But for that to work, the game "
 "files for Maniac Mansion have to be in the 'Maniac' directory inside the "
@@ -8719,7 +8795,7 @@ msgstr ""
 "вам потрібно переписати файли гри Maniac Manssion у папку Maniac всередині "
 "папки з грою Tentacle, а також додати саму гру у ScummVM."
 
-#: engines/scumm/scumm.cpp:3828
+#: engines/scumm/scumm.cpp:3843
 msgid "Would you like to host or join a network play session?"
 msgstr "Чи ви хочете розпочати або приєднатися до мережевої гри?"
 
@@ -8981,7 +9057,7 @@ msgstr "Лишити стару"
 msgid "Keep the new one"
 msgstr "Взяти нову"
 
-#: engines/sword1/logic.cpp:1634
+#: engines/sword1/logic.cpp:1641
 msgid "This is the end of the Broken Sword 1 Demo"
 msgstr "На цьому закінчується демо Broken Sword 1"
 
@@ -9417,19 +9493,19 @@ msgstr "Оригінальне збереження"
 msgid "Transfer Character"
 msgstr "Перенести героя"
 
-#: engines/ultima/ultima8/metaengine.cpp:135
+#: engines/ultima/ultima8/metaengine.cpp:138
 msgid "Ultima VIII"
 msgstr "Ultima VIII"
 
-#: engines/ultima/ultima8/metaengine.cpp:135
+#: engines/ultima/ultima8/metaengine.cpp:138
 msgid "Crusader"
 msgstr "Crusader"
 
-#: engines/ultima/ultima8/metaengine.cpp:178
+#: engines/ultima/ultima8/metaengine.cpp:181
 msgid "Ultima VIII Cheats"
 msgstr "Ultima VIII Чіти"
 
-#: engines/ultima/ultima8/metaengine.cpp:193
+#: engines/ultima/ultima8/metaengine.cpp:196
 msgid "Ultima VIII Debug"
 msgstr "Ultima VIII Відладка"
 

@@ -244,16 +244,16 @@ void Lingo::reloadBuiltIns() {
 LingoArchive::~LingoArchive() {
 	// First cleanup the ScriptContexts that are only in LctxContexts.
 	// LctxContexts has a huge overlap with scriptContexts.
-	for (ScriptContextHash::iterator it = lctxContexts.begin(); it != lctxContexts.end(); ++it){
-		ScriptContext *script = it->_value;
+	for (auto &it : lctxContexts){
+		ScriptContext *script = it._value;
 		if (script->getOnlyInLctxContexts()) {
 			script->decRefCount();
 		}
 	}
 
 	for (int i = 0; i <= kMaxScriptType; i++) {
-		for (ScriptContextHash::iterator it = scriptContexts[i].begin(); it != scriptContexts[i].end(); ++it) {
-			it->_value->decRefCount();
+		for (auto &it : scriptContexts[i]) {
+			it._value->decRefCount();
 		}
 	}
 
@@ -297,14 +297,14 @@ Common::String LingoArchive::formatFunctionList(const char *prefix) {
 		result += Common::String::format("%s%s:\n", prefix, scriptType2str((ScriptType)i));
 		if (scriptContexts[i].size() == 0)
 			result += Common::String::format("%s  [empty]\n", prefix);
-		for (ScriptContextHash::iterator it = scriptContexts[i].begin(); it != scriptContexts[i].end(); ++it) {
-			result += Common::String::format("%s  %d", prefix, it->_key);
-			CastMemberInfo *cmi = cast->getCastMemberInfo(it->_key);
+		for (auto &it : scriptContexts[i]) {
+			result += Common::String::format("%s  %d", prefix, it._key);
+			CastMemberInfo *cmi = cast->getCastMemberInfo(it._key);
 			if (cmi && !cmi->name.empty()) {
 				result += Common::String::format(" \"%s\"", cmi->name.c_str());
 			}
 			result += ":\n";
-			result += (*it->_value).formatFunctionList(Common::String::format("%s    ", prefix).c_str());
+			result += it._value->formatFunctionList(Common::String::format("%s    ", prefix).c_str());
 		}
 	}
 	result += Common::String::format("%sFactories:\n", prefix);
@@ -590,6 +590,11 @@ void Lingo::execute() {
 		// process events every so often
 		if (localCounter > 0 && localCounter % 100 == 0) {
 			_vm->processEvents();
+			// Also process update widgets!
+			Movie *movie = g_director->getCurrentMovie();
+			Score *score = movie->getScore();
+			score->updateWidgets(true);
+
 			g_system->updateScreen();
 			if (_vm->getCurrentMovie()->getScore()->_playState == kPlayStopped) {
 				_freezeState = true;
@@ -738,14 +743,16 @@ void Lingo::resetLingo() {
 	resetLingoGo();
 }
 
-int Lingo::getAlignedType(const Datum &d1, const Datum &d2, bool numsOnly) {
+int Lingo::getAlignedType(const Datum &d1, const Datum &d2, bool equality) {
 	int opType = VOID;
 
 	int d1Type = d1.type;
 	int d2Type = d2.type;
 
-	if (d1Type == d2Type && (!numsOnly || d1Type == INT || d1Type == FLOAT))
-		return d1Type;
+	if (equality) {
+		if (d1Type == STRING && d2Type == STRING)
+			return STRING;
+	}
 
 	if (d1Type == STRING) {
 		Common::String src = d1.asString();
@@ -754,7 +761,11 @@ int Lingo::getAlignedType(const Datum &d1, const Datum &d2, bool numsOnly) {
 			strtod(src.c_str(), &endPtr);
 			if (*endPtr == 0) {
 				d1Type = FLOAT;
+			} else if (!equality) {
+				d1Type = INT;
 			}
+		} else {
+			d1Type = VOID;
 		}
 	}
 	if (d2Type == STRING) {
@@ -764,7 +775,11 @@ int Lingo::getAlignedType(const Datum &d1, const Datum &d2, bool numsOnly) {
 			strtod(src.c_str(), &endPtr);
 			if (*endPtr == 0) {
 				d2Type = FLOAT;
+			} else if (!equality) {
+				d2Type = INT;
 			}
+		} else {
+			d2Type = VOID;
 		}
 	}
 
@@ -778,14 +793,12 @@ int Lingo::getAlignedType(const Datum &d1, const Datum &d2, bool numsOnly) {
 	if (d2Type == OBJECT)
 		d2Type = STRING;
 
-	if (d1Type == FLOAT || d2Type == FLOAT) {
+	if ((d1Type == FLOAT && d2Type == INT) || (d1Type == INT && d2Type == FLOAT)) {
 		opType = FLOAT;
-	} else if (d1Type == INT && d2Type == INT) {
-		opType = INT;
 	} else if ((d1Type == STRING && d2Type == INT) || (d1Type == INT && d2Type == STRING)) {
 		opType = STRING;
-	} else if ((d1Type == STRING && d2Type == SYMBOL) || (d1Type == SYMBOL && d2Type == STRING)) {
-		opType = STRING;
+	} else if (d1Type == d2Type) {
+		opType = d1Type;
 	}
 
 	return opType;
@@ -958,11 +971,12 @@ int Datum::asInt() const {
 		{
 			Common::String src = asString();
 			char *endPtr = nullptr;
-			int result = strtol(src.c_str(), &endPtr, 10);
+			float result = strtof(src.c_str(), &endPtr);
 			if (*endPtr == 0) {
-				res = result;
+				res = (int)result;
 			} else {
-				warning("Invalid int '%s'", src.c_str());
+				warning("Invalid number '%s'", src.c_str());
+				res = (int)((uint64)u.s & 0xffffffffL);
 			}
 		}
 		break;
@@ -997,7 +1011,8 @@ double Datum::asFloat() const {
 			if (*endPtr == 0) {
 				res = result;
 			} else {
-				warning("Invalid float '%s'", src.c_str());
+				warning("Invalid number '%s'", src.c_str());
+				res = (int)((uint64)u.s & 0xffffffffL);
 			}
 		}
 		break;
@@ -1256,7 +1271,7 @@ const char *Datum::type2str(bool ilk) const {
 }
 
 int Datum::equalTo(Datum &d, bool ignoreCase) const {
-	int alignType = g_lingo->getAlignedType(*this, d, false);
+	int alignType = g_lingo->getAlignedType(*this, d, true);
 
 	switch (alignType) {
 	case FLOAT:
@@ -1305,7 +1320,7 @@ bool Datum::operator<=(Datum &d) const {
 }
 
 CompareResult Datum::compareTo(Datum &d) const {
-	int alignType = g_lingo->getAlignedType(*this, d, false);
+	int alignType = g_lingo->getAlignedType(*this, d, true);
 
 	if (alignType == FLOAT) {
 		double f1 = asFloat();
@@ -1354,8 +1369,8 @@ void Lingo::runTests() {
 	if (startMovie.size() > 0) {
 		fileList.push_back(startMovie);
 	} else {
-		for (Common::ArchiveMemberList::iterator it = fsList.begin(); it != fsList.end(); ++it)
-			fileList.push_back((*it)->getName());
+		for (auto &it : fsList)
+			fileList.push_back(it->getName());
 	}
 
 	Common::sort(fileList.begin(), fileList.end());
@@ -1449,8 +1464,8 @@ Common::String Lingo::formatAllVars() {
 
 	result += Common::String("  Local vars:\n");
 	if (_state->localVars) {
-		for (DatumHash::iterator i = _state->localVars->begin(); i != _state->localVars->end(); ++i) {
-			result += Common::String::format("    %s - [%s] %s\n", (*i)._key.c_str(), (*i)._value.type2str(), (*i)._value.asString(true).c_str());
+		for (auto &i : *_state->localVars) {
+			result += Common::String::format("    %s - [%s] %s\n", i._key.c_str(), i._value.type2str(), i._value.asString(true).c_str());
 		}
 	} else {
 		result += Common::String("    (no local vars)\n");
@@ -1460,15 +1475,15 @@ Common::String Lingo::formatAllVars() {
 	if (_state->me.type == OBJECT && _state->me.u.obj->getObjType() & (kFactoryObj | kScriptObj)) {
 		ScriptContext *script = static_cast<ScriptContext *>(_state->me.u.obj);
 		result += Common::String("  Instance/property vars: \n");
-		for (DatumHash::iterator i = script->_properties.begin(); i != script->_properties.end(); ++i) {
-			result += Common::String::format("    %s - [%s] %s\n", (*i)._key.c_str(), (*i)._value.type2str(), (*i)._value.asString(true).c_str());
+		for (auto &i : script->_properties) {
+			result += Common::String::format("    %s - [%s] %s\n", i._key.c_str(), i._value.type2str(), i._value.asString(true).c_str());
 		}
 		result += Common::String("\n");
 	}
 
 	result += Common::String("  Global vars:\n");
-	for (DatumHash::iterator i = _globalvars.begin(); i != _globalvars.end(); ++i) {
-		result += Common::String::format("    %s - [%s] %s\n", (*i)._key.c_str(), (*i)._value.type2str(), (*i)._value.asString(true).c_str());
+	for (auto &i : _globalvars) {
+		result += Common::String::format("    %s - [%s] %s\n", i._key.c_str(), i._value.type2str(), i._value.asString(true).c_str());
 	}
 	result += Common::String("\n");
 	return result;
