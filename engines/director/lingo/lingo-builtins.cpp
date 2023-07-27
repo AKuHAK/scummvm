@@ -2612,7 +2612,7 @@ void LB::b_puppetSprite(int nargs) {
 }
 
 void LB::b_puppetTempo(int nargs) {
-	g_director->getCurrentMovie()->getScore()->_puppetTempo = g_lingo->pop().asInt();
+	g_director->getCurrentMovie()->getScore()->setPuppetTempo(g_lingo->pop().asInt());
 }
 
 void LB::b_puppetTransition(int nargs) {
@@ -3283,7 +3283,14 @@ void LB::b_scummvmassertequal(int nargs) {
 	Datum d2 = g_lingo->pop();
 	Datum d1 = g_lingo->pop();
 
-	int result = (d1 == d2);
+	int result;
+
+	if (d1.type == ARRAY && d2.type == ARRAY) {
+		result = LC::eqData(d1, d2).u.i;
+	} else {
+		result = (d1 == d2);
+	}
+
 	if (!result) {
 		warning("BUILDBOT: LB::b_scummvmassertequals: %s is not equal %s at line %d", d1.asString().c_str(), d2.asString().c_str(), line.asInt());
 	}

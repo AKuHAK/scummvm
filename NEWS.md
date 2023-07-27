@@ -10,6 +10,7 @@ For a more comprehensive changelog of the latest experimental code, see:
    - Added support for Might and Magic Book One.
    - Added support for Muppet Treasure Island.
    - Added support for Primordia, Shardlight and Technobabylon.
+   - Added support for Adibou 1
 
  New platforms:
    - Added libretro new shiny port.
@@ -70,12 +71,14 @@ For a more comprehensive changelog of the latest experimental code, see:
    - Added custom engine option to replace the health gems with HP/SP bars.
 
 
-#### 2.7.1 (2023-XX-XX)
+#### 2.7.1 (2023-07-31)
 
  General:
   - Fixed playback speed for Theora videos.
   - Added scummvm.log file viewer.
   - Exposed ScummVM debug level in the GUI (Misc tab).
+  - Fixed shader scaler loading failing in certain conditions.
+  - Fixed some screen shaking effects (as in DOTT) causing a crash on SDL1 ports.
 
  AGI:
    - Restored possibility to pick arbitrary render mode in Game Options.
@@ -96,7 +99,7 @@ For a more comprehensive changelog of the latest experimental code, see:
  CRYOMNI3D:
    - Fixed files access preventing to finish Versailles.
 
- FREESCAPE:
+ Freescape:
    - Added OpenGL shaders renderer.
    - Games are loading original images from the data files.
    - Refactored and expanded detection tables for Driller and other unsupported games.
@@ -105,17 +108,27 @@ For a more comprehensive changelog of the latest experimental code, see:
  HDB:
    - Fixed bug with inability to pick up red envelope with keyboard.
 
- HYPNO:
+ Hypno:
    - Support rendering Korean font for Wetlands.
 
  Private:
    - Dropped 16bit engine requirement.
+
+ SAGA:
+   - Fixed loading resources from the Amiga release of ITE.
+   - Fixed crash or misbehaviors when handling certain actor actions.
 
  SAGA2:
    - Fixed crash when hovering over certain spells.
 
  SCUMM:
    - Fixed music volume regression in Loom.
+   - Fixed a crash in Full Throttle when pressing 'A' in debug mode.
+   - Silence the warning for missing music files in Monkey Island 1 Ultimate Talkie.
+   - Fixed glitched or invisible cursor in Sam & Max when saving and reloading from
+     the classic menu.
+   - Fixed several savegame loading issues and crashes for early FM-Towns games.
+   - Fixed original GUI banners not disappearing properly in some edge cases.
 
  Sword1:
    - Added detection for Czech and Polish versions with DXA cutscenes.
@@ -125,6 +138,13 @@ For a more comprehensive changelog of the latest experimental code, see:
  Sword2:
    - Added support for GOG.com version.
    - Added detection for alternate Polish version.
+
+ Tinsel:
+   - Fixed reading older Discworld II savegames.
+   - Fixed unaligned accesses.
+
+ Tony:
+   - Fixed unaligned accesses.
 
  Touche:
    - Added support for Russian translation by old-games.ru.
@@ -1854,7 +1874,7 @@ For a more comprehensive changelog of the latest experimental code, see:
      Crusade, Indiana Jones and the Fate of Atlantis, Loom and The Dig. Both
      the Windows and the Macintosh versions are supported.
 
- TONY:
+ Tony:
    - Savegames in Tony Tough now work on big-endian systems.
 
  Tinsel:

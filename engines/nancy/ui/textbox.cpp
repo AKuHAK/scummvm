@@ -206,7 +206,13 @@ void Textbox::drawTextbox() {
 			colorTokens.push(newLinePos);
 
 			newLinePos = currentLine.find(_colorEndToken);
-			currentLine.erase(newLinePos, ARRAYSIZE(_colorEndToken) - 1);
+
+			if (newLinePos != Common::String::npos) {
+				currentLine.erase(newLinePos, ARRAYSIZE(_colorEndToken) - 1);
+			} else {
+				// If we find no color end token we assume the whole line needs to be colored
+				newLinePos = currentLine.size();
+			}
 			colorTokens.push(newLinePos);
 		}
 
@@ -247,7 +253,7 @@ void Textbox::drawTextbox() {
 				if (colorTokens.size()) {
 					// Text contains color part
 
-					if (totalCharsDrawn == colorTokens.front()) {
+					if (totalCharsDrawn >= colorTokens.front()) {
 						// Token is at begginning of (what's left of) the current line
 						isColor = !isColor;
 						colorTokens.pop();

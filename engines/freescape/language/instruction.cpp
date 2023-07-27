@@ -295,31 +295,45 @@ void FreescapeEngine::executeSPFX(FCLInstruction &instruction) {
 	uint16 src = instruction._source;
 	uint16 dst = instruction._destination;
 	if (isAmiga() || isAtariST()) {
-		int color;
-		if (src == 0 && dst >= 2 && dst <= 5) {
-			_currentArea->remapColor(dst, 1);
-			return;
+		uint8 r = 0;
+		uint8 g = 0;
+		uint8 b = 0;
+		uint32 color = 0;
+
+		if (src & (1 << 7)) {
+			uint16 v = 0;
+			color = 0;
+			// Extract the color to replace from the src/dst values
+			v = (src & 0x77) << 8;
+			v = v | (dst & 0x70);
+			v = v >> 4;
+
+			// Convert the color to RGB
+			r = (v & 0xf00) >> 8;
+			r = r << 4 | r;
+			r = r & 0xff;
+
+			g = (v & 0xf0) >> 4;
+			g = g << 4 | g;
+			g = g & 0xff;
+
+			b = v & 0xf;
+			b = b << 4 | b;
+			b = b & 0xff;
+
+			color = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
+			_currentArea->remapColor(dst & 0x0f, color); // src & 0x77, dst & 0x0f
+		} else if ((src & 0xf0) >> 4 == 1) {
+			_gfx->readFromPalette(src & 0x0f, r, g, b);
+			color = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
+			for (int i = 1; i < 16; i++)
+				_currentArea->remapColor(i, color);
+		} else if ((src & 0x0f) == 1) {
+			_gfx->readFromPalette(dst & 0x0f, r, g, b);
+			color = _gfx->_texturePixelFormat.ARGBToColor(0xFF, r, g, b);
+			for (int i = 1; i < 16; i++)
+				_currentArea->remapColor(i, color);
 		}
-
-		if (src == 0) {
-			color = dst;
-		} else {
-
-			switch (src) {
-			case 1:
-				color = 15;
-			break;
-			case 2:
-				color = 14;
-			break;
-			default:
-				color = 0;
-			}
-		}
-
-		debugC(1, kFreescapeDebugCode, "Switching complete palette to color %d", dst);
-		for (int i = 1; i < 16; i++)
-			_currentArea->remapColor(i, color);
 	} else {
 		debugC(1, kFreescapeDebugCode, "Switching palette from position %d to %d", src, dst);
 		if (src == 0 && dst == 1)
@@ -329,6 +343,7 @@ void FreescapeEngine::executeSPFX(FCLInstruction &instruction) {
 		else
 			_currentArea->remapColor(src, dst);
 	}
+	_gfx->setColorRemaps(&_currentArea->_colorRemaps);
 	executeRedraw(instruction);
 }
 

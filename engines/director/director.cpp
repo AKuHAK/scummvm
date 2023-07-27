@@ -98,6 +98,13 @@ DirectorEngine::DirectorEngine(OSystem *syst, const DirectorGameDescription *gam
 	_wmHeight = 768;
 
 	_fpsLimit = 0;
+	_forceDate.tm_sec = -1;
+	_forceDate.tm_min = -1;
+	_forceDate.tm_hour = -1;
+	_forceDate.tm_mday = -1;
+	_forceDate.tm_mon = -1;
+	_forceDate.tm_year = -1;
+	_forceDate.tm_wday = -1;
 
 	_wm = nullptr;
 
@@ -110,7 +117,7 @@ DirectorEngine::DirectorEngine(OSystem *syst, const DirectorGameDescription *gam
 		SearchMan.addSubDirectoryMatching(_gameDataDir, directoryGlob, 0, 5);
 	}
 
-	if (debugChannelSet(-1, kDebug32bpp)) {
+	if (debugChannelSet(-1, kDebug32bpp) || (getGameFlags() & GF_32BPP)) {
 #ifdef USE_RGB_COLOR
 		_colorDepth = 32;
 #else
@@ -206,9 +213,17 @@ Common::Error DirectorEngine::run() {
 		_wmMode |= Graphics::kWMModeFullscreen | Graphics::kWMModeNoDesktop;
 
 #ifdef USE_RGB_COLOR
-	if (debugChannelSet(-1, kDebug32bpp))
+	if (debugChannelSet(-1, kDebug32bpp) || (getGameFlags() & GF_32BPP))
 		_wmMode |= Graphics::kWMMode32bpp;
 #endif
+
+	if (getGameFlags() & GF_DESKTOP)
+		_wmMode &= ~Graphics::kWMModeNoDesktop;
+
+	if (getGameFlags() & GF_640x480) {
+		_wmWidth = 640;
+		_wmHeight = 480;
+	}
 
 	_wm = new Graphics::MacWindowManager(_wmMode, &_director3QuickDrawPatterns, getLanguage());
 	_wm->setEngine(this);

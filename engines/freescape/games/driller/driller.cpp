@@ -89,29 +89,6 @@ DrillerEngine::~DrillerEngine() {
 	delete _drillBase;
 }
 
-void DrillerEngine::titleScreen() {
-	if (isAmiga() || isAtariST()) // TODO: implement these with their own animations
-		return;
-
-	if (_title) {
-		drawTitle();
-		_gfx->flipBuffer();
-		g_system->updateScreen();
-		g_system->delayMillis(3000);
-	}
-}
-void DrillerEngine::borderScreen() {
-	if (isAmiga() || isAtariST()) // TODO: implement these with their own animations
-		return;
-
-	if (_border) {
-		drawBorder();
-		_gfx->flipBuffer();
-		g_system->updateScreen();
-		g_system->delayMillis(3000);
-	}
-}
-
 void DrillerEngine::gotoArea(uint16 areaID, int entranceID) {
 	int prevAreaID = _currentArea ? _currentArea->getAreaID(): -1;
 	debugC(1, kFreescapeDebugMove, "Jumping to area: %d, entrance: %d", areaID, entranceID);
@@ -202,7 +179,7 @@ void DrillerEngine::loadAssetsFullGame() {
 	*/
 
 	FCLInstructionVector instructions;
-	Common::Array<uint8> conditionArray;
+	Common::Array<uint16> conditionArray;
 
 	conditionArray.push_back(0xb);
 	conditionArray.push_back(0x20);
@@ -215,10 +192,6 @@ void DrillerEngine::loadAssetsFullGame() {
 	debugC(1, kFreescapeDebugParser, "%s", conditionSource.c_str());
 	_areaMap[18]->_conditions.push_back(instructions);
 	_areaMap[18]->_conditionSources.push_back(conditionSource);
-}
-
-void DrillerEngine::processBorder() {
-	FreescapeEngine::processBorder();
 }
 
 void DrillerEngine::drawInfoMenu() {

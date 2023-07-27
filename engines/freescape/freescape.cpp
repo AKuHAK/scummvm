@@ -297,6 +297,10 @@ void FreescapeEngine::drawFrame() {
 				drawSensorShoot(sensor);
 		}
 		_underFireFrames--;
+		if (_underFireFrames == 0) {
+			_currentArea->unremapColor(_currentArea->_usualBackgroundColor);
+			_currentArea->unremapColor(_currentArea->_skyColor);
+		}
 	}
 
 	if (_shootingFrames > 0) {
@@ -308,9 +312,6 @@ void FreescapeEngine::drawFrame() {
 
 	drawBorder();
 	drawUI();
-
-	_currentArea->unremapColor(_currentArea->_usualBackgroundColor);
-	_currentArea->unremapColor(_currentArea->_skyColor);
 }
 
 void FreescapeEngine::pressedKey(const int keycode) {}
@@ -341,7 +342,9 @@ void FreescapeEngine::processInput() {
 
 	while (g_system->getEventManager()->pollEvent(event)) {
 		if (_demoMode) {
-			if (event.customType != 0xde00)
+			if (event.type == Common::EVENT_SCREEN_CHANGED)
+				; // Allow event
+			else if (event.customType != 0xde00)
 				continue;
 		}
 
@@ -424,6 +427,7 @@ void FreescapeEngine::processInput() {
 				_gfx->setViewport(_fullscreenViewArea);
 				openMainMenuDialog();
 				_gfx->setViewport(_viewArea);
+				_gfx->computeScreenViewport();
 				_savedScreen->free();
 				delete _savedScreen;
 				break;
@@ -455,6 +459,7 @@ void FreescapeEngine::processInput() {
 
 		case Common::EVENT_SCREEN_CHANGED:
 			_gfx->computeScreenViewport();
+			_gfx->clear(0, 0, 0, true);
 			break;
 
 		case Common::EVENT_MOUSEMOVE:
@@ -466,7 +471,7 @@ void FreescapeEngine::processInput() {
 				g_system->warpMouse(mousePos.x, mousePos.y);
 
 			if (_shootMode) {
-				Common::Point resolution = _gfx->nativeResolution();
+				Common::Point resolution(g_system->getWidth(), g_system->getHeight());
 				_crossairPosition.x = _screenW * mousePos.x / resolution.x;
 				_crossairPosition.y = _screenH * mousePos.y / resolution.y;
 				break;
@@ -482,7 +487,7 @@ void FreescapeEngine::processInput() {
 			{
 				bool touchedScreenControls = false;
 
-				Common::Point resolution = _gfx->nativeResolution();
+				Common::Point resolution(g_system->getWidth(), g_system->getHeight());
 				mousePos.x = _screenW * mousePos.x / resolution.x;
 				mousePos.y = _screenH * mousePos.y / resolution.y;
 				touchedScreenControls = onScreenControls(mousePos);
@@ -550,7 +555,8 @@ Common::Error FreescapeEngine::run() {
 	initGameState();
 	loadColorPalette();
 
-	g_system->lockMouse(true);
+	g_system->showMouse(true);
+	g_system->lockMouse(false);
 
 	// Simple main event loop
 	int saveSlot = ConfMan.getInt("save_slot");
@@ -570,8 +576,10 @@ Common::Error FreescapeEngine::run() {
 	bool endGame = false;
 	// Draw first frame
 
+	g_system->lockMouse(true);
 	resetInput();
-	drawFrame();
+	_gfx->computeScreenViewport();
+	_gfx->clear(0, 0, 0, true);
 	_gfx->flipBuffer();
 	g_system->updateScreen();
 
@@ -600,9 +608,6 @@ Common::Error FreescapeEngine::run() {
 
 	return Common::kNoError;
 }
-
-void FreescapeEngine::titleScreen() {}
-void FreescapeEngine::borderScreen() {}
 
 void FreescapeEngine::loadBorder() {
 	if (_border) {

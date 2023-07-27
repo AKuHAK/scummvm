@@ -189,7 +189,7 @@ public:
 	Common::Event decodeDOSMouseEvent(int code, int repetition);
 
 	uint16 readField(Common::SeekableReadStream *file, int nbits);
-	Common::Array<uint8> readArray(Common::SeekableReadStream *file, int size);
+	Common::Array<uint16> readArray(Common::SeekableReadStream *file, int size);
 
 	// 8-bit
 	void load8bitBinary(Common::SeekableReadStream *file, int offset, int ncolors);
@@ -454,10 +454,6 @@ public:
 
 	void gotoArea(uint16 areaID, int entranceID) override;
 
-	void borderScreen() override;
-	void titleScreen() override;
-
-	void processBorder() override;
 	void drawInfoMenu() override;
 
 	void pressedKey(const int keycode) override;
@@ -525,7 +521,7 @@ public:
 
 	void initGameState() override;
 	void borderScreen() override;
-	void titleScreen() override;
+	bool checkIfGameEnded() override;
 
 	void gotoArea(uint16 areaID, int entranceID) override;
 	void pressedKey(const int keycode) override;
@@ -546,7 +542,9 @@ public:
 	void drawDOSUI(Graphics::Surface *surface) override;
 	void drawZXUI(Graphics::Surface *surface) override;
 
-	void drawFullscreenMessage(Common::String message);
+	void drawFullscreenMessageAndWait(Common::String message);
+	void drawFullscreenMessage(Common::String message, uint32 front, Graphics::Surface *surface);
+
 	Common::Error saveGameStreamExtended(Common::WriteStream *stream, bool isAutosave = false) override;
 	Common::Error loadGameStreamExtended(Common::SeekableReadStream *stream) override;
 
@@ -561,7 +559,6 @@ class EclipseEngine : public FreescapeEngine {
 public:
 	EclipseEngine(OSystem *syst, const ADGameDescription *gd);
 
-	void titleScreen() override;
 	void gotoArea(uint16 areaID, int entranceID) override;
 
 	void loadAssetsDOSFullGame() override;
@@ -578,7 +575,6 @@ public:
 
 	Graphics::ManagedSurface *_option;
 	void initGameState() override;
-	void titleScreen() override;
 	void loadAssetsDOSFullGame() override;
 	void loadAssetsDOSDemo() override;
 	void loadAssetsAmigaDemo() override;
