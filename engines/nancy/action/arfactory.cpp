@@ -37,6 +37,7 @@
 #include "engines/nancy/action/bombpuzzle.h"
 #include "engines/nancy/action/soundequalizerpuzzle.h"
 #include "engines/nancy/action/setplayerclock.h"
+#include "engines/nancy/action/raycastpuzzle.h"
 
 #include "engines/nancy/state/scene.h"
 
@@ -48,26 +49,48 @@ namespace Action {
 ActionRecord *ActionManager::createActionRecord(uint16 type) {
 	switch (type) {
 	case 10:
-		return new Hot1FrSceneChange();
+		return new Hot1FrSceneChange(CursorManager::kHotspot);
 	case 11:
-		return new HotMultiframeSceneChange();
+		return new HotMultiframeSceneChange(CursorManager::kHotspot);
 	case 12:
 		return new SceneChange();
 	case 13:
 		return new HotMultiframeMultisceneChange();
 	case 14:
-		return new Hot1FrExitSceneChange();
+		return new Hot1FrSceneChange(CursorManager::kExit);
+	case 15:
+		return new Hot1FrSceneChange(CursorManager::kMoveForward);
+	case 16:
+		return new Hot1FrSceneChange(CursorManager::kMoveBackward);
+	case 17:
+		return new Hot1FrSceneChange(CursorManager::kMoveUp);
+	case 18:
+		return new Hot1FrSceneChange(CursorManager::kMoveDown);
+	case 19:
+		return new HotMultiframeSceneChange(CursorManager::kMoveForward);
 	case 20:
-		return new PaletteThisScene();
+		if (g_nancy->getGameType() == kGameTypeVampire) {
+			return new PaletteThisScene();
+		} else {
+			return new HotMultiframeSceneChange(CursorManager::kMoveUp);
+		}
 	case 21:
-		return new PaletteNextScene();
+		if (g_nancy->getGameType() == kGameTypeVampire) {
+			return new PaletteNextScene();
+		} else {
+			return new HotMultiframeSceneChange(CursorManager::kMoveDown);
+		}
+	case 22:
+		return new Hot1FrSceneChange(CursorManager::kTurnLeft);
+	case 23:
+		return new Hot1FrSceneChange(CursorManager::kTurnRight);
 	case 40:
 		if (g_nancy->getGameType() < kGameTypeNancy2) {
 			// Only used in TVD
 			return new LightningOn();
 		} else {
 			return new SpecialEffect();
-		}		
+		}
 	case 50:
 		return new ConversationVideo(); // PlayPrimaryVideoChan0
 	case 51:
@@ -168,6 +191,8 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 		return new OverrideLockPuzzle();
 	case 205:
 		return new RiddlePuzzle();
+	case 206:
+		return new RaycastPuzzle();
 	default:
 		error("Action Record type %i is invalid!", type);
 		return nullptr;

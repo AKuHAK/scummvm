@@ -23,7 +23,6 @@
 
 #include "common/config-manager.h"
 #include "common/file.h"
-#include "common/md5.h"
 #include "common/rational.h"
 #include "common/memstream.h"
 #include "common/punycode.h"
@@ -38,19 +37,17 @@
 #endif
 
 #include "director/director.h"
+#include "director/debugger.h"
 #include "director/cast.h"
+#include "director/frame.h"
 #include "director/score.h"
 #include "director/movie.h"
 #include "director/sound.h"
-#include "director/cursor.h"
 #include "director/channel.h"
 #include "director/sprite.h"
 #include "director/window.h"
-#include "director/util.h"
 #include "director/castmember/castmember.h"
-#include "director/castmember/palette.h"
 #include "director/castmember/transition.h"
-#include "director/lingo/lingo.h"
 
 namespace Director {
 
@@ -527,8 +524,12 @@ void Score::update() {
 		// Triggers the frame script in D2-3, explicit enterFrame handlers in D4+
 		// D4 will only process recursive enterFrame handlers to a depth of 2.
 		// Any more will be ignored.
-		if ((_vm->getVersion() >= 400) && (count < 2)) {
-			_movie->processEvent(kEventEnterFrame);
+		if ((_vm->getVersion() >= 400)) {
+			if (count < 2 || _window->recursiveEnterFrameCount() < 2)
+				_movie->processEvent(kEventEnterFrame);
+			else {
+				warning("Score::update(): ignoring recursive enterFrame handler, frozenLingoStateCount: %d, enterFrames: %d", count, _window->recursiveEnterFrameCount());
+			}
 		} else if ((_vm->getVersion() < 400) || _movie->_allowOutdatedLingo) {
 			// Force a flush of any frozen scripts before raising enterFrame
 			if (!processFrozenScripts())

@@ -31,6 +31,7 @@
 #include "director/channel.h"
 #include "director/frame.h"
 #include "director/movie.h"
+#include "director/sprite.h"
 #include "director/window.h"
 #include "director/castmember/bitmap.h"
 #include "director/castmember/filmloop.h"
@@ -244,8 +245,9 @@ void FilmLoopCastMember::loadFilmLoopDataD4(Common::SeekableReadStreamEndian &st
 			uint16 order = stream.readUint16BE();
 			frameSize -= 4;
 
-			int channel = (order / channelSize) - 1;
+			int channel = order / channelSize;
 			int channelOffset = order % channelSize;
+			int offset = order;
 
 			debugC(8, kDebugLoading, "loadFilmLoopDataD4: Message: msgWidth %d, channel %d, channelOffset %d", msgWidth, channel, channelOffset);
 			if (debugChannelSet(8, kDebugLoading)) {
@@ -265,12 +267,13 @@ void FilmLoopCastMember::loadFilmLoopDataD4(Common::SeekableReadStreamEndian &st
 				sprite._puppet = 1;
 				sprite._stretch = 1;
 
-				uint16 needSize = MIN((uint16)(nextStart - channelOffset), segSize);
+				uint16 needSize = MIN((uint16)(nextStart - offset), segSize);
 				int startPosition = stream.pos() - channelOffset;
 				int finishPosition = stream.pos() + needSize;
 				readSpriteDataD4(stream, sprite, startPosition, finishPosition);
 				newFrame.sprites.setVal(channel, sprite);
 				segSize -= needSize;
+				offset += needSize;
 				channel += 1;
 				channelOffset = 0;
 				nextStart += kSprChannelSizeD4;

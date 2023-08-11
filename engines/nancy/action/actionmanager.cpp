@@ -35,6 +35,7 @@ namespace Nancy {
 namespace Action {
 
 void ActionManager::handleInput(NancyInput &input) {
+	bool setHoverCursor = false;
 	for (auto &rec : _records) {
 		if (rec->_isActive) {
 			// Send input to all active records
@@ -45,7 +46,12 @@ void ActionManager::handleInput(NancyInput &input) {
 				rec->_hasHotspot &&
 				rec->_hotspot.isValidRect() && // Needed for nancy2 scene 1600
 				NancySceneState.getViewport().convertViewportToScreen(rec->_hotspot).contains(input.mousePos)) {
-			g_nancy->_cursorManager->setCursorType(rec->getHoverCursor());
+			if (!setHoverCursor) {
+				// Hotspots may overlap, but we want the hover cursor for the first one we encounter
+				// This fixes the stairs in nancy3
+				g_nancy->_cursorManager->setCursorType(rec->getHoverCursor());
+				setHoverCursor = true;
+			}
 
 			if (input.input & NancyInput::kLeftMouseButtonUp) {
 				input.input &= ~NancyInput::kLeftMouseButtonUp;
@@ -71,16 +77,27 @@ void ActionManager::handleInput(NancyInput &input) {
 
 						// Re-add the object to the inventory unless it's marked as a one-time use
 						if (item == NancySceneState.getHeldItem() && item != -1) {
-							if (g_nancy->_inventoryData->itemDescriptions[item].keepItem == kInvItemKeepAlways) {
-								NancySceneState.addItemToInventory(item);
-							}
+							switch (g_nancy->_inventoryData->itemDescriptions[item].keepItem) {
+							case kInvItemKeepAlways :
+								if (g_nancy->getGameType() >= kGameTypeNancy3) {
+									// In nancy3 and up this means the object remains in hand, so do nothing
+									// Older games had the kInvItemReturn behavior instead
+									break;
+								}
 
-							NancySceneState.setHeldItem(-1);
+								// fall through
+							case kInvItemReturn :
+								NancySceneState.addItemToInventory(item);
+								// fall through
+							case kInvItemUseThenLose :
+								NancySceneState.setHeldItem(-1);
+								break;
+							}
 						}
 
 						rec->_cursorDependency = nullptr;
 					}
-					
+
 				}
 
 				break;
@@ -111,7 +128,7 @@ bool ActionManager::addNewActionRecord(Common::SeekableReadStream &inputData) {
 	// If the localChunkSize is less than the total data, there must be dependencies at the end of the chunk
 	uint16 depsDataSize = (uint16)inputData.size() - localChunkSize;
 	if (depsDataSize > 0) {
-		// Each dependency is 12 (up to nancy2) or 16 (nancy3 and up) bytes long 
+		// Each dependency is 12 (up to nancy2) or 16 (nancy3 and up) bytes long
 		uint singleDepSize = g_nancy->getGameType() <= kGameTypeNancy2 ? 12 : 16;
 		uint numDependencies = depsDataSize / singleDepSize;
 		if (depsDataSize % singleDepSize) {
@@ -121,7 +138,7 @@ bool ActionManager::addNewActionRecord(Common::SeekableReadStream &inputData) {
 				_records.size(),
 				newRecord->_description.c_str());
 		}
-		
+
 		if (numDependencies == 0) {
 			newRecord->_dependencies.satisfied = true;
 		}
@@ -170,12 +187,12 @@ bool ActionManager::addNewActionRecord(Common::SeekableReadStream &inputData) {
 			case DependencyType::kCloseParenthesis:
 				depStack.top()->children.pop_back();
 				depStack.pop();
-				break;			
+				break;
 			default:
 				if (dep.hours != -1 || dep.minutes != -1 || dep.seconds != -1) {
 					dep.timeData = ((dep.hours * 60 + dep.minutes) * 60 + dep.seconds) * 1000 + dep.milliseconds;
 				}
-				
+
 				break;
 			}
 		}
@@ -276,7 +293,7 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 				}
 			} else {
 				dep.satisfied = NancySceneState.getLogicCondition(dep.label, dep.condition);
-			}			
+			}
 
 			break;
 		case DependencyType::kElapsedGameTime:
@@ -379,7 +396,7 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 				dep.satisfied = isSatisfied;
 				record._cursorDependency = &dep;
 			}
-			
+
 			break;
 		}
 		case DependencyType::kPlayerTOD:

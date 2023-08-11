@@ -89,22 +89,26 @@ Token::Type FCLInstruction::getType() {
 	return _type;
 }
 
-void FreescapeEngine::executeObjectConditions(GeometricObject *obj, bool shot, bool collided, bool activated) {
+bool FreescapeEngine::executeObjectConditions(GeometricObject *obj, bool shot, bool collided, bool activated) {
+	bool executed = false;;
 	assert(obj != nullptr);
 	if (!obj->_conditionSource.empty()) {
 		_firstSound = true;
 		_syncSound = false;
 		_objExecutingCodeSize = collided ? obj->getSize() : Math::Vector3d();
-		if (collided)
+		if (collided) {
+			clearGameBit(31); // We collided with something that has code
 			debugC(1, kFreescapeDebugCode, "Executing with collision flag: %s", obj->_conditionSource.c_str());
-		else if (shot)
+		} else if (shot)
 			debugC(1, kFreescapeDebugCode, "Executing with shot flag: %s", obj->_conditionSource.c_str());
 		else if (activated)
 			debugC(1, kFreescapeDebugCode, "Executing with activated flag: %s", obj->_conditionSource.c_str());
 		else
 			error("Neither shot or collided flag is set!");
 		executeCode(obj->_condition, shot, collided, false, activated); // TODO: check this last parameter
+		executed = true;
 	}
+	return executed;
 }
 
 void FreescapeEngine::executeLocalGlobalConditions(bool shot, bool collided, bool timer) {
@@ -413,15 +417,15 @@ void FreescapeEngine::executeIncrementVariable(FCLInstruction &instruction) {
 		debugC(1, kFreescapeDebugCode, "Score incremented by %d up to %d", increment, _gameStateVars[variable]);
 		break;
 	case k8bitVariableEnergy:
-		if (_gameStateVars[variable] > k8bitMaxEnergy)
-			_gameStateVars[variable] = k8bitMaxEnergy;
+		if (_gameStateVars[variable] > _maxEnergy)
+			_gameStateVars[variable] = _maxEnergy;
 		else if (_gameStateVars[variable] < 0)
 			_gameStateVars[variable] = 0;
 		debugC(1, kFreescapeDebugCode, "Energy incremented by %d up to %d", increment, _gameStateVars[variable]);
 		break;
 	case k8bitVariableShield:
-		if (_gameStateVars[variable] > k8bitMaxShield)
-			_gameStateVars[variable] = k8bitMaxShield;
+		if (_gameStateVars[variable] > _maxShield)
+			_gameStateVars[variable] = _maxShield;
 		else if (_gameStateVars[variable] < 0)
 			_gameStateVars[variable] = 0;
 
@@ -499,6 +503,8 @@ void FreescapeEngine::executeMakeInvisible(FCLInstruction &instruction) {
 
 }
 
+extern Math::AABB createPlayerAABB(Math::Vector3d const position, int playerHeight);
+
 void FreescapeEngine::executeMakeVisible(FCLInstruction &instruction) {
 	uint16 objectID = 0;
 	uint16 areaID = _currentArea->getAreaID();
@@ -515,6 +521,13 @@ void FreescapeEngine::executeMakeVisible(FCLInstruction &instruction) {
 		Object *obj = _areaMap[areaID]->objectWithID(objectID);
 		assert(obj); // We assume an object should be there
 		obj->makeVisible();
+		if (!isDriller()) {
+			Math::AABB boundingBox = createPlayerAABB(_position, _playerHeight);
+			if (obj->_boundingBox.collides(boundingBox)) {
+				_playerWasCrushed = true;
+				_shootingFrames = 0;
+			}
+		}
 	} else {
 		assert(isDOS() && isDemo()); // Should only happen in the DOS demo
 	}
@@ -547,6 +560,15 @@ void FreescapeEngine::executeToggleVisibility(FCLInstruction &instruction) {
 		obj = _areaMap[areaID]->objectWithID(objectID);
 		assert(obj); // We know that an object should be there
 		obj->makeVisible();
+	}
+	if (!obj->isInvisible()) {
+		if (!isDriller()) {
+			Math::AABB boundingBox = createPlayerAABB(_position, _playerHeight);
+			if (obj->_boundingBox.collides(boundingBox)) {
+				_playerWasCrushed = true;
+				_shootingFrames = 0;
+			}
+		}
 	}
 }
 

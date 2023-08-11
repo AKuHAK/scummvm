@@ -27,7 +27,6 @@
 #include "director/score.h"
 #include "director/movie.h"
 #include "director/sprite.h"
-#include "director/util.h"
 
 namespace Director {
 
@@ -289,11 +288,6 @@ void Frame::readSpriteD2(Common::MemoryReadStreamEndian &stream, uint16 offset, 
 		// This means that the relevant `case` label reads too many bytes and must be split
 		error("Frame::readSpriteD2(): Read %ld extra bytes", stream.pos() - finishPosition);
 	}
-
-	// Sometimes removed sprites leave garbage in the channel
-	// We set it to zero, so then could skip
-	if (sprite._width <= 0 || sprite._height <= 0)
-		sprite._width = sprite._height = 0;
 }
 
 void readSpriteDataD2(Common::SeekableReadStreamEndian &stream, Sprite &sprite, uint32 startPosition, uint32 finishPosition) {
@@ -353,6 +347,10 @@ void readSpriteDataD2(Common::SeekableReadStreamEndian &stream, Sprite &sprite, 
 		}
 	}
 
+	// Sometimes removed sprites leave garbage in the channel
+	// We set it to zero, so then could skip
+	if (sprite._width <= 0 || sprite._height <= 0)
+		sprite._width = sprite._height = 0;
 }
 
 
@@ -565,11 +563,6 @@ void Frame::readSpriteD4(Common::MemoryReadStreamEndian &stream, uint16 offset, 
 		// This means that the relevant `case` label reads too many bytes and must be split
 		error("Frame::readSpriteD4(): Read %ld extra bytes", stream.pos() - finishPosition);
 	}
-
-	// Sometimes removed sprites leave garbage in the channel
-	// We set it to zero, so then could skip
-	if (sprite._width <= 0 || sprite._height <= 0)
-		sprite._width = sprite._height = 0;
 }
 
 void readSpriteDataD4(Common::SeekableReadStreamEndian &stream, Sprite &sprite, uint32 startPosition, uint32 finishPosition) {
@@ -644,6 +637,11 @@ void readSpriteDataD4(Common::SeekableReadStreamEndian &stream, Sprite &sprite, 
 			error("readSpriteDataD4(): Miscomputed field position: %ld", stream.pos() - startPosition);
 		}
 	}
+
+	// Sometimes removed sprites leave garbage in the channel
+	// We set it to zero, so then could skip
+	if (sprite._width <= 0 || sprite._height <= 0)
+		sprite._width = sprite._height = 0;
 }
 
 /**************************

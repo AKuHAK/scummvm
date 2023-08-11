@@ -10,7 +10,7 @@ For a more comprehensive changelog of the latest experimental code, see:
    - Added support for Might and Magic Book One.
    - Added support for Muppet Treasure Island.
    - Added support for Primordia, Shardlight and Technobabylon.
-   - Added support for Adibou 1
+   - Added support for Adibou 1.
 
  New platforms:
    - Added libretro new shiny port.
@@ -20,6 +20,8 @@ For a more comprehensive changelog of the latest experimental code, see:
   - Added optional dependency for libvpx.
   - Added optional dependency for libmikmod.
   - Added support for PC98 font ROM.
+  - Added optional dependency for libsonivox, implementing EAS (Embedded Audio
+    Synthesis) sound driver.
 
  AGS:
    - Synced with upstream AGS 3.6.0.48.
@@ -42,12 +44,18 @@ For a more comprehensive changelog of the latest experimental code, see:
 
  SCUMM:
    - Added support for unpacked RuSCUMM patches for Russian localizations.
+   - Allow usage of the official Monkey Island 1 Roland MT-32 patch with any
+     EGA version, not just the English release.
 
  Sherlock:
    - Added support for Chinese Serrated Scalpel.
+   - Added data to savegames whose lack could make savegames unwinnable.
 
  Sword2:
    - Added support for Chinese translation.
+
+ Tinsel:
+   - Fix running out of soundreels error.
 
  TwinE:
    - Added support for Japanese translation.
@@ -71,7 +79,7 @@ For a more comprehensive changelog of the latest experimental code, see:
    - Added custom engine option to replace the health gems with HP/SP bars.
 
 
-#### 2.7.1 (2023-07-31)
+#### 2.7.1 "Stan's previously broken swords" (2023-07-31)
 
  General:
   - Fixed playback speed for Theora videos.

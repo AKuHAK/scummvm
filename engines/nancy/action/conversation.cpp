@@ -299,16 +299,30 @@ void ConversationSound::addConditionalDialogue() {
 	for (const auto &res : g_nancy->getStaticData().conditionalDialogue[_conditionalResponseCharacterID]) {
 		bool isSatisfied = true;
 
-		for (const auto &cond : res.flagConditions) {
-			if (!NancySceneState.getEventFlag(cond.label, cond.flag)) {
-				isSatisfied = false;
+		for (const auto &cond : res.conditions) {
+			switch (cond.type) {
+			case (byte)StaticDataConditionType::kEvent :
+				if (!NancySceneState.getEventFlag(cond.label, cond.flag)) {
+					isSatisfied = false;
+				}
+
+				break;
+			case (byte)StaticDataConditionType::kInventory :
+				if (NancySceneState.hasItem(cond.label) != cond.flag) {
+					isSatisfied = false;
+				}
+
+				break;
+			case (byte)StaticDataConditionType::kDifficulty :
+				if (	(NancySceneState.getDifficulty() != cond.label && cond.flag != 0) ||
+						(NancySceneState.getDifficulty() == cond.label && cond.flag == 0) ) {
+					isSatisfied = false;
+				}
+
 				break;
 			}
-		}
 
-		for (const auto &cond : res.inventoryConditions) {
-			if (NancySceneState.hasItem(cond.label) != cond.flag) {
-				isSatisfied = false;
+			if (!isSatisfied) {
 				break;
 			}
 		}
@@ -335,16 +349,37 @@ void ConversationSound::addGoodbye() {
 	uint sceneChangeID = 0;
 	for (uint i = 0; i < res.sceneChanges.size(); ++i) {
 		const GoodbyeSceneChange &sc = res.sceneChanges[i];
-		if (sc.flagConditions.size() == 0) {
+		if (sc.conditions.size() == 0) {
 			// No conditions, default choice
 			sceneChangeID = i;
 			break;
 		} else {
 			bool isSatisfied = true;
 
-			for (const auto &cond : sc.flagConditions) {
-				if (!NancySceneState.getEventFlag(cond.label, cond.flag)) {
-					isSatisfied = false;
+			for (const auto &cond : sc.conditions) {
+				switch (cond.type) {
+				case (byte)StaticDataConditionType::kEvent :
+					if (!NancySceneState.getEventFlag(cond.label, cond.flag)) {
+						isSatisfied = false;
+					}
+
+					break;
+				case (byte)StaticDataConditionType::kInventory :
+					if (NancySceneState.hasItem(cond.label) != cond.flag) {
+						isSatisfied = false;
+					}
+
+					break;
+				case (byte)StaticDataConditionType::kDifficulty :
+					if (	(NancySceneState.getDifficulty() != cond.label && cond.flag != 0) ||
+							(NancySceneState.getDifficulty() == cond.label && cond.flag == 0) ) {
+						isSatisfied = false;
+					}
+
+					break;
+				}
+
+				if (!isSatisfied) {
 					break;
 				}
 			}
@@ -362,7 +397,8 @@ void ConversationSound::addGoodbye() {
 	newResponse.sceneChange.sceneID = sceneChange.sceneIDs[g_nancy->_randomSource->getRandomNumber(sceneChange.sceneIDs.size() - 1)];
 
 	// Set an event flag if applicable
-	NancySceneState.setEventFlag(sceneChange.flagToSet);
+	// Assumes flagToSet is an event flag
+	NancySceneState.setEventFlag(sceneChange.flagToSet.label, sceneChange.flagToSet.flag);
 
 	newResponse.sceneChange.continueSceneSound = kContinueSceneSound;
 }
@@ -452,7 +488,7 @@ void ConversationVideo::init() {
 		GraphicsManager::loadSurfacePalette(_drawSurface, _paletteName);
 		setTransparent(true);
 	}
-	
+
 	ConversationSound::init();
 	registerGraphics();
 }
@@ -556,7 +592,7 @@ void ConversationCel::readData(Common::SeekableReadStream &stream) {
 	readFilename(stream, xsheetName);
 	readFilename(stream, _bodyTreeName);
 	readFilename(stream, _headTreeName);
-	
+
 	uint xsheetDataSize = 0;
 	byte *xsbuf = g_nancy->_resource->loadData(xsheetName, xsheetDataSize);
 	if (!xsbuf) {
@@ -564,7 +600,7 @@ void ConversationCel::readData(Common::SeekableReadStream &stream) {
 	}
 
 	Common::MemoryReadStream xsheet(xsbuf, xsheetDataSize, DisposeAfterUse::YES);
-	
+
 	// Read the xsheet and load all images into the arrays
 	// Completely unoptimized, the original engine uses a buffer
 	xsheet.seek(0);
@@ -618,6 +654,6 @@ void ConversationCel::readData(Common::SeekableReadStream &stream) {
 bool ConversationCel::isVideoDonePlaying() {
 	return _curFrame >= _lastFrame && _nextFrameTime <= g_nancy->getTotalPlayTime();
 }
-	
+
 } // End of namespace Action
 } // End of namespace Nancy

@@ -122,7 +122,6 @@ void EclipseEngine::loadAssetsDOSFullGame() {
 		_border = load8bitBinImage(&file, 0x210);
 		_border->setPalette((byte *)&kEGADefaultPaletteData, 0, 16);
 	} else if (_renderMode == Common::kRenderCGA) {
-		loadBundledImages();
 		file.open("TOTEC.EXE");
 
 		if (!file.isOpen())
@@ -191,13 +190,7 @@ void EclipseEngine::drawUI() {
 		drawStringInSurface(_currentAreaMessages[0], 102, 135, black, yellow, surface);
 	drawStringInSurface(Common::String::format("%07d", score), 136, 6, black, white, surface);
 
-	if (!_uiTexture)
-		_uiTexture = _gfx->createTexture(surface);
-	else
-		_uiTexture->update(surface);
-
-	_gfx->drawTexturedRect2D(_fullscreenViewArea, _fullscreenViewArea, _uiTexture);
-
+	drawFullscreenSurface(surface);
 	surface->free();
 	delete surface;
 

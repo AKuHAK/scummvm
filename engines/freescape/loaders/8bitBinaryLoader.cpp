@@ -22,8 +22,6 @@
 // Based on Phantasma code by Thomas Harte (2013),
 // available at https://github.com/TomHarte/Phantasma/ (MIT)
 
-#include "image/bmp.h"
-
 #include "freescape/freescape.h"
 #include "freescape/language/8bitDetokeniser.h"
 #include "freescape/objects/connections.h"
@@ -154,20 +152,28 @@ Object *FreescapeEngine::load8bitObject(Common::SeekableReadStream *file) {
 		debugC(1, kFreescapeDebugParser, "Number of colors: %d", numberOfColours / 2);
 		uint8 entry;
 		for (uint8 colour = 0; colour < numberOfColours / 2; colour++) {
-			uint8 data = readField(file, 8);
+			uint8 data = 0;
+			uint8 extraData = 0;
+			if (!isDriller() && (isAmiga() || isAtariST())) {
+				uint16 field = file->readUint16BE();
+				data = field & 0xff;
+				extraData = field >> 8;
+			} else
+				data = readField(file, 8);
+
 			entry = data & 0xf;
-			//if (_renderMode == Common::kRenderCGA)
-			//	entry = entry % 4; // TODO: use dithering
 
 			colours->push_back(entry);
 			debugC(1, kFreescapeDebugParser, "color[%d] = %x", 2 * colour, entry);
+			if (!isDriller() && (isAmiga() || isAtariST()))
+				debugC(1, kFreescapeDebugParser, "ecolor[%d] = %x", 2 * colour, extraData & 0xf);
 
 			entry = data >> 4;
-			//if (_renderMode == Common::kRenderCGA)
-			//	entry = entry % 4; // TODO: use dithering
-
 			colours->push_back(entry);
 			debugC(1, kFreescapeDebugParser, "color[%d] = %x", 2 * colour + 1, entry);
+			if (!isDriller() && (isAmiga() || isAtariST()))
+				debugC(1, kFreescapeDebugParser, "ecolor[%d] = %x", 2 * colour + 1, extraData >> 4);
+
 			byteSizeOfObject--;
 		}
 
@@ -301,7 +307,16 @@ Object *FreescapeEngine::load8bitObject(Common::SeekableReadStream *file) {
 
 		byteSizeOfObject++;
 		while(--byteSizeOfObject > 0)
-			groupDataArray.push_back(readField(file, 8));
+			if (isAmiga() || isAtariST()) {
+				uint16 field = file->readUint16BE();
+				if (isCastle())
+					assert(field >> 8 == 0);
+				else
+					groupDataArray.push_back(field >> 8);
+
+				groupDataArray.push_back(field & 0xff);
+			} else
+				groupDataArray.push_back(readField(file, 8));
 
 		return new Group(
 			objectID,
@@ -505,6 +520,12 @@ Area *FreescapeEngine::load8bitArea(Common::SeekableReadStream *file, uint16 nco
 		extraColor[1] = readField(file, 8);
 		extraColor[2] = readField(file, 8);
 		extraColor[3] = readField(file, 8);
+
+		if (isAmiga()) {
+			// TODO
+			groundColor = skyColor;
+			skyColor = 0;
+		}
 	}
 	debugC(1, kFreescapeDebugParser, "Area name: %s", name.c_str());
 
@@ -537,7 +558,10 @@ Area *FreescapeEngine::load8bitArea(Common::SeekableReadStream *file, uint16 nco
 	}
 	int64 endLastObject = file->pos();
 	debugC(1, kFreescapeDebugParser, "Last position %lx", endLastObject);
-	assert(endLastObject == static_cast<int64>(base + cPtr) || areaNumber == 192);
+	if (isDark() && isAmiga())
+		assert(endLastObject <= static_cast<int64>(base + cPtr));
+	else
+		assert(endLastObject == static_cast<int64>(base + cPtr) || areaNumber == 192);
 	file->seek(base + cPtr);
 	uint8 numConditions = readField(file, 8);
 	debugC(1, kFreescapeDebugParser, "%d area conditions at %x of area %d", numConditions, base + cPtr, areaNumber);
@@ -675,21 +699,27 @@ void FreescapeEngine::load8bitBinary(Common::SeekableReadStream *file, int offse
 		}
 	}
 
-	if (isDriller()) {
+	if (isDriller() || isDark()) {
+		debugC(1, kFreescapeDebugParser, "Time to finish the game:");
 		if (isAmiga() || isAtariST())
 			file->seek(offset + 0x168);
 		else
 			file->seek(offset + 0xb4);
 		Common::String n;
+
+		if (isDriller()) {
+			n += char(readField(file, 8));
+			n += char(readField(file, 8));
+			debugC(1, kFreescapeDebugParser, "'%s' hours", n.c_str());
+			_initialCountdown =_initialCountdown + 3600 * atoi(n.c_str());
+			n.clear();
+			n += char(readField(file, 8));
+			assert(n == ":");
+			n.clear();
+		}
 		n += char(readField(file, 8));
 		n += char(readField(file, 8));
-		_initialCountdown =_initialCountdown + 3600 * atoi(n.c_str());
-		n.clear();
-		n += char(readField(file, 8));
-		assert(n == ":");
-		n.clear();
-		n += char(readField(file, 8));
-		n += char(readField(file, 8));
+		debugC(1, kFreescapeDebugParser, "'%s' minutes", n.c_str());
 		_initialCountdown = _initialCountdown + 60 * atoi(n.c_str());
 		n.clear();
 		n += char(readField(file, 8));
@@ -697,13 +727,11 @@ void FreescapeEngine::load8bitBinary(Common::SeekableReadStream *file, int offse
 		n.clear();
 		n += char(readField(file, 8));
 		n += char(readField(file, 8));
+		debugC(1, kFreescapeDebugParser, "'%s' seconds", n.c_str());
 		_initialCountdown = _initialCountdown + atoi(n.c_str());
-
 		if (_useExtendedTimer)
 			_initialCountdown = 359999; // 99:59:59
-	} else if (isDark())
-		_initialCountdown = 2 * 3600; // 02:00:00
-	else if (isCastle())
+	} else if (isCastle())
 		_initialCountdown = 1000000000;
 
 	if (isAmiga() || isAtariST())
@@ -746,32 +774,6 @@ void FreescapeEngine::load8bitBinary(Common::SeekableReadStream *file, int offse
 	_startEntrance = startEntrance;
 	_colorNumber = ncolors;
 	_binaryBits = 8;
-}
-
-void FreescapeEngine::loadBundledImages() {
-	/*Image::BitmapDecoder decoder;
-	Common::String targetName = Common::String(_gameDescription->gameId);
-	if (isDOS() && isDemo())
-		Common::replace(targetName, "-demo", "");
-
-	Common::String borderFilename = targetName + "_" + Common::getRenderModeCode(_renderMode) + ".bmp";
-	if (_dataBundle->hasFile(borderFilename)) {
-		Common::SeekableReadStream *borderFile = _dataBundle->createReadStreamForMember(borderFilename);
-		decoder.loadStream(*borderFile);
-		_border = new Graphics::Surface();
-		_border->copyFrom(*decoder.getSurface());
-		decoder.destroy();
-	} else
-		error("Missing border file '%s' in data bundle", borderFilename.c_str());
-
-	Common::String titleFilename = targetName + "_" + Common::getRenderModeDescription(_renderMode) + "_title.bmp";
-	if (_dataBundle->hasFile(titleFilename)) {
-		Common::SeekableReadStream *titleFile = _dataBundle->createReadStreamForMember(titleFilename);
-		decoder.loadStream(*titleFile);
-		_title = new Graphics::Surface();
-		_title->copyFrom(*decoder.getSurface());
-		decoder.destroy();
-	}*/
 }
 
 void FreescapeEngine::loadFonts(byte *font, int charNumber) {

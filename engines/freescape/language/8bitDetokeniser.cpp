@@ -30,8 +30,6 @@
 namespace Freescape {
 
 uint8 k8bitMaxVariable = 64;
-uint8 k8bitMaxShield = 64;
-uint8 k8bitMaxEnergy = 64;
 
 Common::String detokenise8bitCondition(Common::Array<uint16> &tokenisedCondition, FCLInstructionVector &instructions, bool isAmigaAtari) {
 	Common::String detokenisedStream;
@@ -50,7 +48,7 @@ Common::String detokenise8bitCondition(Common::Array<uint16> &tokenisedCondition
 		 2, 1, 1, 2, 1, 1, 2, 1,
 		 1, 2, 2, 1, 2, 0, 0, 0,
 		 1, 1, 0, 1, 1, 1, 1, 1,
-		 2, 2, 1, 1, 0, 1, 0, 0,
+		 2, 2, 1, 1, 1, 1, 0, 0,
 		 0, 0, 0, 0, 0, 0, 2, 2,
 		 1};
 
@@ -302,6 +300,11 @@ Common::String detokenise8bitCondition(Common::Array<uint16> &tokenisedCondition
 		case 34: // show a message on screen
 			detokenisedStream += "PRINT (";
 			currentInstruction = FCLInstruction(Token::PRINT);
+			break;
+
+		case 36: // Not sure about this one
+			detokenisedStream += "STOPANIM (";
+			currentInstruction = FCLInstruction(Token::STOPANIM);
 			break;
 
 		case 37:

@@ -53,8 +53,8 @@ NancyEngine::NancyEngine(OSystem *syst, const NancyGameDescription *gd) :
 		Engine(syst),
 		_gameDescription(gd),
 		_system(syst),
-		_datFileMajorVersion(0),
-		_datFileMinorVersion(2),
+		_datFileMajorVersion(1),
+		_datFileMinorVersion(0),
 		_false(gd->gameType <= kGameTypeNancy2 ? 1 : 0),
 		_true(gd->gameType <= kGameTypeNancy2 ? 2 : 1) {
 
@@ -81,6 +81,8 @@ NancyEngine::NancyEngine(OSystem *syst, const NancyGameDescription *gd) :
 	_sliderPuzzleData = nullptr;
 	_clockData = nullptr;
 	_specialEffectData = nullptr;
+	_raycastPuzzleData = nullptr;
+	_raycastPuzzleLevelBuilderData = nullptr;
 }
 
 NancyEngine::~NancyEngine() {
@@ -102,13 +104,15 @@ NancyEngine::~NancyEngine() {
 	delete _sliderPuzzleData;
 	delete _clockData;
 	delete _specialEffectData;
+	delete _raycastPuzzleData;
+	delete _raycastPuzzleLevelBuilderData;
 }
 
 NancyEngine *NancyEngine::create(GameType type, OSystem *syst, const NancyGameDescription *gd) {
 	if (type >= kGameTypeVampire && type <= kGameTypeNancy6) {
 		return new NancyEngine(syst, gd);
 	}
-	
+
 	error("Unknown GameType");
 }
 
@@ -270,12 +274,12 @@ Common::Error NancyEngine::run() {
 		if (s) {
 			s->process();
 		}
-		
+
 		_graphicsManager->draw();
-		
-		if (_gameFlow.changingState) { 
+
+		if (_gameFlow.changingState) {
 			_graphicsManager->clearObjects();
-			
+
 			s = getStateObject(_gameFlow.prevState);
 			if (s) {
 				if(s->onStateExit(_gameFlow.prevState)) {
@@ -395,6 +399,17 @@ void NancyEngine::bootGameEngine() {
 		_specialEffectData = new SPEC(chunkStream);
 	}
 
+	chunkStream = boot->getChunkStream("RCPR");
+	if (chunkStream) {
+		_raycastPuzzleData = new RCPR(chunkStream);
+	}
+
+	chunkStream = boot->getChunkStream("RCLB");
+	if (chunkStream) {
+		_raycastPuzzleLevelBuilderData = new RCLB(chunkStream);
+	}
+
+	_sound->initSoundChannels();
 	_sound->loadCommonSounds(boot);
 
 	delete boot;
@@ -497,22 +512,32 @@ void NancyEngine::readDatFile() {
 
 	byte major = datFile->readByte();
 	byte minor = datFile->readByte();
-	if (major != _datFileMajorVersion || minor != _datFileMinorVersion) {
+	if (major != _datFileMajorVersion) {
 		error("Incorrect nancy.dat version. Expected '%d.%d', found %d.%d",
 			_datFileMajorVersion, _datFileMinorVersion, major, minor);
+	} else {
+		if (minor != _datFileMinorVersion) {
+			warning("Incorrect nancy.dat version. Expected '%d.%d', found %d.%d. Game may still work, but expect bugs",
+			_datFileMajorVersion, _datFileMinorVersion, major, minor);
+		}
 	}
 
 	uint16 numGames = datFile->readUint16LE();
-	if (getGameType() > numGames) {
+	uint16 gameType = getGameType();
+	if (gameType > numGames) {
+		// Fallback for when no data is present for the current game:
+		// throw a warning and use the last available game data
 		warning("Data for game type %d is not in nancy.dat", getGameType());
-		return;
+		gameType = numGames;
 	}
 
 	// Seek to offset containing current game
-	datFile->skip((getGameType() - 1) * 4);
-	datFile->seek(datFile->readUint32LE());
+	datFile->skip((gameType - 1) * 4);
+	uint32 thisGameOffset = datFile->readUint32LE();
+	uint32 nextGameOffset = gameType == numGames ? datFile->size() : datFile->readUint32LE();
+	datFile->seek(thisGameOffset);
 
-	_staticData.readData(*datFile, _gameDescription->desc.language);
+	_staticData.readData(*datFile, _gameDescription->desc.language, nextGameOffset);
 }
 
 Common::Error NancyEngine::synchronize(Common::Serializer &ser) {

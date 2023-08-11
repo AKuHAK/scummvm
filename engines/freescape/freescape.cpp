@@ -22,7 +22,6 @@
 #include "common/config-manager.h"
 #include "common/events.h"
 #include "common/math.h"
-#include "common/compression/unzip.h"
 #include "common/random.h"
 #include "common/timer.h"
 #include "graphics/cursorman.h"
@@ -99,6 +98,7 @@ FreescapeEngine::FreescapeEngine(OSystem *syst, const ADGameDescription *gd)
 	_currentDemoMousePosition = _crossairPosition;
 	_flyMode = false;
 	_noClipMode = false;
+	_playerWasCrushed = false;
 	_forceEndGame = false;
 	_syncSound = false;
 	_firstSound = false;
@@ -151,6 +151,9 @@ FreescapeEngine::FreescapeEngine(OSystem *syst, const ADGameDescription *gd)
 
 	_underFireFrames = 0;
 	_shootingFrames = 0;
+
+	_maxShield = 63;
+	_maxEnergy = 63;
 }
 
 FreescapeEngine::~FreescapeEngine() {
@@ -180,6 +183,11 @@ FreescapeEngine::~FreescapeEngine() {
 	delete _gfx;
 	delete _dataBundle;
 	delete _speaker;
+
+	for (auto &it : _indicators) {
+		it->free();
+		delete it;
+	}
 }
 
 void FreescapeEngine::drawBorder() {
@@ -194,13 +202,15 @@ void FreescapeEngine::drawBorder() {
 
 void FreescapeEngine::drawTitle() {
 	_gfx->setViewport(_fullscreenViewArea);
-	if (!_titleTexture) {
-		Graphics::Surface *title = _gfx->convertImageFormatIfNecessary(_title);
-		_titleTexture = _gfx->createTexture(title);
-		title->free();
-		delete title;
+	if (_title) {
+		if (!_titleTexture) {
+			Graphics::Surface *title = _gfx->convertImageFormatIfNecessary(_title);
+			_titleTexture = _gfx->createTexture(title);
+			title->free();
+			delete title;
+		}
+		_gfx->drawTexturedRect2D(_fullscreenViewArea, _fullscreenViewArea, _titleTexture);
 	}
-	_gfx->drawTexturedRect2D(_fullscreenViewArea, _fullscreenViewArea, _titleTexture);
 	_gfx->setViewport(_viewArea);
 }
 
@@ -247,10 +257,7 @@ void FreescapeEngine::checkSensors() {
 	}
 }
 
-void FreescapeEngine::drawSensorShoot(Sensor *sensor) {
-	assert(sensor);
-	_gfx->renderSensorShoot(1, sensor->getOrigin(), _position, _viewArea);
-}
+void FreescapeEngine::drawSensorShoot(Sensor *sensor) {}
 
 void FreescapeEngine::flashScreen(int backgroundColor) {
 	if (backgroundColor >= 16)
@@ -282,13 +289,16 @@ void FreescapeEngine::drawFrame() {
 
 		if (isDriller() && (isDOS() || isAmiga() || isAtariST()))
 			underFireColor = 1;
+		else if (isDark() && (isDOS() || isAmiga() || isAtariST()))
+			underFireColor = 4;
 
 		_currentArea->remapColor(_currentArea->_usualBackgroundColor, underFireColor);
 		_currentArea->remapColor(_currentArea->_skyColor, underFireColor);
 	}
 
 	drawBackground();
-	_currentArea->draw(_gfx, _ticks);
+	if (!_playerWasCrushed) // Avoid rendering inside objects
+		_currentArea->draw(_gfx, _ticks);
 
 	if (_underFireFrames > 0) {
 		for (auto &it : _sensors) {
@@ -388,6 +398,7 @@ void FreescapeEngine::processInput() {
 				break;
 			case Common::KEYCODE_KP5:
 			case Common::KEYCODE_KP0:
+			case Common::KEYCODE_0:
 				shoot();
 				break;
 			case Common::KEYCODE_p:
@@ -471,10 +482,17 @@ void FreescapeEngine::processInput() {
 				g_system->warpMouse(mousePos.x, mousePos.y);
 
 			if (_shootMode) {
-				Common::Point resolution(g_system->getWidth(), g_system->getHeight());
-				_crossairPosition.x = _screenW * mousePos.x / resolution.x;
-				_crossairPosition.y = _screenH * mousePos.y / resolution.y;
+				_crossairPosition.x = _screenW * mousePos.x / g_system->getWidth();
+				_crossairPosition.y = _screenH * mousePos.y / g_system->getHeight();
 				break;
+			} else {
+				// Mouse pointer is locked into the the middle of the screen
+				// since we only need the relative movements. This will not affect any touchscreen device
+				// so on-screen controls are still accesible
+				mousePos.x = g_system->getWidth() * ( _viewArea.left + _viewArea.width() / 2) / _screenW;
+				mousePos.y = g_system->getHeight() * (_viewArea.top + _viewArea.height() / 2) / _screenW;
+				g_system->warpMouse(mousePos.x, mousePos.y);
+				g_system->getEventManager()->purgeMouseEvents();
 			}
 
 			rotate(event.relMouse.x * _mouseSensitivity, event.relMouse.y * _mouseSensitivity);
@@ -492,8 +510,11 @@ void FreescapeEngine::processInput() {
 				mousePos.y = _screenH * mousePos.y / resolution.y;
 				touchedScreenControls = onScreenControls(mousePos);
 
-				if (!touchedScreenControls && _viewArea.contains(_crossairPosition))
-					shoot();
+				if (!touchedScreenControls) {
+					if (_viewArea.contains(_shootMode ? _crossairPosition : mousePos))
+						shoot();
+				}
+
 			}
 			break;
 
@@ -518,17 +539,7 @@ void FreescapeEngine::executeMovementConditions() {
 	executeLocalGlobalConditions(false, true, false);
 }
 
-void FreescapeEngine::updateTimeVariables() {
-	int seconds, minutes, hours;
-	getTimeFromCountdown(seconds, minutes, hours);
-
-	if (_lastMinute != minutes) {
-		_lastMinute = minutes;
-		_gameStateVars[0x1e] += 1;
-		_gameStateVars[0x1f] += 1;
-		executeLocalGlobalConditions(false, true, false); // Only execute "on collision" room/global conditions
-	}
-}
+void FreescapeEngine::updateTimeVariables() {}
 
 Common::Error FreescapeEngine::run() {
 	_vsyncEnabled = g_system->getFeatureState(OSystem::kFeatureVSync);
@@ -576,6 +587,7 @@ Common::Error FreescapeEngine::run() {
 	bool endGame = false;
 	// Draw first frame
 
+	g_system->showMouse(false);
 	g_system->lockMouse(true);
 	resetInput();
 	_gfx->computeScreenViewport();
@@ -828,25 +840,6 @@ Common::Error FreescapeEngine::loadGameStreamExtended(Common::SeekableReadStream
 	return Common::kNoError;
 }
 
-void FreescapeEngine::loadDataBundle() {
-	_dataBundle = Common::makeZipArchive(FREESCAPE_DATA_BUNDLE);
-	if (!_dataBundle) {
-		error("ENGINE: Couldn't load data bundle '%s'.", FREESCAPE_DATA_BUNDLE.c_str());
-	}
-	Common::String versionFilename = "version";
-	if (!_dataBundle->hasFile(versionFilename))
-		error("No version number in %s", FREESCAPE_DATA_BUNDLE.c_str());
-
-	Common::SeekableReadStream *versionFile = _dataBundle->createReadStreamForMember(versionFilename);
-	char *versionData = (char *)malloc((versionFile->size() + 1) * sizeof(char));
-	versionFile->read(versionData, versionFile->size());
-	versionData[versionFile->size()] = '\0';
-	Common::String expectedVersion = "2";
-	if (versionData != expectedVersion)
-		error("Unexpected version number for freescape.dat: expecting '%s' but found '%s'", expectedVersion.c_str(), versionData);
-	free(versionData);
-}
-
 void FreescapeEngine::insertTemporaryMessage(const Common::String message, int deadline) {
 	_temporaryMessages.insert_at(0, message);
 	_temporaryMessageDeadlines.insert_at(0, deadline);
@@ -932,6 +925,8 @@ void FreescapeEngine::pauseEngineIntern(bool pause) {
 	Engine::pauseEngineIntern(pause);
 
 	// TODO: Handle the viewport here
+	if (_frameLimiter)
+		_frameLimiter->pause(pause);
 
 	// Unlock the mouse so that the cursor is usable when the GMM opens
 	if (!_shootMode) {
