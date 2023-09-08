@@ -192,24 +192,35 @@ public:
 	Common::Event decodeDOSMouseEvent(int code, int repetition);
 
 	uint16 readField(Common::SeekableReadStream *file, int nbits);
+	uint16 readPtr(Common::SeekableReadStream *file);
 	Common::Array<uint16> readArray(Common::SeekableReadStream *file, int size);
 
 	// 8-bit
 	void load8bitBinary(Common::SeekableReadStream *file, int offset, int ncolors);
 	Area *load8bitArea(Common::SeekableReadStream *file, uint16 ncolors);
 	Object *load8bitObject(Common::SeekableReadStream *file);
+	Group *load8bitGroup(Common::SeekableReadStream *file, byte rawFlagsAndType);
+	Group *load8bitGroupV1(Common::SeekableReadStream *file, byte rawFlagsAndType);
+	Group *load8bitGroupV2(Common::SeekableReadStream *file, byte rawFlagsAndType);
+
 	void loadGlobalObjects(Common::SeekableReadStream *file, int offset, int size);
-	void renderPixels8bitBinImage(Graphics::ManagedSurface *surface, int &i, int &j, uint8 pixels, int color);
+	void renderPixels8bitBinImage(Graphics::ManagedSurface *surface, int row, int column, int bit, int count);
 
 	void renderPixels8bitBinCGAImage(Graphics::ManagedSurface *surface, int &i, int &j, uint8 pixels, int color);
 	void renderPixels8bitBinEGAImage(Graphics::ManagedSurface *surface, int &i, int &j, uint8 pixels, int color);
 
 	Graphics::ManagedSurface *load8bitBinImage(Common::SeekableReadStream *file, int offset);
+	void load8bitBinImageRow(Common::SeekableReadStream *file, Graphics::ManagedSurface *surface, int row);
+	void load8bitBinImageRowIteration(Common::SeekableReadStream *file, Graphics::ManagedSurface *surface, int row, int bit);
+	int execute8bitBinImageCommand(Common::SeekableReadStream *file, Graphics::ManagedSurface *surface, int row, int pixels, int bit);
+	int execute8bitBinImageSingleCommand(Common::SeekableReadStream *file, Graphics::ManagedSurface *surface, int row, int pixels, int bit, int count);
+	int execute8bitBinImageMultiCommand(Common::SeekableReadStream *file, Graphics::ManagedSurface *surface, int row, int pixels, int bit, int count);
 
 	// Areas
 	uint16 _startArea;
 	AreaMap _areaMap;
 	Area *_currentArea;
+	bool _gotoExecuted;
 	Math::Vector3d _scale;
 
 	virtual void gotoArea(uint16 areaID, int entranceID);
@@ -223,6 +234,7 @@ public:
 	bool _flyMode;
 	bool _shootMode;
 	bool _noClipMode;
+	bool _invertY;
 	static Common::Array<Common::Keymap *> initKeymaps(const char *target);
 	void processInput();
 	void resetInput();
@@ -275,6 +287,7 @@ public:
 	uint16 _playerHeight;
 	uint16 _playerWidth;
 	uint16 _playerDepth;
+	uint16 _stepUpDistance;
 
 	int _playerStepIndex;
 	Common::Array<int> _playerSteps;
@@ -315,6 +328,7 @@ public:
 	void executeSwapJet(FCLInstruction &instruction);
 	virtual void executePrint(FCLInstruction &instruction);
 	void executeSPFX(FCLInstruction &instruction);
+	void executeStartAnim(FCLInstruction &instruction);
 
 	// Sound
 	Audio::SoundHandle _soundFxHandle;
@@ -365,7 +379,7 @@ public:
 	Common::StringArray _messagesList;
 
 	void loadMessagesFixedSize(Common::SeekableReadStream *file, int offset, int size, int number);
-	void loadMessagesVariableSize(Common::SeekableReadStream *file, int offset, int number);
+	virtual void loadMessagesVariableSize(Common::SeekableReadStream *file, int offset, int number);
 
 	void loadFonts(Common::SeekableReadStream *file, int offset);
 	void loadFonts(byte *font, int charNumber);
@@ -550,12 +564,17 @@ public:
 	void initDOS();
 	void initAmigaAtari();
 	void initZX();
+	void initCPC();
 
 	void loadAssetsDOSFullGame() override;
 	void loadAssetsDOSDemo() override;
 	void loadAssetsAmigaFullGame() override;
 
+	void loadAssetsCPCFullGame() override;
+
 	void loadAssetsZXDemo() override;
+	void loadAssetsZXFullGame() override;
+	void loadMessagesVariableSize(Common::SeekableReadStream *file, int offset, int number) override;
 
 	int _lastTenSeconds;
 	int _lastSecond;
@@ -567,6 +586,7 @@ public:
 	void drawSensorShoot(Sensor *sensor) override;
 	void drawDOSUI(Graphics::Surface *surface) override;
 	void drawZXUI(Graphics::Surface *surface) override;
+	void drawCPCUI(Graphics::Surface *surface) override;
 	void drawAmigaAtariSTUI(Graphics::Surface *surface) override;
 
 

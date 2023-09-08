@@ -468,6 +468,8 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "warlock",			"Spaceship Warlock" },
 	{ "wiggles1",			"A Day with the Wiggles" },
 	{ "willywabbit",		"Willy Wabbit & His Magical Books" },
+	{ "willywabbit2",		"Around the World With Willy Wabbit" },
+	{ "willywabbitmath",	"Willy Wabbit Math Adventure" },
 	{ "willywabbitmosaic",	"Mosaic Game" },
 	{ "winniewitch",		"Winnie the Witch" },
 	{ "wishbone", 			"Wishbone and the Amazing Odyssey" },
@@ -854,6 +856,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "tomlisaindiens",		"Tom et Lisa: les Indiens" },
 
 	// German titles
+	{ "addybuschuzirkus",	"Addy Buschu: Im Zirkus" },
 	{ "bibi2",				"Bibi Blocksberg 2: Ein verhexter Schultag" },
 	{ "bibifilm",			"Bibi Blocksberg: Mein verhextes Filmstudio" },
 	{ "braingames",			"Brain Games" },
@@ -924,6 +927,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "bem",				"妖怪人間ベム 新たなる魂の迷宮" },					// Yokai Ningen Bemu
 	{ "bemtoybox",			"妖怪人間ベム データToyBox" },						// Bem Data Toy Box
 	{ "beyondthetime",		"Beyond the Time" },
+	{ "bluesango",			"Blue Sango" },
 	{ "bombreikochiba",		"千葉麗子 BOMB!" },	// Reiko Chiba - Bomb
 	{ "cattheripper",		"Cat the Ripper 13人目の探偵士" }, // Cat the Ripper: 13th Detective
 	{ "cellofania",			"セロファニア" },
@@ -969,6 +973,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "henachoco04",		"あの素晴らしい弁当を2度3度" },								// That Wonderful Bento 2 or 3 Times
 	{ "henachoco04r",		"あの素晴らしいラメンスペシャル" },								// That Wonderful Ramen Special
 	{ "henachoco05",		"野犬ロデム" },								// Rodem the Wild
+	{ "henachoco05r",		"ロデムッチ" },								// Rodemcchi
 	{ "henachoco06",		"蒸し蒸しチキンそり旅行" },								// Steamed Chicken Sled Trip
 	{ "henachoco07",		"うそつきと私" },								// Liar and Me
 	{ "henachoco08",		"おませなおませな屋台大作戦" },								// Omasena Omasena Stall Strategy
@@ -977,6 +982,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "henachococd",		"ギャラクレヤン'75 オレニモインゼイクレヤン" }, // Galakureyan'75 Inzeikureyan
 	{ "henachocoexpo",		"イタチョコの野望" }, // Itachoco's Ambition
 	{ "henachocogala",		"スペースギャラクレヤン" }, // Space Galakureyan
+	{ "henachocowine2",		"WineはY" }, // Wine is Y; second of two games with the same title
 	{ "hidoiyokun",			"ひどいよくん" }, // Hidoiyo-kun
 	{ "himejijo",			"A.MAZING姫路城" },									// A.MAZING Himejijo (the HIMEJI Castle)
 	{ "horrortour2",		"Zeddas: Horror Tour 2" },
@@ -1931,6 +1937,9 @@ static const DirectorGameDescription gameDescriptions[] = {
 	MACDEMO1_l("henachoco", "Trial Version", "Hena Choco Derby Demo", "f5277c53bacd27936158dd3867e587e2", 1794011, Common::JA_JPN, 311),
 	// Found on Info Mac 5 (1995-01)
 	MACDEMO1_l("henachoco", "Trial Version", "Hena Choco Derby Demo", "f5277c53bacd27936158dd3867e587e2", 1794020, Common::JA_JPN, 311),
+	MACGAME1t_l("henachoco", "", "HenaDerby", "1c78f2b964247e28bfccfa822d020307", 2167247, Common::JA_JPN, 311),
+
+	MACGAME1t_l("henachoco02", "", "sai68040", "a4db265ecca5ba55cd588b0334d2f182", 2350313, Common::JA_JPN, 311),
 
 	// Original demo filename is ﾑｽﾞｶｼｲﾎﾝｦﾖﾑﾄﾈﾑｸﾅﾙ
 	MACDEMO1_l("henachoco03", "Demo", "xn--oj7cxalkre7cjz1d2agc0e8b1cm", "f5277c53bacd27936158dd3867e587e2", 1058521, Common::JA_JPN, 311),
@@ -2021,6 +2030,11 @@ static const DirectorGameDescription gameDescriptions[] = {
 	// desktop allows it to work like it would have on the original OS.
 	MACGAME1f_l("henachoco05", "", "yaken", "3731a1d809be07929da1f5d691ee3c97", 290398, Common::JA_JPN, 402, GF_DESKTOP|GF_640x480),
 	WINGAME1f_l("henachoco05", "", "YAKEN.EXE", "1f9b0ef872de7b84063a53b2a1083c60", 2103629, Common::JA_JPN, 400, GF_DESKTOP|GF_640x480),
+
+	// Same desktop behaviour as Rodem
+	MACGAME1f_l("henachoco05r", "", "Rodemutti", "e3d07b046864d6c22116ac2754aaf5cb", 290398, Common::JA_JPN, 402, GF_DESKTOP|GF_640x480),
+	MACGAME1f_l("henachoco05r", "Patched version (earlier)", "rodemcchi", "307566cc2c1ed8b144187a098a2b1291", 4095826, Common::JA_JPN, 402, GF_DESKTOP|GF_640x480),
+	MACGAME1f_l("henachoco05r", "Patched version (later)", "rodem-tti", "e6165016b17961ac8616568301842c51", 4095754, Common::JA_JPN, 402, GF_DESKTOP|GF_640x480),
 
 	// German release is D5
 	MACGAME1("majestic", "", "Majestic", "01be45e7241194dad07938e7059b88e3", 483518, 400),
@@ -5184,7 +5198,13 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME1t_l("shinshofukei", "", "SINSYO2.EXE", "bb16588758a1ebd5df9fa8ecdd6bc249", 1296944, Common::JA_JPN, 404),
 
 	WINDEMO1("shramerica", "Demo", "SHRAMER.EXE", "b50e77a25088cfe1cb88ee2dc4d3a9c9", 1335269, 404),
+
+	MACGAME2("shrgrammar", "",	   "Grammar Power Mac",		"r:096e0aacbc1670c80a354c3c49b3fabe", 63304,
+								   "OFFSTAGE/GRAMSLAM.DIR", "t:43d84ede1e83bda9d8588201a74f397a", 697989, 404),
+	WINGAME2("shrgrammar", "",	   "START.EXE", 			"t:737838e6f24205bd85486d08b7bb27ad", 700655,
+								   "OFFSTAGE/GRAMSLAM.DIR", "t:43d84ede1e83bda9d8588201a74f397a", 697989, 404),
 	WINDEMO1("shrgrammar", "Demo", "SHRGRAM.EXE", "c3ee0462fe5935cf1eabfbdecfe33f03", 698575, 404),
+
 	WINDEMO1("shrmath", "Demo", "SHRMATH.EXE", "bc3ec272680e0e57f76032a2a8e196eb", 690109, 404),
 
 	// Player app is a standalone player for cartoons created in Studio
@@ -5531,6 +5551,10 @@ static const DirectorGameDescription gameDescriptions[] = {
 	// Windows version is D3
 	MACGAME1t("willywabbit", "North American release", "Willy Wabbit(Click me)", "04e5a9a6c98f48aaef7fe7115b3606ca", 304029, 400),
 
+	// Released on two discs, sold separately or bundled together
+	WINGAME1t_l("willywabbit2", "Around the World", "ATWMAIN.EXE", "34c63cc23bb4987a054bdf8c378b2fc9", 1342511, Common::JA_JPN, 404),
+	WINGAME1t_l("willywabbit2", "Game Pack", "ATWGAME.EXE", "79c57e89e0beb4f8f2bd1ef5cc5ad5d1", 1325755, Common::JA_JPN, 404),
+
 	// Free download from SEC's website:
 	// https://web.archive.org/web/19970109103231/http://www.sec.com.sg/freegame.htm
 	// Just calls itself "Mosaic Game" in-game, but is based on
@@ -5803,6 +5827,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME2("blender", "Volume 2.5", "BLENDME.EXE",	   "2e62abdad839e42068afdcd0644d7dcf", 949909,
 									  "FILES/OPENING.DIR", "45cb69d7174a3f93d54e9a5ee1fb9f3b", 2274768, 500),
 	WINGAME1("blender", "Volume 3.1", "LNCHR_32.EXE",	   "1a7acbba10a7246ba58c1d53fc7203f5", 1421431, 501),
+
+	WINGAME1t_l("bluesango", "", "BLUESANG.EXE", "08e531b980ebfb343201400add17b68e", 2143080, Common::JA_JPN, 501),
 
 	// Designed by In Chair Viewing (ICV)
 	// Binaries provided for Win3.1, Win95, WinNT
@@ -6838,6 +6864,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME1("vp2", "", "VPHYS2.EXE", "c3c38bd3907ca7e13220b74bd0317a6c", 1021347, 500),
 	WINDEMO1("vp2", "Demo", "VP2DEMO.EXE", "c3c38bd3907ca7e13220b74bd0317a6c", 1021353, 500),
 
+	WINGAME1t("willywabbitmath", "US Version", "MATHAD32.EXE", "b8417f75139827f36d96c0c8cc0189d4", 2038701, 501),
+
 	MACGAME1("wine", "", "double-click me!", "231d3041df162be4a0ddd36a74eb03b6", 719289, 501),
 	WINGAME2("wine", "", "WIN95.EXE",		 "1a7acbba10a7246ba58c1d53fc7203f5", 1411337,
 						 "160MAIN.DXR",		 "23dbb4744121b077d331b01123709519", 592640, 501),
@@ -7864,6 +7892,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 	WINGAME1_l("heidimail", "",  "HeidiML.exe", "1799677b9d869c8dc577d931e229ee3b", 2662490, Common::JA_JPN, 702),
 	WINGAME1_l("heidislide", "", "Slide.exe",   "1799677b9d869c8dc577d931e229ee3b", 7934640, Common::JA_JPN, 702),
 
+	MACGAME1t_l("henachocowine2", "", "WineCom", "12b86bfbc7f08195e2d1d72c576a4a90", 79408477, Common::JA_JPN, 702),
+
 	MACGAME1_l("ironmask", "", "THE IRON MASK", "0944b962ebb00f4b5d5149d220f8449b", 112786, Common::IT_ITA, 702),
 	WINGAME1_l("ironmask", "", "TIM.exe", "7c18c9a6af2694156bf09ed195c1ab09", 2916546, Common::IT_ITA, 702),
 
@@ -8842,6 +8872,10 @@ static const DirectorGameDescription gameDescriptions[] = {
 
 	WINGAME2_l("1contre100", "", "start.exe", "00541c08177b6d55a3df893bcfccc843", 2764454,
 								 "main.dxr",  "c2bf555f6209e51a1c8cce29c8e6534f", 43315121, Common::FR_FRA, 1010),
+
+	// TRAC report #14576
+	WINGAME2_l("addybuschuzirkus", "", "AC1.exe",  "t:bce969dfb978d2c1c00785d102787f3d", 4204863,
+									   "adbc.ico", "t:cc3dd9e7e9f690f6a6b0701796a73148", 21974, Common::DE_DEU, 1010),
 
 	// TRAC report #14382
 	WINGAME1_l("adiboubobos", "", "Casse-Virus.exe", "t:8be9bfb3aa0c3f7d6a20980721149998", 5270940, Common::FR_FRA, 1010),

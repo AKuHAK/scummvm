@@ -65,6 +65,7 @@
 #include "director/lingo/xlibs/labeldrvxobj.h"
 #include "director/lingo/xlibs/maniacbg.h"
 #include "director/lingo/xlibs/memoryxobj.h"
+#include "director/lingo/xlibs/misc.h"
 #include "director/lingo/xlibs/miscx.h"
 #include "director/lingo/xlibs/moovxobj.h"
 #include "director/lingo/xlibs/movemousexobj.h"
@@ -76,6 +77,7 @@
 #include "director/lingo/xlibs/prefpath.h"
 #include "director/lingo/xlibs/printomatic.h"
 #include "director/lingo/xlibs/qtmovie.h"
+#include "director/lingo/xlibs/qtvr.h"
 #include "director/lingo/xlibs/quicktime.h"
 #include "director/lingo/xlibs/registercomponent.h"
 #include "director/lingo/xlibs/serialportxobj.h"
@@ -195,8 +197,9 @@ static struct XLibProto {
 	{ JITDraw3XObj::fileNames,			JITDraw3XObj::open,			JITDraw3XObj::close,		kXObj,					400 },	// D4
 	{ JourneyWareXINIXObj::fileNames,	JourneyWareXINIXObj::open,	JourneyWareXINIXObj::close,	kXObj,					400 },	// D4
 	{ LabelDrvXObj::fileNames,			LabelDrvXObj::open,			LabelDrvXObj::close,		kXObj,					400 },	// D4
-	{ ManiacBgXObj::fileNames,			ManiacBgXObj::open,			ManiacBgXObj::close,			kXObj,				300 },	// D3
+	{ ManiacBgXObj::fileNames,			ManiacBgXObj::open,			ManiacBgXObj::close,		kXObj,					300 },	// D3
 	{ MemoryXObj::fileNames,			MemoryXObj::open,			MemoryXObj::close,			kXObj,					300 },	// D3
+	{ Misc::fileNames,					Misc::open,					Misc::close,				kXObj,					400 },	// D4
 	{ MiscX::fileNames,					MiscX::open,				MiscX::close,				kXObj,					400 },	// D4
 	{ MoovXObj::fileNames, 				MoovXObj::open, 			MoovXObj::close,			kXObj,					300 },  // D3
 	{ MoveMouseXObj::fileNames,			MoveMouseXObj::open,		MoveMouseXObj::close,		kXObj,					400 },	// D4
@@ -207,8 +210,9 @@ static struct XLibProto {
 	{ Porta::fileNames,					Porta::open,				Porta::close,				kXObj,					300 },	// D3
 	{ PrefPath::fileNames,				PrefPath::open,				PrefPath::close,			kXObj,					400 },	// D4
 	{ PrintOMaticXObj::fileNames,		PrintOMaticXObj::open,		PrintOMaticXObj::close,		kXObj,					400 },	// D4
+	{ QTVR::fileNames,					QTVR::open,					QTVR::close,				kXObj,					400 },	// D4
 	{ QTMovie::fileNames,				QTMovie::open,				QTMovie::close,				kXObj,					400 },	// D4
-	{ Quicktime::fileNames,				Quicktime::open,				Quicktime::close,				kXObj,					300 },	// D3
+	{ Quicktime::fileNames,				Quicktime::open,			Quicktime::close,			kXObj,					300 },	// D3
 	{ RearWindowXObj::fileNames,		RearWindowXObj::open,		RearWindowXObj::close,		kXObj,					400 },	// D4
 	{ RegisterComponent::fileNames,		RegisterComponent::open,	RegisterComponent::close,	kXObj,					400 },	// D4
 	{ SerialPortXObj::fileNames,		SerialPortXObj::open,		SerialPortXObj::close,		kXObj,					200 },	// D2

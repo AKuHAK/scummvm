@@ -235,6 +235,9 @@ void FreescapeEngine::executeCode(FCLInstructionVector &code, bool shot, bool co
 		case Token::SCREEN:
 			// TODO
 			break;
+		case Token::STARTANIM:
+			executeStartAnim(instruction);
+			break;
 		case Token::BITNOTEQ:
 			if (executeEndIfBitNotEqual(instruction))
 				ip = codeSize;
@@ -576,6 +579,7 @@ void FreescapeEngine::executeGoto(FCLInstruction &instruction) {
 	uint16 areaID = instruction._source;
 	uint16 entranceID = instruction._destination;
 	gotoArea(areaID, entranceID);
+	_gotoExecuted = true;
 }
 
 void FreescapeEngine::executeSetBit(FCLInstruction &instruction) {
@@ -646,5 +650,22 @@ void FreescapeEngine::executeSwapJet(FCLInstruction &instruction) {
 	}
 	// TODO: implement the rest of the changes (e.g. border)
 }
+
+void FreescapeEngine::executeStartAnim(FCLInstruction &instruction) {
+	uint16 objID = instruction._source;
+	debugC(1, kFreescapeDebugCode, "Staring animation of object %d", objID);
+	Object *obj = _currentArea->objectWithID(objID);
+	assert(obj);
+	Group *group = nullptr;
+	if (obj->getType() == kGroupType) {
+		group = (Group *)obj;
+	} else {
+		assert(obj->_partOfGroup);
+		group = (Group *)obj->_partOfGroup;
+	}
+	debugC(1, kFreescapeDebugCode, "From group %d", group->getObjectID());
+	group->_active = true;
+}
+
 
 } // End of namespace Freescape

@@ -184,6 +184,13 @@ struct ViewStruct;
 
 class Globals {
 public:
+	enum SimdFlags : uint {
+		SIMD_NONE = 0,
+		SIMD_NEON = (1 << 0),
+		SIMD_SSE2 = (1 << 1),
+		SIMD_AVX2 = (1 << 2),
+	};
+
 	/**
 	 * @defgroup agsglobals AGS Globals
 	 * @ingroup agsengine
@@ -221,6 +228,7 @@ public:
 	int _trans_blend_green = 0;
 	int _trans_blend_blue = 0;
 	BlenderMode __blender_mode = kRgbToRgbBlender;
+	uint _simd_flags = SIMD_NONE;
 	/* current format information and worker routines */
 	int _utype = U_UTF8;
 
@@ -1107,10 +1115,6 @@ public:
 
 	// Current engine version
 	Version _EngineVersion;
-	// Lowest savedgame version, accepted by this engine
-	Version _SavedgameLowestBackwardCompatVersion;
-	// Lowest engine version, which would accept current savedgames
-	Version _SavedgameLowestForwardCompatVersion;
 
 	/**@}*/
 

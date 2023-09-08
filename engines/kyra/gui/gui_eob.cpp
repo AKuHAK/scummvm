@@ -1567,9 +1567,17 @@ void EoBCoreEngine::gui_processInventorySlotClick(int slot) {
 	}
 }
 
-GUI_EoB::GUI_EoB(EoBCoreEngine *vm) : GUI(vm), _vm(vm), _screen(vm->_screen), _numSlotsVisible(vm->gameFlags().platform == Common::kPlatformSegaCD ? 5 : 6),
-	_menuFont(_vm->gameFlags().platform == Common::kPlatformPC98 ? Screen::FID_SJIS_FNT : (_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FID_CHINESE_FNT : Screen::FID_8_FNT)),
-	_menuFont2(_vm->gameFlags().use16ColorMode ? Screen::FID_SJIS_FNT : (_vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FID_CHINESE_FNT : Screen::FID_8_FNT)) {
+GUI_EoB::GUI_EoB(EoBCoreEngine *vm) : GUI(vm), _vm(vm), _screen(vm ? vm->_screen : nullptr), _numSlotsVisible(vm && vm->gameFlags().platform == Common::kPlatformSegaCD ? 5 : 6),
+	_menuFont(vm ? (vm->gameFlags().platform == Common::kPlatformPC98 ? Screen::FID_SJIS_FNT : (vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FID_CHINESE_FNT : Screen::FID_8_FNT)) : Screen::FID_8_FNT),
+	_menuFont2(vm ? (vm->gameFlags().use16ColorMode ? Screen::FID_SJIS_FNT : (vm->_flags.lang == Common::Language::ZH_TWN ? Screen::FID_CHINESE_FNT : Screen::FID_8_FNT)) : Screen::FID_8_FNT),
+	// The PC-98 versions of EOB I + II, the English Sega-CD version of EOB I and the Chinese version of EOB II allow small characters.
+	// For all other versions we convert to capital characters.
+	_textInputForceUppercase(vm && vm->_flags.platform != Common::kPlatformPC98 && vm->_flags.lang != Common::ZH_TWN && !(vm->_flags.platform == Common::kPlatformSegaCD && vm->_flags.lang != Common::EN_ANY)),
+	_textInputHeight(vm && vm->game() == GI_EOB2 && vm->gameFlags().lang == Common::Language::ZH_TWN ? 16 : 9),
+	_textInputShadowOffset(vm && vm->game() == GI_EOB2 && vm->gameFlags().lang == Common::Language::ZH_TWN ? 1 : 0),
+	_dlgButtonHeight1(vm && vm->game() == GI_EOB2 && vm->gameFlags().lang == Common::Language::ZH_TWN ? 16 : 14),
+	_dlgButtonHeight2(vm && vm->game() == GI_EOB2 && vm->gameFlags().lang == Common::Language::ZH_TWN ? 17 : 14),
+	_dlgButtonLabelYOffs(vm && vm->game() == GI_EOB2 && vm->gameFlags().lang == Common::Language::ZH_TWN ? 1 : 3) {
 
 	_menuStringsPrefsTemp = new char*[4]();
 	_saveSlotStringsTemp = new char*[6];
@@ -1593,6 +1601,7 @@ GUI_EoB::GUI_EoB(EoBCoreEngine *vm) : GUI(vm), _vm(vm), _screen(vm->_screen), _n
 	_menuTextColor = _menuHighlightColor = _menuShadowColor = 0;
 	_menuCur = 0;
 	_menuNumItems = 0;
+	assert(_vm);
 
 	_numPages = (_vm->game() == GI_EOB2) ? 8 : 5;
 	_numVisPages = (_vm->game() == GI_EOB2) ? 6 : 5;
@@ -1614,8 +1623,8 @@ GUI_EoB::GUI_EoB(EoBCoreEngine *vm) : GUI(vm), _vm(vm), _screen(vm->_screen), _n
 	else
 		_highLightColorTable = _highlightColorTableVGA;
 
-	EoBRect16 *highlightFrames = new EoBRect16[20];
-	memcpy(highlightFrames, _highlightFramesDefault, 20 * sizeof(EoBRect16));
+	EoBRect16 *highlightFrames = new EoBRect16[ARRAYSIZE(_highlightFramesDefault)];
+	memcpy(highlightFrames, _highlightFramesDefault, sizeof(_highlightFramesDefault));
 
 	if (_vm->gameFlags().platform == Common::kPlatformSegaCD) {
 		for (int i = 0; i < 6; ++i) {
@@ -1624,6 +1633,8 @@ GUI_EoB::GUI_EoB(EoBCoreEngine *vm) : GUI(vm), _vm(vm), _screen(vm->_screen), _n
 			highlightFrames[i].x2 = _vm->guiSettings()->charBoxCoords.boxX[i & 1] + _vm->guiSettings()->charBoxCoords.boxWidth - 1;
 			highlightFrames[i].y2 = _vm->guiSettings()->charBoxCoords.boxY[i >> 1] + _vm->guiSettings()->charBoxCoords.boxHeight - 1;
 		}
+	} else if (_vm->gameFlags().lang == Common::ZH_TWN) {
+		memcpy(&highlightFrames[14], _highlightFramesTransferZH, sizeof(_highlightFramesTransferZH));
 	}
 
 	_highlightFrames = highlightFrames;
@@ -2153,23 +2164,23 @@ Common::Point GUI_EoB::simpleMenu_getTextPoint(int num, int *col) {
 void GUI_EoB::simpleMenu_printButton(int sd, int num, const char *title, bool isHighlight, bool isInitial) {
 	int column;
 	Common::Point tPoint = simpleMenu_getTextPoint(num, &column);
-        if (_vm->gameFlags().platform == Common::kPlatformSegaCD) {
-                _vm->_txt->printShadedText(title, 4 + tPoint.x, (sd == 8 ? 2 : 20) + tPoint.y, isHighlight ? _menuHighlightColor : _menuTextColor, _menuShadowColor);
-        } else {
+    if (_vm->gameFlags().platform == Common::kPlatformSegaCD) {
+		_vm->_txt->printShadedText(title, 4 + tPoint.x, (sd == 8 ? 2 : 20) + tPoint.y, isHighlight ? _menuHighlightColor : _menuTextColor, _menuShadowColor);
+    } else {
 		Common::Point p = tPoint + _menuPoint;
-                _screen->printShadedText(title, p.x, p.y, _menuTextColor, 0, _menuShadowColor);
-                if (isHighlight)
-                        _screen->printText(title, p.x, p.y, _menuHighlightColor, 0);
+        _screen->printShadedText(title, p.x, p.y, _menuTextColor, 0, _menuShadowColor);
+		if (isHighlight)
+			_screen->printText(title, p.x, p.y, _menuHighlightColor, 0);
 		if (num < ARRAYSIZE(_menuOverflow) && isInitial)
 			_menuOverflow[num] = _screen->getTextWidth(title) > _menuColumnWidth[column];
-        }
+	}
 }
 
 void GUI_EoB::simpleMenu_setup(int sd, int maxItem, const char *const *strings, int32 menuItemsMask, int itemOffset, int lineSpacing, int textColor, int highlightColor, int shadowColor) {
 	simpleMenu_initMenuItemsMask(sd, maxItem, menuItemsMask, itemOffset);
 
 	const ScreenDim *dm = _screen->getScreenDim(19 + sd);
-        _menuPoint = Common::Point((_screen->_curDim->sx + dm->sx) << 3, _screen->_curDim->sy + dm->sy);
+	_menuPoint = Common::Point((_screen->_curDim->sx + dm->sx) << 3, _screen->_curDim->sy + dm->sy);
 
 	int v = simpleMenu_getMenuItem(_menuCur, menuItemsMask, itemOffset);
 	_menuColumns = 1;
@@ -2216,7 +2227,7 @@ void GUI_EoB::simpleMenu_setup(int sd, int maxItem, const char *const *strings, 
 
 	for (int i = 0; i < _menuNumItems; i++) {
 		int item = simpleMenu_getMenuItem(i, menuItemsMask, itemOffset);
-                simpleMenu_printButton(sd, i, strings[item], item == v, true);
+		simpleMenu_printButton(sd, i, strings[item], item == v, true);
 	}
 
 	_vm->removeInputTop();
@@ -2307,8 +2318,8 @@ int GUI_EoB::simpleMenu_process(int sd, const char *const *strings, void *b, int
 	}
 
 	if (newItem != currentItem) {
-                simpleMenu_printButton(sd, currentItem, strings[simpleMenu_getMenuItem(currentItem, menuItemsMask, itemOffset)], false, false);
-                simpleMenu_printButton(sd, newItem, strings[simpleMenu_getMenuItem(newItem, menuItemsMask, itemOffset)], true, false);
+		simpleMenu_printButton(sd, currentItem, strings[simpleMenu_getMenuItem(currentItem, menuItemsMask, itemOffset)], false, false);
+		simpleMenu_printButton(sd, newItem, strings[simpleMenu_getMenuItem(newItem, menuItemsMask, itemOffset)], true, false);
 		if (_vm->gameFlags().platform == Common::kPlatformSegaCD) {
 			_screen->sega_getRenderer()->render(0, 6, 20, 26, 5);
 		}
@@ -2325,6 +2336,14 @@ int GUI_EoB::simpleMenu_process(int sd, const char *const *strings, void *b, int
 	_menuCur = newItem;
 
 	return result;
+}
+
+void GUI_EoB::simpleMenu_unselect(int sd, const char *const *strings, void *b, int32 menuItemsMask, int itemOffset) {
+	// This function is basically just a hack for EOB II Chinese. It isn't used or needed anywhere else.
+	int currentItem = _menuCur % _menuNumItems;
+	simpleMenu_printButton(sd, currentItem, strings[simpleMenu_getMenuItem(currentItem, menuItemsMask, itemOffset)], false, false);
+	_menuCur = 0;
+	_screen->updateScreen();
 }
 
 int GUI_EoB::simpleMenu_getMenuItem(int index, int32 menuItemsMask, int itemOffset) {
@@ -2681,12 +2700,12 @@ bool GUI_EoB::runLoadMenu(int x, int y, bool fromMainMenu) {
 		} else if (slot >= 0) {
 			if (_saveSlotIdTemp[slot] == -1) {
 				_vm->useMainMenuGUISettings(fromMainMenu);
-				messageDialogue(11, 65, _vm->guiSettings()->colors.guiColorLightRed);
+				messageDialog(11, 65, _vm->guiSettings()->colors.guiColorLightRed);
 				_vm->useMainMenuGUISettings(false);
 			} else {
 				if (_vm->loadGameState(_saveSlotIdTemp[slot]).getCode() != Common::kNoError) {
 					_vm->useMainMenuGUISettings(fromMainMenu);
-					messageDialogue(11, 16, _vm->guiSettings()->colors.guiColorLightRed);
+					messageDialog(11, 16, _vm->guiSettings()->colors.guiColorLightRed);
 					_vm->useMainMenuGUISettings(false);
 				}
 				runLoop = false;
@@ -2717,13 +2736,13 @@ bool GUI_EoB::confirmDialogue2(int dim, int id, int deflt) {
 	int lastHighlight = -1;
 
 	for (int i = 0; i < 2; i++)
-		drawMenuButtonBox(x[i], y, 32, 14, false, false);
+		drawMenuButtonBox(x[i], y, 32, _dlgButtonHeight2, false, false);
 
 	for (bool runLoop = true; runLoop && !_vm->shouldQuit();) {
 		Common::Point p = _vm->getMousePos();
-		if (_vm->posWithinRect(p.x, p.y, x[0], y, x[0] + 32, y + 14))
+		if (_vm->posWithinRect(p.x, p.y, x[0], y, x[0] + 32, y + _dlgButtonHeight2))
 			newHighlight = 0;
-		else if (_vm->posWithinRect(p.x, p.y, x[1], y, x[1] + 32, y + 14))
+		else if (_vm->posWithinRect(p.x, p.y, x[1], y, x[1] + 32, y + _dlgButtonHeight2))
 			newHighlight = 1;
 
 		int inputFlag = _vm->checkInput(0, false, 0) & 0x8FF;
@@ -2740,10 +2759,10 @@ bool GUI_EoB::confirmDialogue2(int dim, int id, int deflt) {
 			newHighlight = 0;
 			runLoop = false;
 		}  else if (inputFlag == 199 || inputFlag == 201) {
-			if (_vm->posWithinRect(p.x, p.y, x[0], y, x[0] + 32, y + 14)) {
+			if (_vm->posWithinRect(p.x, p.y, x[0], y, x[0] + 32, y + _dlgButtonHeight2)) {
 				newHighlight = 0;
 				runLoop = false;
-			} else if (_vm->posWithinRect(p.x, p.y, x[1], y, x[1] + 32, y + 14)) {
+			} else if (_vm->posWithinRect(p.x, p.y, x[1], y, x[1] + 32, y + _dlgButtonHeight2)) {
 				newHighlight = 1;
 				runLoop = false;
 			}
@@ -2751,16 +2770,16 @@ bool GUI_EoB::confirmDialogue2(int dim, int id, int deflt) {
 
 		if (newHighlight != lastHighlight) {
 			for (int i = 0; i < 2; i++)
-				_screen->printShadedText(_vm->_menuYesNoStrings[i], x[i] + 16 - (_screen->getTextWidth(_vm->_menuYesNoStrings[i]) / 2) + 1, y + 3, i == newHighlight ? _vm->guiSettings()->colors.guiColorLightRed : _vm->guiSettings()->colors.guiColorWhite, 0, _vm->guiSettings()->colors.guiColorBlack);
+				_screen->printShadedText(_vm->_menuYesNoStrings[i], x[i] + 16 - (_screen->getTextWidth(_vm->_menuYesNoStrings[i]) / 2) + 1, y + _dlgButtonLabelYOffs, i == newHighlight ? _vm->guiSettings()->colors.guiColorLightRed : _vm->guiSettings()->colors.guiColorWhite, 0, _vm->guiSettings()->colors.guiColorBlack);
 			_screen->updateScreen();
 			lastHighlight = newHighlight;
 		}
 	}
 
-	drawMenuButtonBox(x[newHighlight], y, 32, 14, true, true);
+	drawMenuButtonBox(x[newHighlight], y, 32, _dlgButtonHeight2, true, true);
 	_screen->updateScreen();
 	_vm->_system->delayMillis(80);
-	drawMenuButtonBox(x[newHighlight], y, 32, 14, false, true);
+	drawMenuButtonBox(x[newHighlight], y, 32, _dlgButtonHeight2, false, true);
 	_screen->updateScreen();
 
 	_screen->copyRegion(0, _screen->_curDim->h, _screen->_curDim->sx << 3, _screen->_curDim->sy, _screen->_curDim->w << 3, _screen->_curDim->h, 2, 0, Screen::CR_NO_P_CHECK);
@@ -2774,7 +2793,7 @@ bool GUI_EoB::confirmDialogue2(int dim, int id, int deflt) {
 	return newHighlight == 0;
 }
 
-void GUI_EoB::messageDialogue(int dim, int id, int buttonTextCol) {
+void GUI_EoB::messageDialog(int dim, int id, int buttonTextCol) {
 	int od = _screen->curDimIndex();
 	_screen->setScreenDim(dim);
 	Screen::FontId of = _screen->setFont(_menuFont);
@@ -2787,13 +2806,8 @@ void GUI_EoB::messageDialogue(int dim, int id, int buttonTextCol) {
 	int by = dm->sy + dm->h - 19;
 	int bw = _screen->getTextWidth(_vm->_menuOkString) + 7;
 
-	if (_vm->_flags.lang == Common::Language::ZH_TWN) {
-		drawMenuButtonBox(bx, by, bw, 16, false, false);
-		_screen->printShadedText(_vm->_menuOkString, bx + 4, by + 1, buttonTextCol, 0, _vm->guiSettings()->colors.guiColorBlack);
-	} else {
-		drawMenuButtonBox(bx, by, bw, 14, false, false);
-		_screen->printShadedText(_vm->_menuOkString, bx + 4, by + 3, buttonTextCol, 0, _vm->guiSettings()->colors.guiColorBlack);
-	}
+	drawMenuButtonBox(bx, by, bw, _dlgButtonHeight1, false, false);
+	_screen->printShadedText(_vm->_menuOkString, bx + 4, by + _dlgButtonLabelYOffs, buttonTextCol, 0, _vm->guiSettings()->colors.guiColorBlack);
 	_screen->updateScreen();
 
 	for (bool runLoop = true; runLoop && !_vm->shouldQuit();) {
@@ -2801,17 +2815,17 @@ void GUI_EoB::messageDialogue(int dim, int id, int buttonTextCol) {
 		_vm->removeInputTop();
 
 		if (inputFlag == 199 || inputFlag == 201) {
-			if (_vm->posWithinRect(_vm->_mouseX, _vm->_mouseY, bx, by, bx + bw, by + 14))
+			if (_vm->posWithinRect(_vm->_mouseX, _vm->_mouseY, bx, by, bx + bw, by + _dlgButtonHeight1))
 				runLoop = false;
 		} else if (inputFlag == _vm->_keyMap[Common::KEYCODE_SPACE] || inputFlag == _vm->_keyMap[Common::KEYCODE_RETURN] || inputFlag == _vm->_keyMap[Common::KEYCODE_o]) {
 			runLoop = false;
 		}
 	}
 
-	drawMenuButtonBox(bx, by, bw, 14, true, true);
+	drawMenuButtonBox(bx, by, bw, _dlgButtonHeight1, true, true);
 	_screen->updateScreen();
 	_vm->_system->delayMillis(80);
-	drawMenuButtonBox(bx, by, bw, 14, false, true);
+	drawMenuButtonBox(bx, by, bw, _dlgButtonHeight1, false, true);
 	_screen->updateScreen();
 
 	_screen->copyRegion(0, dm->h, dm->sx << 3, dm->sy, dm->w << 3, dm->h, 2, 0, Screen::CR_NO_P_CHECK);
@@ -2824,7 +2838,7 @@ void GUI_EoB::messageDialogue(int dim, int id, int buttonTextCol) {
 	dm = _screen->getScreenDim(dim);
 }
 
-void GUI_EoB::messageDialogue2(int dim, int id, int buttonTextCol) {
+void GUI_EoB::messageDialog2(int dim, int id, int buttonTextCol) {
 	_screen->_curPage = 2;
 	_screen->setClearScreenDim(dim);
 	drawMenuButtonBox(_screen->_curDim->sx << 3, _screen->_curDim->sy, _screen->_curDim->w << 3, _screen->_curDim->h, false, false);
@@ -2833,10 +2847,10 @@ void GUI_EoB::messageDialogue2(int dim, int id, int buttonTextCol) {
 	_screen->copyRegion(_screen->_curDim->sx << 3, _screen->_curDim->sy, _screen->_curDim->sx << 3, _screen->_curDim->sy, _screen->_curDim->w << 3, _screen->_curDim->h, 2, 0, Screen::CR_NO_P_CHECK);
 
 	int x = (_screen->_curDim->sx << 3) + (_screen->_curDim->w << 2) - (_screen->getTextWidth(_vm->_menuOkString) / 2);
-	int y = _screen->_curDim->sy + _screen->_curDim->h - 21;
+	int y = _screen->_curDim->sy + _screen->_curDim->h - (35 - _dlgButtonHeight2);
 	int w = _screen->getTextWidth(_vm->_menuOkString) + 8;
-	drawMenuButtonBox(x, y, w, 14, false, false);
-	_screen->printShadedText(_vm->_menuOkString, x + 4, y + 3, buttonTextCol, 0, _vm->guiSettings()->colors.guiColorBlack);
+	drawMenuButtonBox(x, y, w, _dlgButtonHeight1, false, false);
+	_screen->printShadedText(_vm->_menuOkString, x + 4, y + _dlgButtonLabelYOffs, buttonTextCol, 0, _vm->guiSettings()->colors.guiColorBlack);
 	_screen->updateScreen();
 
 	for (bool runLoop = true; runLoop && !_vm->shouldQuit();) {
@@ -2844,7 +2858,7 @@ void GUI_EoB::messageDialogue2(int dim, int id, int buttonTextCol) {
 		_vm->removeInputTop();
 
 		if (inputFlag == 199 || inputFlag == 201) {
-			if (_vm->posWithinRect(_vm->_mouseX, _vm->_mouseY, x, y, x + w, y + 14))
+			if (_vm->posWithinRect(_vm->_mouseX, _vm->_mouseY, x, y, x + w, y + _dlgButtonHeight1))
 				runLoop = false;
 		} else if (inputFlag == _vm->_keyMap[Common::KEYCODE_SPACE] || inputFlag == _vm->_keyMap[Common::KEYCODE_RETURN] || inputFlag == _vm->_keyMap[Common::KEYCODE_o]) {
 			runLoop = false;
@@ -2852,14 +2866,13 @@ void GUI_EoB::messageDialogue2(int dim, int id, int buttonTextCol) {
 	}
 
 	_screen->set16bitShadingLevel(4);
-	_vm->gui_drawBox(x, y, w, 14, _vm->guiSettings()->colors.frame2, _vm->guiSettings()->colors.fill, -1);
+	_vm->gui_drawBox(x, y, w, _dlgButtonHeight1, _vm->guiSettings()->colors.frame2, _vm->guiSettings()->colors.fill, -1);
 	_screen->set16bitShadingLevel(0);
 	_screen->updateScreen();
 	_vm->_system->delayMillis(80);
-	drawMenuButtonBox(x, y, w, 14, false, false);
-	_screen->printShadedText(_vm->_menuOkString, x + 4, y + 3, buttonTextCol, 0, _vm->guiSettings()->colors.guiColorBlack);
+	drawMenuButtonBox(x, y, w, _dlgButtonHeight1, false, false);
+	_screen->printShadedText(_vm->_menuOkString, x + 4, y + _dlgButtonLabelYOffs, buttonTextCol, 0, _vm->guiSettings()->colors.guiColorBlack);
 	_screen->updateScreen();
-
 }
 
 void GUI_EoB::updateBoxFrameHighLight(int box) {
@@ -2904,7 +2917,6 @@ int GUI_EoB::getTextInput(char *dest, int x, int y, int destMaxLen, int textColo
 	uint8 *segaCharBuf = new uint8[destMaxLen << 5]();
 
 	int len = strlen(dest);
-	int height = (_vm->game() == GI_EOB2 && _vm->gameFlags().lang == Common::Language::ZH_TWN) ? 15 : 9;
 	if (len > destMaxLen) {
 		len = destMaxLen;
 		dest[destMaxLen] = 0;
@@ -2914,7 +2926,7 @@ int GUI_EoB::getTextInput(char *dest, int x, int y, int destMaxLen, int textColo
 	if (len >= destMaxLen)
 		pos--;
 
-	_screen->copyRegion((x - 1) << 3, y, 0, 200 - height, (destMaxLen + 2) << 3, height, 0, 2, Screen::CR_NO_P_CHECK);
+	_screen->copyRegion((x - 1) << 3, y, 0, 200 - _textInputHeight, (destMaxLen + 2) << 3, _textInputHeight, 0, 2, Screen::CR_NO_P_CHECK);
 	if (_vm->gameFlags().platform == Common::kPlatformFMTowns)
 		_screen->copyRegion(0, 0, 160, 0, 160, 128, 2, 2, Screen::CR_NO_P_CHECK);
 	_screen->printShadedText(dest, x << 3, y, textColor1, textColor2, _vm->guiSettings()->colors.guiColorBlack);
@@ -2943,10 +2955,10 @@ int GUI_EoB::getTextInput(char *dest, int x, int y, int destMaxLen, int textColo
 					_screen->sega_getRenderer()->render(0, x + pos, y >> 3, 1, 1);
 					_screen->sega_setTextBuffer(0, 0);
 				} else if (cursorState) {
-					_screen->copyRegion((pos + 1) << 3, 200 - height, (x + pos) << 3, y, 8, height, 2, 0, Screen::CR_NO_P_CHECK);
+					_screen->copyRegion((pos + 1) << 3, 200 - _textInputHeight, (x + pos) << 3, y, 8, _textInputHeight, 2, 0, Screen::CR_NO_P_CHECK);
 					_screen->printShadedText(sufx, (x + pos) << 3, y, textColor1, textColor2, _vm->guiSettings()->colors.guiColorBlack);
 				} else {
-					_screen->fillRect((x + pos) << 3, y, ((x + pos) << 3) + 7, y + height - 2, cursorColor);
+					_screen->fillRect((x + pos) << 3, y, ((x + pos) << 3) + 7, y + _textInputHeight - 2 + _textInputShadowOffset, cursorColor);
 					_screen->printText(sufx, (x + pos) << 3, y, textColor1, cursorColor);
 				}
 
@@ -3011,9 +3023,7 @@ int GUI_EoB::getTextInput(char *dest, int x, int y, int destMaxLen, int textColo
 
 		} else if ((in > 31 && in < 126) || (in == 0x89)) {
 			if (!(in == 32 && pos == 0)) {
-				// The PC-98 versions of EOB I + II and the English Sega-CD version of EOB I are the only versions that allow small characters.
-				// For all other versions we convert to capital characters.
-				if (in >= 97 && in <= 122 && _vm->_flags.platform != Common::kPlatformPC98 && !(_vm->_flags.platform == Common::kPlatformSegaCD && _vm->_flags.lang != Common::EN_ANY))
+				if (in >= 97 && in <= 122 && _textInputForceUppercase)
 					in -= 32;
 
 				if (pos < len) {
@@ -3070,7 +3080,7 @@ int GUI_EoB::getTextInput(char *dest, int x, int y, int destMaxLen, int textColo
 			_screen->sega_getRenderer()->render(0, x, y >> 3, destMaxLen, 1);
 			_screen->sega_setTextBuffer(0, 0);
 		} else {
-			_screen->copyRegion(0, 200 - height, (x - 1) << 3, y, (destMaxLen + 2) << 3, height, 2, 0, Screen::CR_NO_P_CHECK);
+			_screen->copyRegion(0, 200 - _textInputHeight, (x - 1) << 3, y, (destMaxLen + 2) << 3, _textInputHeight, 2, 0, Screen::CR_NO_P_CHECK);
 			_screen->printShadedText(dest, x << 3, y, textColor1, textColor2, _vm->guiSettings()->colors.guiColorBlack);
 		}
 
@@ -3275,7 +3285,7 @@ bool GUI_EoB::transferFileMenu(Common::String &targetName, Common::String &selec
 			break;
 
 		if (_saveSlotIdTemp[slot] == -1)
-			messageDialogue(11, 65, _vm->guiSettings()->colors.guiColorLightRed);
+			messageDialog(11, 65, _vm->guiSettings()->colors.guiColorLightRed);
 		else {
 			_screen->modifyScreenDim(11, xo, yo, dm->w, dm->h);
 			selection = _vm->getSavegameFilename(targetName, _saveSlotIdTemp[slot]);
@@ -3358,7 +3368,7 @@ bool GUI_EoB::runSaveMenu(int x, int y) {
 				}
 
 				if (!strlen(_saveSlotStringsTemp[slot])) {
-					messageDialogue(11, 54, _vm->guiSettings()->colors.guiColorLightRed);
+					messageDialog(11, 54, _vm->guiSettings()->colors.guiColorLightRed);
 					in = -1;
 				}
 			}
@@ -3392,7 +3402,7 @@ bool GUI_EoB::runSaveMenu(int x, int y) {
 			if (err.getCode() == Common::kNoError)
 				result = true;
 			else
-				messageDialogue(11, 15, _vm->guiSettings()->colors.guiColorLightRed);
+				messageDialog(11, 15, _vm->guiSettings()->colors.guiColorLightRed);
 
 			runLoop = false;
 		}
@@ -3523,7 +3533,7 @@ int GUI_EoB::selectSaveSlotDialog(int x, int y, int id) {
 void GUI_EoB::drawSaveSlotDialog(int x, int y, int id) {
 	_screen->setCurPage(2);
 	drawMenuButtonBox(0, 0, 176, 144, false, false);
-	const char* title = (id < 2) ? _vm->_saveLoadStrings[2 + id] : _vm->_transferStringsScummVM[id - 1];
+	const char *title = (id < 2) ? _vm->_saveLoadStrings[2 + id] : _vm->_transferStringsScummVM[id - 1];
 	_screen->printShadedText(title, 52, _vm->_flags.lang == Common::Language::ZH_TWN ? 3 : 5,
 				 (_vm->_configRenderMode == Common::kRenderCGA) ? 1 : _vm->guiSettings()->colors.guiColorWhite, 0, _vm->guiSettings()->colors.guiColorBlack);
 	_screen->copyRegion(0, 0, x, y, 176, 144, 2, 0, Screen::CR_NO_P_CHECK);
@@ -4904,7 +4914,7 @@ void GUI_EoB::restParty_updateRestTime(int hours, bool init) {
 	_screen->setFont(of);
 }
 
-const EoBRect16 GUI_EoB::_highlightFramesDefault[] = {
+const EoBRect16 GUI_EoB::_highlightFramesDefault[20] = {
 	{ 0x00B7, 0x0001, 0x00F7, 0x0034 },
 	{ 0x00FF, 0x0001, 0x013F, 0x0034 },
 	{ 0x00B7, 0x0035, 0x00F7, 0x0068 },
@@ -4925,6 +4935,15 @@ const EoBRect16 GUI_EoB::_highlightFramesDefault[] = {
 	{ 0x00A3, 0x0040, 0x00C3, 0x0061 },
 	{ 0x0004, 0x0068, 0x0024, 0x0089 },
 	{ 0x00A3, 0x0068, 0x00C3, 0x0089 }
+};
+
+const EoBRect16 GUI_EoB::_highlightFramesTransferZH[] = {
+	{ 0x0004, 0x0012, 0x0024, 0x0033 },
+	{ 0x00A3, 0x0012, 0x00C3, 0x0033 },
+	{ 0x0004, 0x004E, 0x0024, 0x006F },
+	{ 0x00A3, 0x004E, 0x00C3, 0x006F },
+	{ 0x0004, 0x008A, 0x0024, 0x00AB },
+	{ 0x00A3, 0x008A, 0x00C3, 0x00AB }
 };
 
 const uint8 GUI_EoB::_highlightColorTableVGA[] = { 0x0F, 0xB0, 0xB2, 0xB4, 0xB6, 0xB8, 0xBA, 0xBC, 0x0C, 0xBC, 0xBA, 0xB8, 0xB6, 0xB4, 0xB2, 0xB0, 0x00 };

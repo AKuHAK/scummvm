@@ -88,8 +88,8 @@ public:
 };
 
 OSystem_iOS7::OSystem_iOS7() :
-	_mixer(NULL), _lastMouseTap(0), _queuedEventTime(0),
-	_secondaryTapped(false), _lastSecondaryTap(0),
+	_mixer(NULL), _queuedEventTime(0),
+	_secondaryTapped(false),
 	_screenOrientation(kScreenOrientationAuto),
 	_timeSuspended(0), _runningTasks(0) {
 	_queuedInputEvent.type = Common::EVENT_INVALID;
@@ -159,6 +159,10 @@ bool OSystem_iOS7::hasFeature(Feature f) {
 	case kFeatureKbdMouseSpeed:
 	case kFeatureOpenGLForGame:
 	case kFeatureShadersForGame:
+	case kFeatureTouchscreen:
+#ifdef SCUMMVM_NEON
+	case kFeatureCpuNEON:
+#endif
 		return true;
 
 	default:

@@ -2,9 +2,9 @@ MODULE := graphics
 
 MODULE_OBJS := \
 	big5.o \
-	blit.o \
-	blit-alpha.o \
-	blit-scale.o \
+	blit/blit.o \
+	blit/blit-alpha.o \
+	blit/blit-scale.o \
 	cursorman.o \
 	font.o \
 	fontman.o \
@@ -64,11 +64,6 @@ MODULE_OBJS := \
 ifdef USE_ARM_SCALER_ASM
 MODULE_OBJS += \
 	scaler/downscalerARM.o
-endif
-
-ifdef ATARI
-MODULE_OBJS += \
-	blit-atari.o
 endif
 
 ifdef USE_TINYGL
@@ -137,6 +132,27 @@ MODULE_OBJS += \
 	scaler/edge.o
 endif
 
+endif
+
+ifdef ATARI
+MODULE_OBJS += \
+	blit/blit-atari.o
+endif
+
+ifdef SCUMMVM_NEON
+MODULE_OBJS += \
+	blit/blit-neon.o
+$(MODULE)/blit/blit-neon.o: CXXFLAGS += $(NEON_CXXFLAGS)
+endif
+ifdef SCUMMVM_SSE2
+MODULE_OBJS += \
+	blit/blit-sse2.o
+$(MODULE)/blit/blit-sse2.o: CXXFLAGS += -msse2
+endif
+ifdef SCUMMVM_AVX2
+MODULE_OBJS += \
+	blit/blit-avx2.o
+$(MODULE)/blit/blit-avx2.o: CXXFLAGS += -mavx2
 endif
 
 # Include common rules

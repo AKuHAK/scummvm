@@ -1159,7 +1159,7 @@ void ScummEngine_v6::o6_startSound() {
 		_imuseDigital->startSfx(pop(), 64);
 	else
 #endif
-		_sound->addSoundToQueue(pop(), offset);
+		_sound->startSound(pop(), offset);
 }
 
 void ScummEngine_v6::o6_stopSound() {
@@ -1170,7 +1170,7 @@ void ScummEngine_v6::o6_startMusic() {
 	if (_game.version >= 7)
 		error("o6_startMusic() It shouldn't be called here for imuse digital");
 
-	_sound->addSoundToQueue(pop());
+	_sound->startSound(pop());
 }
 
 void ScummEngine_v6::o6_stopObjectScript() {
@@ -2069,7 +2069,9 @@ void ScummEngine_v6::o6_actorOps() {
 		break;
 	case SO_ACTOR_FACE:										/* set direction */
 		a->_moving &= ~MF_TURN;
-		a->setDirection(pop());
+		j = pop();
+		a->turnToDirection(j);
+		a->setDirection(j);
 		break;
 	case SO_ACTOR_TURN:										/* turn to direction */
 		a->turnToDirection(pop());

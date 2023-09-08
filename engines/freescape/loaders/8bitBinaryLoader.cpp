@@ -31,17 +31,26 @@
 
 namespace Freescape {
 
+uint16 FreescapeEngine::readPtr(Common::SeekableReadStream *file) {
+	uint16 value;
+	if (isAmiga() || isAtariST()) {
+		uint16 lo = file->readUint16BE();
+		assert(lo < 256);
+		uint16 hi = file->readUint16BE();
+		assert(hi < 256);
+		value = 256 * hi + lo;
+		value = 2 * value;
+	} else
+		value = file->readUint16LE();
+	return value;
+}
+
 uint16 FreescapeEngine::readField(Common::SeekableReadStream *file, int bits) {
 	uint16 value;
 	assert(bits == 8 || bits == 16);
 	if (isAmiga() || isAtariST()) {
 		if (bits == 16) {
-			uint16 lo = file->readUint16BE();
-			assert(lo < 256);
-			uint16 hi = file->readUint16BE();
-			assert(hi < 256);
-			value = 256 * hi + lo;
-			value = 2 * value; // Unclear why, but this reads a pointer
+			value = file->readUint16BE();
 		} else {
 			assert(bits == 8);
 			value = file->readUint16BE();
@@ -73,11 +82,183 @@ Common::Array<uint16> FreescapeEngine::readArray(Common::SeekableReadStream *fil
 	return array;
 }
 
+Group *FreescapeEngine::load8bitGroup(Common::SeekableReadStream *file, byte rawFlagsAndType) {
+	if (isDark())
+		return load8bitGroupV1(file, rawFlagsAndType);
+	else
+		return load8bitGroupV2(file, rawFlagsAndType);
+}
+
+Group *FreescapeEngine::load8bitGroupV1(Common::SeekableReadStream *file, byte rawFlagsAndType) {
+	debugC(1, kFreescapeDebugParser, "Object of type 'group'");
+	Common::Array<AnimationOpcode *> animation;
+	Common::Array<uint16> groupObjects = readArray(file, 6);
+
+	// object ID
+	uint16 objectID = readField(file, 8);
+	// size of object on disk; we've accounted for 8 bytes
+	// already so we can subtract that to get the remaining
+	// length beyond here
+	uint8 byteSizeOfObject = readField(file, 8);
+	debugC(1, kFreescapeDebugParser, "Raw object %d ; type group ; size %d", objectID, byteSizeOfObject);
+	if (byteSizeOfObject < 9) {
+		error("Not enough bytes %d to read object %d with type group", byteSizeOfObject, objectID);
+	}
+
+	assert(byteSizeOfObject >= 9);
+	byteSizeOfObject = byteSizeOfObject - 9;
+	for (int i = 0; i < 3; i++) {
+		uint16 value = 0;
+		if (isAmiga() || isAtariST())
+			value = readField(file, 16);
+		else
+			value = readField(file, 8);
+
+		groupObjects.push_back(value);
+	}
+
+	byteSizeOfObject = byteSizeOfObject - 3;
+	for (int i = 0; i < 9; i++)
+		debugC(1, kFreescapeDebugParser, "Group object[%d] = %d", i, groupObjects[i]);
+
+	Common::Array<uint16> groupOperations;
+	Common::Array<Math::Vector3d> groupPositions;
+	while (byteSizeOfObject > 0) {
+		uint16 value = 0;
+		if (isAmiga() || isAtariST())
+			value = readField(file, 16);
+		else
+			value = readField(file, 8);
+
+		debugC(1, kFreescapeDebugParser, "Reading value: %x", value);
+		int opcode = value >> 8;
+		AnimationOpcode* operation = new AnimationOpcode(opcode);
+		byteSizeOfObject--;
+		if (opcode == 0xff) {
+			debugC(1, kFreescapeDebugParser, "Group operation rewind");
+		} else if (opcode == 0x01) {
+			debugC(1, kFreescapeDebugParser, "Group operation script execution");
+			// get the length
+			uint32 lengthOfCondition = value & 0xff;
+			assert(lengthOfCondition > 0);
+			debugC(1, kFreescapeDebugParser, "Length of condition: %d at %lx", lengthOfCondition, long(file->pos()));
+			// get the condition
+			Common::Array<uint16> conditionArray = readArray(file, lengthOfCondition);
+			operation->conditionSource = detokenise8bitCondition(conditionArray, operation->condition, isAmiga() || isAtariST());
+			debugC(1, kFreescapeDebugParser, "%s", operation->conditionSource.c_str());
+			byteSizeOfObject = byteSizeOfObject - lengthOfCondition;
+		} else {
+			if (byteSizeOfObject >= 1) {
+				operation->position.x() = value & 0xff;
+				operation->position.y() = file->readByte();
+				operation->position.z() = file->readByte();
+				debugC(1, kFreescapeDebugParser, "Group operation %d move to: %f %f %f", opcode, operation->position.x(), operation->position.y(), operation->position.z());
+				byteSizeOfObject = byteSizeOfObject - 1;
+			} else {
+				debugC(1, kFreescapeDebugParser, "Incomplete group operation %d", opcode);
+				byteSizeOfObject = 0;
+				continue;
+			}
+		}
+		animation.push_back(operation);
+	}
+
+	return new Group(
+		objectID,
+		rawFlagsAndType,
+		groupObjects,
+		animation);
+}
+
+
+Group *FreescapeEngine::load8bitGroupV2(Common::SeekableReadStream *file, byte rawFlagsAndType) {
+	debugC(1, kFreescapeDebugParser, "Object of type 'group'");
+	Common::Array<AnimationOpcode *> animation;
+	Common::Array<uint16> groupObjects = readArray(file, 6);
+
+	// object ID
+	uint16 objectID = readField(file, 8);
+	// size of object on disk; we've accounted for 8 bytes
+	// already so we can subtract that to get the remaining
+	// length beyond here
+	uint8 byteSizeOfObject = readField(file, 8);
+	debugC(1, kFreescapeDebugParser, "Raw object %d ; type group ; size %d", objectID, byteSizeOfObject);
+	if (byteSizeOfObject < 9) {
+		error("Not enough bytes %d to read object %d with type group", byteSizeOfObject, objectID);
+	}
+
+	assert(byteSizeOfObject >= 9);
+	byteSizeOfObject = byteSizeOfObject - 9;
+
+	for (int i = 0; i < 3; i++) {
+		uint16 value = 0;
+		if (isAmiga() || isAtariST())
+			value = readField(file, 16);
+		else
+			value = readField(file, 8);
+		groupObjects.push_back(value);
+	}
+
+	byteSizeOfObject = byteSizeOfObject - 3;
+	for (int i = 0; i < 9; i++)
+		debugC(1, kFreescapeDebugParser, "Group object[%d] = %d", i, groupObjects[i]);
+
+	Common::Array<uint16> groupOperations;
+	Common::Array<Math::Vector3d> groupPositions;
+	while (byteSizeOfObject > 0) {
+		uint16 opcode = 0;
+		if (isAmiga() || isAtariST())
+			opcode = readField(file, 16);
+		else
+			opcode = readField(file, 8);
+
+		AnimationOpcode* operation = new AnimationOpcode(opcode);
+
+		byteSizeOfObject--;
+		if (opcode == 0x80) {
+			debugC(1, kFreescapeDebugParser, "Group operation rewind");
+		} else if (opcode == 0x01) {
+			debugC(1, kFreescapeDebugParser, "Group operation script execution");
+			// get the length
+			uint32 lengthOfCondition = readField(file, 8);
+			assert(lengthOfCondition > 0);
+			byteSizeOfObject--;
+			debugC(1, kFreescapeDebugParser, "Length of condition: %d at %lx", lengthOfCondition, long(file->pos()));
+			// get the condition
+			Common::Array<uint16> conditionArray = readArray(file, lengthOfCondition);
+			operation->conditionSource = detokenise8bitCondition(conditionArray, operation->condition, isAmiga() || isAtariST());
+			debugC(1, kFreescapeDebugParser, "%s", operation->conditionSource.c_str());
+			byteSizeOfObject = byteSizeOfObject - lengthOfCondition;
+		} else {
+			if (byteSizeOfObject >= 3) {
+				operation->position.x() = readField(file, 8);
+				operation->position.y() = readField(file, 8);
+				operation->position.z() = readField(file, 8);
+				debugC(1, kFreescapeDebugParser, "Group operation %d move to: %f %f %f", opcode, operation->position.x(), operation->position.y(), operation->position.z());
+				byteSizeOfObject = byteSizeOfObject - 3;
+			} else {
+				byteSizeOfObject = 0;
+				continue;
+			}
+		}
+		animation.push_back(operation);
+	}
+
+	return new Group(
+		objectID,
+		rawFlagsAndType,
+		groupObjects,
+		animation);
+}
+
 Object *FreescapeEngine::load8bitObject(Common::SeekableReadStream *file) {
 
 	byte rawFlagsAndType = readField(file, 8);
 	debugC(1, kFreescapeDebugParser, "Raw object data flags and type: %d", rawFlagsAndType);
 	ObjectType objectType = (ObjectType)(rawFlagsAndType & 0x1F);
+
+	if (objectType == ObjectType::kGroupType)
+		return load8bitGroup(file, rawFlagsAndType);
 
 	Math::Vector3d position, v;
 
@@ -267,7 +448,7 @@ Object *FreescapeEngine::load8bitObject(Common::SeekableReadStream *file) {
 		byte color = readField(file, 8) & 0xf;
 		assert(color > 0);
 		byte firingInterval = readField(file, 8);
-		uint16 firingRange = readField(file, 16) / 2;
+		uint16 firingRange = readPtr(file) / 2;
 		if (isDark())
 			firingRange = firingRange / 2;
 		byte sensorAxis = readField(file, 8);
@@ -295,33 +476,7 @@ Object *FreescapeEngine::load8bitObject(Common::SeekableReadStream *file) {
 	} break;
 
 	case kGroupType:
-		debugC(1, kFreescapeDebugParser, "Object of type 'group'");
-		Common::Array<uint8> groupDataArray;
-		groupDataArray.push_back(uint8(position.x()));
-		groupDataArray.push_back(uint8(position.y()));
-		groupDataArray.push_back(uint8(position.z()));
-
-		groupDataArray.push_back(uint8(v.x()));
-		groupDataArray.push_back(uint8(v.y()));
-		groupDataArray.push_back(uint8(v.z()));
-
-		byteSizeOfObject++;
-		while(--byteSizeOfObject > 0)
-			if (isAmiga() || isAtariST()) {
-				uint16 field = file->readUint16BE();
-				if (isCastle())
-					assert(field >> 8 == 0);
-				else
-					groupDataArray.push_back(field >> 8);
-
-				groupDataArray.push_back(field & 0xff);
-			} else
-				groupDataArray.push_back(readField(file, 8));
-
-		return new Group(
-			objectID,
-			rawFlagsAndType,
-			groupDataArray);
+		error("Unreachable");
 		break;
 	}
 	// Unreachable
@@ -338,104 +493,6 @@ static const char *eclipseRoomName[] = {
 	"ILLUSION",
 	"????????"};
 
-void FreescapeEngine::renderPixels8bitBinImage(Graphics::ManagedSurface *surface, int &i, int &j, uint8 pixels, int color) {
-	if (i >= 320) {
-		//debug("cannot continue, stopping here at row %d!", j);
-		return;
-	}
-
-	int acc = 1 << 7;
-	while (acc > 0) {
-		assert(i < 320);
-		if (acc & pixels) {
-			int previousColor = surface->getPixel(i, j);
-			surface->setPixel(i, j, previousColor + color);
-			assert(previousColor + color < 16);
-		}
-		i++;
-		acc = acc >> 1;
-	}
-
-}
-
-Graphics::ManagedSurface *FreescapeEngine::load8bitBinImage(Common::SeekableReadStream *file, int offset) {
-	Graphics::ManagedSurface *surface = new Graphics::ManagedSurface();
-	surface->create(_screenW, _screenH, Graphics::PixelFormat::createFormatCLUT8());
-	surface->fillRect(Common::Rect(0, 0, 320, 200), 0);
-
-	file->seek(offset);
-	int imageSize = file->readUint16BE();
-
-	int i = 0;
-	int j = 0;
-	int hPixelsWritten = 0;
-	int color = 1;
-	int command = 0;
-	while (file->pos() <= offset + imageSize) {
-		//debug("pos: %lx", file->pos());
-		command = file->readByte();
-
-		color = 1 + hPixelsWritten / 320;
-		//debug("command: %x with j: %d", command, j);
-		if (j >= 200)
-			return surface;
-
-		if (command <= 0x7f) {
-			//debug("starting singles at i: %d j: %d", i, j);
-			int start = i;
-			while (command-- >= 0) {
-				int pixels = file->readByte();
-				//debug("single pixels command: %d with pixels: %x", command, pixels);
-				renderPixels8bitBinImage(surface, i, j, pixels, color);
-			}
-			hPixelsWritten = hPixelsWritten + i - start;
-		} else if (command <= 0xff && command >= 0xf0) {
-			int size = (136 - 8*(command - 0xf0)) / 2;
-			int start = i;
-			int pixels = file->readByte();
-			//debug("starting 0xfX: at i: %d j: %d with pixels: %x", i, j, pixels);
-			while (size > 0) {
-				renderPixels8bitBinImage(surface, i, j, pixels, color);
-				size = size - 4;
-			}
-			hPixelsWritten = hPixelsWritten + i - start;
-			assert(i <= 320);
-		} else if (command <= 0xef && command >= 0xe0) {
-			int size = (264 - 8*(command - 0xe0)) / 2;
-			int start = i;
-			int pixels = file->readByte();
-			//debug("starting 0xeX: at i: %d j: %d with pixels: %x", i, j, pixels);
-			while (size > 0) {
-				renderPixels8bitBinImage(surface, i, j, pixels, color);
-				size = size - 4;
-			}
-			hPixelsWritten = hPixelsWritten + i - start;
-		} else if (command <= 0xdf && command >= 0xd0) {
-			int size = (272 + 8*(0xdf - command)) / 2;
-			int start = i;
-			int pixels = file->readByte();
-			while (size > 0) {
-				renderPixels8bitBinImage(surface, i, j, pixels, color);
-				size = size - 4;
-			}
-			hPixelsWritten = hPixelsWritten + i - start;
-		} else {
-			error("unknown command: %x", command);
-		}
-
-		if (i >= 320) {
-			i = 0;
-			if (hPixelsWritten >= (_renderMode == Common::kRenderCGA ? 640 : 1280)) {
-				j++;
-				hPixelsWritten = 0;
-			}
-		}
-
-
-	}
-	return surface;
-}
-
 Area *FreescapeEngine::load8bitArea(Common::SeekableReadStream *file, uint16 ncolors) {
 
 	Common::String name;
@@ -445,7 +502,7 @@ Area *FreescapeEngine::load8bitArea(Common::SeekableReadStream *file, uint16 nco
 	uint8 numberOfObjects = readField(file, 8);
 	uint8 areaNumber = readField(file, 8);
 
-	uint16 cPtr = readField(file, 16);
+	uint16 cPtr = readPtr(file);
 	debugC(1, kFreescapeDebugParser, "Condition pointer: %x", cPtr);
 	uint8 scale = readField(file, 8);
 	debugC(1, kFreescapeDebugParser, "Scale: %d", scale);
@@ -537,12 +594,6 @@ Area *FreescapeEngine::load8bitArea(Common::SeekableReadStream *file, uint16 nco
 
 		if (newObject) {
 			newObject->scale(scale);
-			if (newObject->getType() == ObjectType::kGroupType) {
-				Group *group = (Group *)newObject;
-				for (ObjectMap::iterator it = objectsByID->begin(); it != objectsByID->end(); ++it)
-					group->linkObject(it->_value);
-			}
-
 			if (newObject->getType() == kEntranceType) {
 				if (entrancesByID->contains(newObject->getObjectID() & 0x7fff))
 					error("WARNING: replacing object id %d (%d)", newObject->getObjectID(), newObject->getObjectID() & 0x7fff);
@@ -556,6 +607,16 @@ Area *FreescapeEngine::load8bitArea(Common::SeekableReadStream *file, uint16 nco
 		} else if (!(isDemo() && isCastle()))
 			error("Failed to read an object!");
 	}
+
+	// Link all groups
+	for (ObjectMap::iterator it = objectsByID->begin(); it != objectsByID->end(); ++it) {
+		if (it->_value->getType() == ObjectType::kGroupType) {
+			Group *group = (Group *)it->_value;
+			for (ObjectMap::iterator itt = objectsByID->begin(); itt != objectsByID->end(); ++itt)
+				group->linkObject(itt->_value);
+		}
+	}
+
 	int64 endLastObject = file->pos();
 	debugC(1, kFreescapeDebugParser, "Last position %lx", endLastObject);
 	if (isDark() && isAmiga())
@@ -618,7 +679,7 @@ void FreescapeEngine::load8bitBinary(Common::SeekableReadStream *file, int offse
 			numberOfAreas = isDemo() ? 87 : 104;
 	}
 
-	uint32 dbSize = readField(file, 16);
+	uint32 dbSize = readPtr(file);
 	debugC(1, kFreescapeDebugParser, "Database ends at %x", dbSize);
 
 	uint8 startArea = readField(file, 8);
@@ -669,11 +730,11 @@ void FreescapeEngine::load8bitBinary(Common::SeekableReadStream *file, int offse
 		file->seek(offset + 0x46);
 
 	uint16 demoDataTable;
-	demoDataTable = readField(file, 16);
+	demoDataTable = readPtr(file);
 	debugC(1, kFreescapeDebugParser, "Pointer to demo data: %x\n", demoDataTable);
 
 	uint16 globalByteCodeTable;
-	globalByteCodeTable = readField(file, 16);
+	globalByteCodeTable = readPtr(file);
 	debugC(1, kFreescapeDebugParser, "GBCT: %x\n", globalByteCodeTable);
 
 	if (isDOS())
@@ -743,7 +804,7 @@ void FreescapeEngine::load8bitBinary(Common::SeekableReadStream *file, int offse
 	debugC(1, kFreescapeDebugParser, "areas index at: %lx", long(file->pos()));
 	uint16 *fileOffsetForArea = new uint16[numberOfAreas];
 	for (uint16 area = 0; area < numberOfAreas; area++) {
-		fileOffsetForArea[area] = readField(file, 16);
+		fileOffsetForArea[area] = readPtr(file);
 		debugC(1, kFreescapeDebugParser, "offset: %x", fileOffsetForArea[area]);
 	}
 
@@ -861,7 +922,7 @@ void FreescapeEngine::loadMessagesVariableSize(Common::SeekableReadStream *file,
 		}
 
 		_messagesList.push_back(message);
-		debugC(1, kFreescapeDebugParser, "%s", _messagesList[i].c_str());
+		debugC(1, kFreescapeDebugParser, "'%s'", _messagesList[i].c_str());
 	}
 }
 

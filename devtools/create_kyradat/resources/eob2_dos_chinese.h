@@ -1,5 +1,5 @@
 static const char *const kEoB2ChargenStrings1DOSChinese[9] = {
-	"\xaa\xba\xab\x5f\xc0\x49\xb6\xa4\xa5\xee\xa4\x77\xab\xd8\xa5\xdf\xa7\xb9\xb2\xa6\x2c\xbd\xd0\xb1\x4e\xab\xfc\xbc\xd0\xb2\xbe\xa8\xec\x5b\x50\x4c\x41\x59\x5d\xab\xf6\xa4\x55\xa5\xaa\xc1\xe4\x2c\xa9\xce\xab\xf6\x5b\x50\x5d\xc1\xe4\x2c\xb6\x7d\xa9\x6c\xb1\x7a\xaa\xba\xab\x5f\xc0\x49\xae\xc8\xb5\x7b", /* "的冒險隊伍已建立完畢,請將指標移到[PLAY]按下左鍵,或按[P]鍵,開始您的冒險旅程"; */
+	"\xb1""z""\xaa\xba\xab""_""\xc0""I""\xb6\xa4\xa5\xee\xa4""w""\xab\xd8\xa5\xdf\xa7\xb9\xb2\xa6"",""\xbd\xd0\xb1""N""\xab\xfc\xbc\xd0\xb2\xbe\xa8\xec""[PLAY]""\xab\xf6\xa4""U""\xa5\xaa\xc1\xe4"",""\xa9\xce\xab\xf6""[P]""\xc1\xe4"",""\xb6""}""\xa9""l""\xb1""z""\xaa\xba\xab""_""\xc0""I""\xae\xc8\xb5""{", /* "您的冒險隊伍已建立完畢,請將指標移到[PLAY]按下左鍵,或按[P]鍵,開始您的冒險旅程"; */
 	"          ",
 	"\xa8\xbe\x3a\r\xa9\x52\x3a\r\xaf\xc5\x3a", /* "防:\r命:\r級:"; */
 	"%s\r%d\r%d\r%d\r%d\r%d",
@@ -910,22 +910,21 @@ static const char *const kEoB2MainMenuStringsDOSChinese[5] = {
 static const StringListProvider kEoB2MainMenuStringsDOSChineseProvider = { ARRAYSIZE(kEoB2MainMenuStringsDOSChinese), kEoB2MainMenuStringsDOSChinese };
 
 static const char *const kEoB2TransferStrings1DOSChinese[2] = {
-	"\xb5\xa5\xaf\xc5\x3a\x25\x64", /* "等級:%d"; */
-	" / %d"
+	"\xb5\xa5\xaf\xc5\x3a""%-2d", /* "等級:%d"; */
+	"/%2d "
 };
 
 static const StringListProvider kEoB2TransferStrings1DOSChineseProvider = { ARRAYSIZE(kEoB2TransferStrings1DOSChinese), kEoB2TransferStrings1DOSChinese };
 
-static const char *const kEoB2TransferStrings2DOSChinese[2] = {
-	"\xa6\x62\xb1\x7a\xaa\xba\xb6\xa4\xa5\xee\xa4\xa4\x2c\xb1\x7a\xb3\xcc\xa6\x68\xa5\x75\xaf\xe0\xbf\xef\xa5\x7c\xa6\xec\xa4\x48\xaa\xab\xc2\xe0\xb4\xab", /* ",您最多只能選四位人物轉換"; */
-	"Select OK when you are finished choosing your party."
+static const char *const kEoB2TransferStrings2DOSChinese[1] = {
+	"\xa6\x62\xb1\x7a\xaa\xba\xb6\xa4\xa5\xee\xa4\xa4\x2c\xb1\x7a\xb3\xcc\xa6\x68\xa5\x75\xaf\xe0\xbf\xef\xa5\x7c\xa6\xec\xa4\x48\xaa\xab\xc2\xe0\xb4\xab" /* "在您的隊伍中,您最多只能選四位人物轉換"; */
 };
 
 static const StringListProvider kEoB2TransferStrings2DOSChineseProvider = { ARRAYSIZE(kEoB2TransferStrings2DOSChinese), kEoB2TransferStrings2DOSChinese };
 
 static const char *const kEoB2TransferLabelsDOSChinese[2] = {
-	"CANCEL",
-	"OK"
+	"\xa8\xfa\xae\xf8",	/* "取消" */
+	"\xa7\xb9\xa6\xa8"	/* "完成" */		
 };
 
 static const StringListProvider kEoB2TransferLabelsDOSChineseProvider = { ARRAYSIZE(kEoB2TransferLabelsDOSChinese), kEoB2TransferLabelsDOSChinese };
@@ -1094,3 +1093,12 @@ static const DarkMoonAnimCommand kEoB2IntroAnimData40DOSChinese[] = {
 };
 
 static const DarkMoonAnimCommandProvider kEoB2IntroAnimData40DOSChineseProvider = { ARRAYSIZE(kEoB2IntroAnimData40DOSChinese), kEoB2IntroAnimData40DOSChinese }; // OK
+
+static const uint16 kEoB2TransferPortraitFramesDOSChinese[32] = {
+	0x0004, 0x0012, 0x0024, 0x0033, 0x00A3, 0x0024, 0x00BF, 0x0033,
+	0x0004, 0x004E, 0x0024, 0x006F, 0x00A3, 0x004E, 0x00C3, 0x006F,
+	0x0004, 0x008A, 0x0024, 0x00AB, 0x00A3, 0x008A, 0x00C3, 0x00AB,
+	0x0004, 0x00B5, 0x0022, 0x00C6, 0x00A3, 0x00B5, 0x00C1, 0x00C6
+};
+
+static const Uint16Provider kEoB2TransferPortraitFramesDOSChineseProvider = { ARRAYSIZE(kEoB2TransferPortraitFramesDOSChinese), kEoB2TransferPortraitFramesDOSChinese };
