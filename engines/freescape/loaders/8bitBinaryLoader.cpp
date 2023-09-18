@@ -157,6 +157,7 @@ Group *FreescapeEngine::load8bitGroupV1(Common::SeekableReadStream *file, byte r
 			} else {
 				debugC(1, kFreescapeDebugParser, "Incomplete group operation %d", opcode);
 				byteSizeOfObject = 0;
+				delete operation;
 				continue;
 			}
 		}
@@ -238,6 +239,7 @@ Group *FreescapeEngine::load8bitGroupV2(Common::SeekableReadStream *file, byte r
 				byteSizeOfObject = byteSizeOfObject - 3;
 			} else {
 				byteSizeOfObject = 0;
+				delete operation;
 				continue;
 			}
 		}
@@ -272,6 +274,10 @@ Object *FreescapeEngine::load8bitObject(Common::SeekableReadStream *file) {
 
 	// object ID
 	uint16 objectID = readField(file, 8);
+
+	if (objectID == 224 && objectType == 29)
+		objectType = (ObjectType)7;
+
 	// size of object on disk; we've accounted for 8 bytes
 	// already so we can subtract that to get the remaining
 	// length beyond here
@@ -281,13 +287,13 @@ Object *FreescapeEngine::load8bitObject(Common::SeekableReadStream *file) {
 		error("Not enough bytes %d to read object %d with type %d", byteSizeOfObject, objectID, objectType);
 	}
 
-	if (objectType > ObjectType::kGroupType && isDemo()) {
+	if (objectType > ObjectType::kGroupType && isDemo() && isCastle()) {
 		// Castle DOS demo has an invalid object, which should not be parsed.
 		debugC(1, kFreescapeDebugParser, "WARNING: invalid object %d!", objectID);
 		readArray(file, byteSizeOfObject - 9);
 		return nullptr;
 	}
-
+	assert(objectType <= ObjectType::kGroupType);
 	assert(byteSizeOfObject >= 9);
 	byteSizeOfObject = byteSizeOfObject - 9;
 	if (objectID == 255 && objectType == ObjectType::kEntranceType) {
@@ -540,7 +546,7 @@ Area *FreescapeEngine::load8bitArea(Common::SeekableReadStream *file, uint16 nco
 	uint8 gasPocketY = 0;
 	uint8 gasPocketRadius = 0;
 	// Castle specific
-	uint8 extraColor[4];
+	uint8 extraColor[4] = {};
 	if (isEclipse()) {
 		byte idx = file->readByte();
 		name = idx < 8 ? eclipseRoomName[idx] : eclipseRoomName[8];

@@ -27,6 +27,7 @@ const char *const directoryGlobs[] = {
 	"game",
 	"iff",
 	"cifTree",
+	"datafiles",
 	nullptr
 };
 
@@ -47,6 +48,9 @@ static const PlainGameDescriptor nancyGames[] = {
 	{ "nancy4", "Nancy Drew: Treasure in the Royal Tower" },
 	{ "nancy5", "Nancy Drew: The Final Scene" },
 	{ "nancy6", "Nancy Drew: Secret of the Scarlet Hand" },
+	{ "nancy7", "Nancy Drew: Ghost Dogs of Moon Lake" },
+	{ "nancy8", "Nancy Drew: The Haunted Carousel" },
+	{ "nancy9", "Nancy Drew: Danger on Deception Island" },
 	{ nullptr, nullptr }
 };
 
@@ -107,7 +111,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 			AD_ENTRY1s("ciftree.dat", "fa4293d728a1b31407961cd82e86a015", 7784516),
 			Common::EN_ANY,
 			Common::kPlatformWindows,
-			ADGF_UNSTABLE,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
 			GUIO0()
 		},
 		Nancy::kGameTypeNancy2
@@ -253,7 +257,7 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 		},
 		Nancy::kGameTypeNancy4
 	},
-		{ // MD5 by eriktorbjorn
+	{ // MD5 by eriktorbjorn
 		{
 			"nancy4", nullptr,
 			{
@@ -356,6 +360,73 @@ static const Nancy::NancyGameDescription gameDescriptions[] = {
 		},
 		Nancy::kGameTypeNancy6
 	},
+	{ // MD5 by eriktorbjorn
+		{
+			"nancy6", nullptr,
+			{
+				{ "data1.hdr", 0, "6a45cdf632301ae1b55fd7474bec3650", 298551 },
+				{ "data1.cab", 0, "399b83b188bfc05077d81cc1eadd456c", 4470086 },
+				{ "data2.cab", 0, "30ca94b596f6b5971a22c111b24d6764", 206382511 },
+				AD_LISTEND
+			},
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			GUIO0()
+		},
+		Nancy::kGameTypeNancy6
+	},
+	{
+		{
+			"nancy7", nullptr,
+			AD_ENTRY1s("ciftree.dat", "e49e6f56a47c363e2651bd19a70ff557", 55835579),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
+			GUIO0()
+		},
+		Nancy::kGameTypeNancy7
+	},
+	{ // MD5 by eriktorbjorn
+		{
+			"nancy7", nullptr,
+			{
+				{ "data1.hdr", 0, "f58175e4647e635e96d73dde49deb871", 335485 },
+				{ "data1.cab", 0, "6b48a626a8c6c12c9d7f68ee6c80212a", 4693602 },
+				{ "data2.cab", 0, "0aec46d4a59ea0279228ab25bfb3fcd5", 144613827 },
+				AD_LISTEND
+			},
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM | Nancy::GF_COMPRESSED,
+			GUIO0()
+		},
+		Nancy::kGameTypeNancy7
+	},
+	{
+		{
+			"nancy8", nullptr,
+			AD_ENTRY1s("ciftree.dat", "d85192a942a207017ebf0a19207ac698", 19498032),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
+			GUIO0()
+		},
+		Nancy::kGameTypeNancy8
+	},
+	{
+		{
+			"nancy9", nullptr,
+			AD_ENTRY1s("ciftree.dat", "3a756e09631f4a2c8f48bf316e77b5d5", 26610718),
+			Common::EN_ANY,
+			Common::kPlatformWindows,
+			ADGF_UNSTABLE | ADGF_DROPPLATFORM,
+			GUIO0()
+		},
+		Nancy::kGameTypeNancy9
+	},
+
+	// Do not delete
 	{ AD_TABLE_END_MARKER, Nancy::kGameTypeNone }
 };
 

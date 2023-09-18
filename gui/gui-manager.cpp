@@ -546,17 +546,22 @@ void GuiManager::runLoop() {
 		    && systemMillisNowForTooltipCheck - _lastMousePosition.time > (uint32)kTooltipDelay
 		    && !activeDialog->isDragging()) {
 			Widget *wdg = activeDialog->findWidget(_lastMousePosition.x, _lastMousePosition.y);
-			if (wdg && wdg->hasTooltip() && !(wdg->getFlags() & WIDGET_PRESSED)
+			if (wdg && (wdg->hasTooltip() || (wdg->getFlags() & WIDGET_DYN_TOOLTIP)) && !(wdg->getFlags() & WIDGET_PRESSED)
 			    && (_lastTooltipShown.wdg != wdg || systemMillisNowForTooltipCheck - _lastTooltipShown.time > (uint32)kTooltipSameWidgetDelay)) {
 				_lastTooltipShown.time = systemMillisNowForTooltipCheck;
 				_lastTooltipShown.wdg  = wdg;
 				_lastTooltipShown.x = _lastMousePosition.x;
 				_lastTooltipShown.y = _lastMousePosition.y;
 				if (wdg->getType() != kEditTextWidget || activeDialog->getFocusWidget() != wdg) {
-					Tooltip *tooltip = new Tooltip();
-					tooltip->setup(activeDialog, wdg, _lastMousePosition.x, _lastMousePosition.y);
-					tooltip->runModal();
-					delete tooltip;
+					if (wdg->getFlags() & WIDGET_DYN_TOOLTIP)
+						wdg->handleTooltipUpdate(_lastMousePosition.x + activeDialog->_x - wdg->getAbsX(), _lastMousePosition.y + activeDialog->_y - wdg->getAbsY());
+
+					if (wdg->hasTooltip()) {
+						Tooltip *tooltip = new Tooltip();
+						tooltip->setup(activeDialog, wdg, _lastMousePosition.x, _lastMousePosition.y);
+						tooltip->runModal();
+						delete tooltip;
+					}
 				}
 			}
 		}

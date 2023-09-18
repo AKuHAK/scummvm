@@ -61,17 +61,14 @@ void ConversationSound::readData(Common::SeekableReadStream &stream) {
 		_sound.readNormal(stream);
 	}
 
-	char *rawText = new char[1500];
-	ser.syncBytes((byte *)rawText, 1500);
-	UI::Textbox::assembleTextLine(rawText, _text, 1500);
-	delete[] rawText;
+	readCaptionText(stream);
 
 	if (ser.getVersion() <= kGameTypeNancy1) {
 		_sound.readNormal(stream);
 	}
 
 	_responseGenericSound.readNormal(stream);
-	ser.skip(1);
+	ser.skip(1); // RESPONSE_STARTUP_CLEAR_ALL, RESPONSE_STARTUP_KEEP_OLD; never used (tested up to nancy5)
 	ser.syncAsByte(_conditionalResponseCharacterID);
 	ser.syncAsByte(_goodbyeResponseCharacterID);
 	ser.syncAsByte(_defaultNextScene);
@@ -82,24 +79,20 @@ void ConversationSound::readData(Common::SeekableReadStream &stream) {
 
 	uint16 numResponses = 0;
 	ser.syncAsUint16LE(numResponses);
-	rawText = new char[400];
 
 	_responses.resize(numResponses);
 	for (uint i = 0; i < numResponses; ++i) {
 		ResponseStruct &response = _responses[i];
 		response.conditionFlags.read(stream);
-		ser.syncBytes((byte*)rawText, 400);
-		UI::Textbox::assembleTextLine(rawText, response.text, 400);
+		readResponseText(stream, response);
 		readFilename(stream, response.soundName);
-		ser.skip(1);
+		ser.skip(1); // RESPONSE_ADD_IF_NOT_FOUND, RESPONSE_REMOVE_AND_ADD_TO_END, or RESPONSE_REMOVE
 		response.sceneChange.readData(stream, ser.getVersion() == kGameTypeVampire);
 		ser.syncAsSint16LE(response.flagDesc.label);
 		ser.syncAsByte(response.flagDesc.flag);
 		ser.skip(0x32, kGameTypeVampire, kGameTypeNancy1);
 		ser.skip(2, kGameTypeNancy2);
 	}
-
-	delete[] rawText;
 
 	uint16 numSceneBranchStructs = stream.readUint16LE();
 	_sceneBranchStructs.resize(numSceneBranchStructs);
@@ -291,6 +284,20 @@ void ConversationSound::execute() {
 	}
 }
 
+void ConversationSound::readCaptionText(Common::SeekableReadStream &stream) {
+	char *rawText = new char[1500];
+	stream.read(rawText, 1500);
+	UI::Textbox::assembleTextLine(rawText, _text, 1500);
+	delete[] rawText;
+}
+
+void ConversationSound::readResponseText(Common::SeekableReadStream &stream, ResponseStruct &response) {
+	char *rawText = new char[400];
+	stream.read(rawText, 400);
+	UI::Textbox::assembleTextLine(rawText, response.text, 400);
+	delete[] rawText;
+}
+
 void ConversationSound::addConditionalDialogue() {
 	for (const auto &res : g_nancy->getStaticData().conditionalDialogue[_conditionalResponseCharacterID]) {
 		bool isSatisfied = true;
@@ -327,7 +334,18 @@ void ConversationSound::addConditionalDialogue() {
 			_responses.push_back(ResponseStruct());
 			ResponseStruct &newResponse = _responses.back();
 			newResponse.soundName = res.soundID;
-			newResponse.text = g_nancy->getStaticData().conditionalDialogueTexts[res.textID];
+
+			if (g_nancy->getGameType() <= kGameTypeNancy5) {
+				// String is also inside nancy.dat
+				newResponse.text = g_nancy->getStaticData().conditionalDialogueTexts[res.textID];
+			} else {
+				// String is inside the CVTX chunk in the CONVO file. Sound ID doubles as string key
+				const CVTX *convo = (const CVTX *)g_nancy->getEngineData("CONVO");
+				assert(convo);
+
+				newResponse.text = convo->texts[res.soundID];
+			}
+			
 			newResponse.sceneChange.sceneID = res.sceneID;
 			newResponse.sceneChange.continueSceneSound = kContinueSceneSound;
 		}
@@ -339,7 +357,17 @@ void ConversationSound::addGoodbye() {
 	_responses.push_back(ResponseStruct());
 	ResponseStruct &newResponse = _responses.back();
 	newResponse.soundName = res.soundID;
-	newResponse.text = g_nancy->getStaticData().goodbyeTexts[_goodbyeResponseCharacterID];
+
+	if (g_nancy->getGameType() <= kGameTypeNancy5) {
+		// String is also inside nancy.dat
+		newResponse.text = g_nancy->getStaticData().goodbyeTexts[_goodbyeResponseCharacterID];
+	} else {
+		// String is inside the CVTX chunk in the CONVO file. Sound ID doubles as string key
+		const CVTX *convo = (const CVTX *)g_nancy->getEngineData("CONVO");
+		assert(convo);
+
+		newResponse.text = convo->texts[res.soundID];
+	}
 
 	// Evaluate conditions to pick from the collection of replies
 	uint sceneChangeID = 0;
@@ -561,23 +589,25 @@ private:
 };
 
 bool ConversationCelLoader::loadInner() {
-	for (uint i = _owner._curFrame; i < _owner._bodyCelNames.size(); ++i) {
-		if (!_owner._celCache.contains(_owner._bodyCelNames[i])) {
-			_owner.loadCel(_owner._bodyCelNames[i], _owner._bodyTreeName);
-			return false;
-		}
-
-		if (!_owner._celCache.contains(_owner._headCelNames[i])) {
-			_owner.loadCel(_owner._headCelNames[i], _owner._headTreeName);
-			return false;
+	for (uint i = _owner._curFrame; i < _owner._celNames[0].size(); ++i) {
+		for (uint j = 0; j < _owner._celRObjects.size(); ++j) {
+			if (!_owner._celCache.contains(_owner._celNames[j][i])) {
+				_owner.loadCel(_owner._celNames[j][i], _owner._treeNames[j]);
+				return false;
+			}
 		}
 	}
 
 	return true;
 }
 
+ConversationCel::~ConversationCel() {
+	// Make sure there isn't a single-frame gap between conversation scenes where
+	// the character is invisible
+	g_nancy->_graphicsManager->suppressNextDraw();
+}
+
 void ConversationCel::init() {
-	registerGraphics();
 	_curFrame = _firstFrame;
 	_nextFrameTime = g_nancy->getTotalPlayTime();
 	ConversationSound::init();
@@ -585,25 +615,41 @@ void ConversationCel::init() {
 	_loaderPtr.reset(new ConversationCelLoader(*this));
 	auto castedPtr = _loaderPtr.dynamicCast<DeferredLoader>();
 	g_nancy->addDeferredLoader(castedPtr);
+
+	for (uint i = 0; i < _treeNames.size(); ++i) {
+		if (_treeNames[i].size()) {
+			_celRObjects.push_back(RenderedCel());
+		} else break;
+	}
+
+	registerGraphics();
 }
 
 void ConversationCel::registerGraphics() {
-	RenderObject::registerGraphics();
-	_headRObj.registerGraphics();
+	for (uint i = 0; i < _celRObjects.size(); ++i) {
+		_celRObjects[i]._z = 9 + _drawingOrder[i];
+		_celRObjects[i].setVisible(true);
+		_celRObjects[i].setTransparent(true);
+		_celRObjects[i].registerGraphics();
+	}
+
+	RenderActionRecord::registerGraphics();
 }
 
 void ConversationCel::updateGraphics() {
 	uint32 currentTime = g_nancy->getTotalPlayTime();
 
 	if (_state == kRun && currentTime > _nextFrameTime && _curFrame <= _lastFrame) {
-		Cel &bodyCel = loadCel(_bodyCelNames[_curFrame], _bodyTreeName);
-		Cel &headCel = loadCel(_headCelNames[_curFrame], _headTreeName);
-
-		_drawSurface.create(bodyCel.surf, bodyCel.src);
-		moveTo(bodyCel.dest);
-
-		_headRObj._drawSurface.create(headCel.surf, headCel.src);
-		_headRObj.moveTo(headCel.dest);
+		for (uint i = 0; i < _celRObjects.size(); ++i) {
+			Cel &cel = loadCel(_celNames[i][_curFrame], _treeNames[i]);
+			if (_overrideTreeRects[i] == kCelOverrideTreeRectsOn) {
+				_celRObjects[i]._drawSurface.create(cel.surf, _overrideRectSrcs[i]);
+				_celRObjects[i].moveTo(_overrideRectDests[i]);
+			} else {
+				_celRObjects[i]._drawSurface.create(cel.surf, cel.src);
+				_celRObjects[i].moveTo(cel.dest);
+			}
+		}
 
 		_nextFrameTime += _frameTime;
 		++_curFrame;
@@ -611,11 +657,10 @@ void ConversationCel::updateGraphics() {
 }
 
 void ConversationCel::readData(Common::SeekableReadStream &stream) {
-	Nancy::GameType gameType = g_nancy->getGameType();
 	Common::String xsheetName;
 	readFilename(stream, xsheetName);
-	readFilename(stream, _bodyTreeName);
-	readFilename(stream, _headTreeName);
+	
+	readFilenameArray(stream, _treeNames, 4);
 
 	uint xsheetDataSize = 0;
 	byte *xsbuf = g_nancy->_resource->loadData(xsheetName, xsheetDataSize);
@@ -640,28 +685,17 @@ void ConversationCel::readData(Common::SeekableReadStream &stream) {
 	_frameTime = xsheet.readUint16LE();
 	xsheet.skip(2);
 
-	_bodyCelNames.resize(numFrames);
-	_headCelNames.resize(numFrames);
+	_celNames.resize(4, Common::Array<Common::String>(numFrames));
 	for (uint i = 0; i < numFrames; ++i) {
-		readFilename(xsheet, _bodyCelNames[i]);
-		readFilename(xsheet, _headCelNames[i]);
-
-		// Zeroes
-		if (gameType >= kGameTypeNancy3) {
-			xsheet.skip(74);
-		} else {
-			xsheet.skip(28);
+		for (uint j = 0; j < _celNames.size(); ++j) {
+			readFilename(xsheet, _celNames[j][i]);
 		}
+
+		// 4 unknown values
+		xsheet.skip(8);
 	}
 
 	// Continue reading the AR stream
-
-	// Zeroes
-	if (g_nancy->getGameType() >= kGameTypeNancy3) {
-		stream.skip(66);
-	} else {
-		stream.skip(20);
-	}
 
 	// Something related to quality
 	stream.skip(3);
@@ -669,8 +703,20 @@ void ConversationCel::readData(Common::SeekableReadStream &stream) {
 	_firstFrame = stream.readUint16LE();
 	_lastFrame = stream.readUint16LE();
 
-	// A few more quality-related bytes and more zeroes
-	stream.skip(0x8E);
+	stream.skip(6);
+
+	_drawingOrder.resize(4);
+	for (uint i = 0; i < 4; ++i) {
+		_drawingOrder[i] = stream.readByte();
+	}
+
+	_overrideTreeRects.resize(4);
+	for (uint i = 0; i < 4; ++i) {
+		_overrideTreeRects[i] = stream.readByte();
+	}
+
+	readRectArray(stream, _overrideRectSrcs, 4);
+	readRectArray(stream, _overrideRectDests, 4);
 
 	ConversationSound::readData(stream);
 }
@@ -688,6 +734,46 @@ ConversationCel::Cel &ConversationCel::loadCel(const Common::String &name, const
 	Cel &newCel = _celCache.getOrCreateVal(name);
 	g_nancy->_resource->loadImage(name, newCel.surf, treeName, &newCel.src, &newCel.dest);
 	return _celCache[name];
+}
+
+void ConversationSoundT::readCaptionText(Common::SeekableReadStream &stream) {
+	Common::String key;
+	readFilename(stream, key);
+
+	const CVTX *convo = (const CVTX *)g_nancy->getEngineData("CONVO");
+	assert(convo);
+
+	_text = convo->texts[key];
+}
+
+void ConversationSoundT::readResponseText(Common::SeekableReadStream &stream, ResponseStruct &response) {
+	Common::String key;
+	readFilename(stream, key);
+
+	const CVTX *convo = (const CVTX *)g_nancy->getEngineData("CONVO");
+	assert(convo);
+
+	response.text = convo->texts[key];
+}
+
+void ConversationCelT::readCaptionText(Common::SeekableReadStream &stream) {
+	Common::String key;
+	readFilename(stream, key);
+
+	const CVTX *convo = (const CVTX *)g_nancy->getEngineData("CONVO");
+	assert(convo);
+
+	_text = convo->texts[key];
+}
+
+void ConversationCelT::readResponseText(Common::SeekableReadStream &stream, ResponseStruct &response) {
+	Common::String key;
+	readFilename(stream, key);
+
+	const CVTX *convo = (const CVTX *)g_nancy->getEngineData("CONVO");
+	assert(convo);
+
+	response.text = convo->texts[key];
 }
 
 } // End of namespace Action

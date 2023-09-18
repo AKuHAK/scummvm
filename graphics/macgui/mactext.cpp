@@ -19,9 +19,10 @@
  *
  */
 
-#include "common/unicode-bidi.h"
+#include "common/file.h"
 #include "common/timer.h"
-#include "common/system.h"
+#include "common/unicode-bidi.h"
+#include "common/compression/unzip.h"
 
 #include "graphics/font.h"
 #include "graphics/macgui/mactext.h"
@@ -30,6 +31,10 @@
 #include "graphics/macgui/macmenu.h"
 #include "graphics/macgui/macwidget.h"
 #include "graphics/macgui/macwindow.h"
+
+#ifdef USE_PNG
+#include "image/png.h"
+#endif
 
 namespace Graphics {
 
@@ -130,7 +135,9 @@ MacText::MacText(MacWidget *parent, int x, int y, int w, int h, MacWindowManager
 	if (macFont) {
 		_defaultFormatting = MacFontRun(_wm);
 		_defaultFormatting.font = wm->_fontMan->getFont(*macFont);
-		_defaultFormatting.setValues(_wm, macFont->getId(), macFont->getSlant(), macFont->getSize(), 0, 0, 0);
+		byte r, g, b;
+		_wm->_pixelformat.colorToRGB(fgcolor, r, g, b);
+		_defaultFormatting.setValues(_wm, macFont->getId(), macFont->getSlant(), macFont->getSize(), r, g, b);
 	} else {
 		_defaultFormatting.font = NULL;
 	}
@@ -265,6 +272,13 @@ MacText::~MacText() {
 	delete _shadowSurface;
 	delete _cursorSurface;
 	delete _cursorSurface2;
+
+#ifdef USE_PNG
+	for (auto &i : _imageCache)
+		delete i._value;
+#endif
+
+	delete _imageArchive;
 }
 
 // this func returns the fg color of the first character we met in text
@@ -546,22 +560,6 @@ void MacText::setDefaultFormatting(uint16 fontId, byte textSlant, uint16 fontSiz
 	_defaultFormatting.font = _wm->_fontMan->getFont(macFont);
 }
 
-static const Common::U32String::value_type *readHex(uint16 *res, const Common::U32String::value_type *s, int len) {
-	*res = 0;
-
-	for (int i = 0; i < len; i++) {
-		char b = (char)*s++;
-
-		*res <<= 4;
-		if (tolower(b) >= 'a')
-			*res |= tolower(b) - 'a' + 10;
-		else
-			*res |= tolower(b) - '0';
-	}
-
-	return s;
-}
-
 // Adds the given string to the end of the last line/chunk
 // while observing the _maxWidth and keeping this chunk's
 // formatting
@@ -656,6 +654,8 @@ void MacText::splitString(const Common::U32String &str, int curLine) {
 	Common::U32String paragraph, tmp;
 
 	MacFontRun current_format = _defaultFormatting;
+	int indentSize = 0;
+	int firstLineIndent = 0;
 
 	while (*l) {
 		paragraph.clear();
@@ -682,6 +682,8 @@ void MacText::splitString(const Common::U32String &str, int curLine) {
 		// Now process whole paragraph
 		const Common::U32String::value_type *s = paragraph.c_str();
 
+		firstLineIndent = 0;
+
 		while (*s) {
 			tmp.clear();
 
@@ -694,44 +696,178 @@ void MacText::splitString(const Common::U32String &str, int curLine) {
 				}
 			}
 
-			// get format
-			if (*s == '\015') {	// binary format
+			// get format (sync with stripFormat() )
+			if (*s == '\016') {	// human-readable format
 				s++;
 
-				uint16 fontId = *s++; fontId = (fontId << 8) | *s++;
-				byte textSlant = *s++;
-				uint16 fontSize = *s++; fontSize = (fontSize << 8) | *s++;
-				uint16 palinfo1 = *s++; palinfo1 = (palinfo1 << 8) | *s++;
-				uint16 palinfo2 = *s++; palinfo2 = (palinfo2 << 8) | *s++;
-				uint16 palinfo3 = *s++; palinfo3 = (palinfo3 << 8) | *s++;
+				// First two digits is slant, third digit is Header number
+				switch (*s) {
+				case '+': { // \016+XXYZ  -- opening textSlant, H<Y>, indent<+Z>
+					uint16 textSlant, headSize, indent;
+					s++;
 
-				D(9, "** splitString: fontId: %d, textSlant: %d, fontSize: %d, p0: %x p1: %x p2: %x",
-						fontId, textSlant, fontSize, palinfo1, palinfo2, palinfo3);
+					s = readHex(&textSlant, s, 2);
 
-				current_format.setValues(_wm, fontId, textSlant, fontSize, palinfo1, palinfo2, palinfo3);
+					current_format.textSlant |= textSlant; // Setting the specified bit
 
-				if (!_macFontMode)
-					current_format.font = _defaultFormatting.font;
-			} else if (*s == '\016') {	// human-readable format
-				s++;
+					s = readHex(&headSize, s, 1);
+					if (headSize >= 1 && headSize <= 6) { // set
+						const float sizes[] = { 1, 2.0f, 1.41f, 1.155f, 1.0f, .894f, .816f };
+						current_format.fontSize = _defaultFormatting.fontSize * sizes[headSize];
+					}
 
-				uint16 fontId, textSlant, fontSize, palinfo1, palinfo2, palinfo3;
+					s = readHex(&indent, s, 1);
 
-				s = readHex(&fontId, s, 4);
-				s = readHex(&textSlant, s, 2);
-				s = readHex(&fontSize, s, 4);
-				s = readHex(&palinfo1, s, 4);
-				s = readHex(&palinfo2, s, 4);
-				s = readHex(&palinfo3, s, 4);
+					if (s)
+						indentSize += indent * current_format.fontSize * 2;
 
-				D(9, "** splitString: fontId: %d, textSlant: %d, fontSize: %d, p0: %x p1: %x p2: %x",
-						fontId, textSlant, fontSize, palinfo1, palinfo2, palinfo3);
+					D(9, "** splitString+: fontId: %d, textSlant: %d, fontSize: %d, indent: %d",
+							current_format.fontId, current_format.textSlant, current_format.fontSize,
+							indent);
 
-				current_format.setValues(_wm, fontId, textSlant, fontSize, palinfo1, palinfo2, palinfo3);
+					break;
+					}
+				case '-': { // \016-XXYZ  -- closing textSlant, H<Y>, indent<+Z>
+					uint16 textSlant, headSize, indent;
+					s++;
 
-				// So far, we enforce single font here, though in the future, font size could be altered
-				if (!_macFontMode)
-					current_format.font = _defaultFormatting.font;
+					s = readHex(&textSlant, s, 2);
+
+					current_format.textSlant &= ~textSlant; // Clearing the specified bit
+
+					s = readHex(&headSize, s, 1);
+					if (headSize == 0xf) // reset
+						current_format.fontSize = _defaultFormatting.fontSize;
+
+					s = readHex(&indent, s, 1);
+
+					if (s)
+						indentSize -= indent * current_format.fontSize * 2;
+
+					D(9, "** splitString-: fontId: %d, textSlant: %d, fontSize: %d, indent: %d",
+							current_format.fontId, current_format.textSlant, current_format.fontSize,
+							indent);
+					break;
+					}
+
+				case '[': { // \016[RRGGBB  -- setting color
+					uint16 palinfo1, palinfo2, palinfo3;
+					s++;
+
+					s = readHex(&palinfo1, s, 4);
+					s = readHex(&palinfo2, s, 4);
+					s = readHex(&palinfo3, s, 4);
+
+					current_format.palinfo1 = palinfo1;
+					current_format.palinfo2 = palinfo2;
+					current_format.palinfo3 = palinfo3;
+					current_format.fgcolor  = _wm->findBestColor(palinfo1 & 0xff, palinfo2 & 0xff, palinfo3 & 0xff);
+
+					D(9, "** splitString[: %08x", fgcolor);
+					break;
+					}
+
+				case ']': { // \016]  -- setting default color
+					s++;
+
+					current_format.palinfo1 = _defaultFormatting.palinfo1;
+					current_format.palinfo2 = _defaultFormatting.palinfo2;
+					current_format.palinfo3 = _defaultFormatting.palinfo3;
+					current_format.fgcolor = _defaultFormatting.fgcolor;
+
+					D(9, "** splitString]: %08x", current_format.fgcolor);
+					break;
+					}
+
+				case '*': { // \016*XXsssssss  -- negative indent, XX size, sssss is the string
+					s++;
+
+					uint16 len;
+
+					s = readHex(&len, s, 2);
+
+					Common::U32String bullet = Common::U32String(s, len);
+
+					s += len;
+
+					firstLineIndent = -current_format.getFont()->getStringWidth(bullet);
+
+					D(9, "** splitString*: %02x '%s' (%d)", len, bullet.encode().c_str(), firstLineIndent);
+					break;
+					}
+
+				case 'i': { // \016iXXNNnnnnAAaaaaTTttt -- image, XX% width,
+										//          NN, nnnn -- filename len and text
+										//          AA, aaaa -- alt len and text
+										//          TT, tttt -- text (tooltip) len and text
+					s++;
+
+					uint16 len;
+
+					s = readHex(&_textLines[curLine].picpercent, s, 2);
+					s = readHex(&len, s, 2);
+					_textLines[curLine].picfname = Common::U32String(s, len).encode();
+					s += len;
+
+					s = readHex(&len, s, 2);
+					_textLines[curLine].picalt = Common::U32String(s, len);
+					s += len;
+
+					s = readHex(&len, s, 2);
+					_textLines[curLine].pictitle = Common::U32String(s, len);
+					s += len;
+
+					D(9, "** splitString[i]: %d%% fname: '%s'  alt: '%s'  title: '%s'",
+						_textLines[curLine].picpercent,
+						_textLines[curLine].picfname.c_str(), _textLines[curLine].picalt.c_str(),
+						_textLines[curLine].pictitle.c_str());
+					break;
+					}
+
+				case 't': { // \016tXXXX -- switch to the requested font id
+					s++;
+
+					uint16 fontId;
+
+					s = readHex(&fontId, s, 4);
+
+					current_format.fontId = fontId == 0xffff ? _defaultFormatting.fontId : fontId;
+
+					D(9, "** splitString[t]: fontId: %d", fontId);
+					break;
+					}
+
+				case 'l': { // \016lLLllll -- link len and text
+					s++;
+
+					uint16 len;
+
+					s = readHex(&len, s, 2);
+					current_format.link = Common::U32String(s, len);
+					s += len;
+					break;
+					}
+
+				default: {
+					uint16 fontId, textSlant, fontSize, palinfo1, palinfo2, palinfo3;
+
+					s = readHex(&fontId, s, 4);
+					s = readHex(&textSlant, s, 2);
+					s = readHex(&fontSize, s, 4);
+					s = readHex(&palinfo1, s, 4);
+					s = readHex(&palinfo2, s, 4);
+					s = readHex(&palinfo3, s, 4);
+
+					current_format.setValues(_wm, fontId, textSlant, fontSize, palinfo1, palinfo2, palinfo3);
+
+					D(9, "** splitString: fontId: %d, textSlant: %d, fontSize: %d, fg: %04x",
+							fontId, textSlant, fontSize, current_format.fgcolor);
+
+					// So far, we enforce single font here, though in the future, font size could be altered
+					if (!_macFontMode)
+						current_format.font = _defaultFormatting.font;
+					}
+				}
 			}
 
 			while (*s && *s != ' ' && *s != '\001') {
@@ -745,8 +881,12 @@ void MacText::splitString(const Common::U32String &str, int curLine) {
 				_textLines[curLine].lastChunk().text = tmp;
 				continue;
 			}
+
+			_textLines[curLine].indent = indentSize;
+			_textLines[curLine].firstLineIndent = firstLineIndent;
+
 			// calc word_width, the trick we define here is we don`t count the space
-			int word_width = getStringWidth(current_format, tmp);
+			int word_width = _textLines[curLine].indent + getStringWidth(current_format, tmp) + firstLineIndent;
 			// add all spaces left
 			while (*s == ' ') {
 				tmp += *s;
@@ -777,6 +917,9 @@ void MacText::splitString(const Common::U32String &str, int curLine) {
 			if (cur_width + word_width >= _maxWidth && cur_width != 0) {
 				++curLine;
 				_textLines.insert_at(curLine, MacTextLine());
+				_textLines[curLine].indent = indentSize;
+				_textLines[curLine].firstLineIndent = 0;
+				firstLineIndent = 0;
 			}
 
 			// deal with the super long word situation
@@ -789,7 +932,7 @@ void MacText::splitString(const Common::U32String &str, int curLine) {
 					// we just need to deal it specially
 
 					// meaning you have to split this word;
-					int tmp_width = 0;
+					int tmp_width = _textLines[curLine].indent;
 					_textLines[curLine].chunks.push_back(word[i]);
 					// empty the string
 					_textLines[curLine].lastChunk().text = Common::U32String();
@@ -817,8 +960,10 @@ void MacText::splitString(const Common::U32String &str, int curLine) {
 							_textLines.insert_at(curLine, MacTextLine());
 							_textLines[curLine].chunks.push_back(word[i]);
 							_textLines[curLine].lastChunk().text = Common::U32String();
-							tmp_width = 0;
-							cur_width = 0;
+							_textLines[curLine].firstLineIndent = 0;
+							firstLineIndent = 0;
+							tmp_width = _textLines[curLine].indent;
+							cur_width = _textLines[curLine].indent;
 						}
 						tmp_width += char_width;
 						_textLines[curLine].lastChunk().text += c;
@@ -914,6 +1059,15 @@ void MacText::render() {
 		render(0, _textLines.size());
 
 		_fullRefresh = false;
+
+#if 0
+		Common::DumpFile out;
+		Common::String filename = Common::String::format("z-%p.png", (void *)this);
+		if (out.open(filename)) {
+			warning("Wrote: %s", filename.c_str());
+			Image::writePNG(out, _surface->rawSurface());
+		}
+#endif
 	}
 }
 
@@ -930,7 +1084,19 @@ void MacText::render(int from, int to, int shadow) {
 	}
 
 	for (int i = myFrom; i != myTo; i += delta) {
-		int xOffset = getAlignOffset(i);
+		if (!_textLines[i].picfname.empty()) {
+			const Surface *image = getImageSurface(_textLines[i].picfname);
+
+			int xOffset = (_textLines[i].width - _textLines[i].charwidth) / 2;
+			Common::Rect bbox(xOffset, _textLines[i].y, xOffset + _textLines[i].charwidth, _textLines[i].y + _textLines[i].height);
+
+			if (image)
+				surface->blitFrom(image, Common::Rect(0, 0, image->w, image->h), bbox);
+
+			continue;
+		}
+
+		int xOffset = getAlignOffset(i) + _textLines[i].indent + _textLines[i].firstLineIndent;
 		xOffset++;
 
 		int start = 0, end = _textLines[i].chunks.size();
@@ -947,9 +1113,9 @@ void MacText::render(int from, int to, int shadow) {
 
 		// TODO: _textMaxWidth, when -1, was not rendering ANY text.
 		for (int j = start; j != end; j += delta) {
-			debug(9, "MacText::render: line %d[%d] h:%d at %d,%d (%s) fontid: %d on %dx%d, fgcolor: %d bgcolor: %d, font: %p",
+			debug(9, "MacText::render: line %d[%d] h:%d at %d,%d (%s) fontid: %d fontsize: %d on %dx%d, fgcolor: %d bgcolor: %d, font: %p",
 				  i, j, _textLines[i].height, xOffset, _textLines[i].y, _textLines[i].chunks[j].text.encode().c_str(),
-				  _textLines[i].chunks[j].fontId, _surface->w, _surface->h, _textLines[i].chunks[j].fgcolor, _bgcolor,
+				  _textLines[i].chunks[j].fontId, _textLines[i].chunks[j].fontSize, _surface->w, _surface->h, _textLines[i].chunks[j].fgcolor, _bgcolor,
 				  (const void *)_textLines[i].chunks[j].getFont());
 
 			if (_textLines[i].chunks[j].text.empty())
@@ -962,13 +1128,13 @@ void MacText::render(int from, int to, int shadow) {
 
 			if (_textLines[i].chunks[j].plainByteMode()) {
 				Common::String str = _textLines[i].chunks[j].getEncodedText();
-				_textLines[i].chunks[j].getFont()->drawString(surface, str, xOffset, _textLines[i].y + yOffset, w, shadow ? _wm->_colorBlack : _textLines[i].chunks[j].fgcolor, Graphics::kTextAlignLeft, 0, true);
+				_textLines[i].chunks[j].getFont()->drawString(surface, str, xOffset, _textLines[i].y + yOffset, w, shadow ? _wm->_colorBlack : _textLines[i].chunks[j].fgcolor, kTextAlignLeft, 0, true);
 				xOffset += _textLines[i].chunks[j].getFont()->getStringWidth(str);
 			} else {
 				if (_wm->_language == Common::HE_ISR)
-					_textLines[i].chunks[j].getFont()->drawString(surface, convertBiDiU32String(_textLines[i].chunks[j].text, Common::BIDI_PAR_RTL), xOffset, _textLines[i].y + yOffset, w, shadow ? _wm->_colorBlack : _textLines[i].chunks[j].fgcolor, Graphics::kTextAlignLeft, 0, true);
+					_textLines[i].chunks[j].getFont()->drawString(surface, convertBiDiU32String(_textLines[i].chunks[j].text, Common::BIDI_PAR_RTL), xOffset, _textLines[i].y + yOffset, w, shadow ? _wm->_colorBlack : _textLines[i].chunks[j].fgcolor, kTextAlignLeft, 0, true);
 				else
-					_textLines[i].chunks[j].getFont()->drawString(surface, convertBiDiU32String(_textLines[i].chunks[j].text), xOffset, _textLines[i].y + yOffset, w, shadow ? _wm->_colorBlack : _textLines[i].chunks[j].fgcolor, Graphics::kTextAlignLeft, 0, true);
+					_textLines[i].chunks[j].getFont()->drawString(surface, convertBiDiU32String(_textLines[i].chunks[j].text), xOffset, _textLines[i].y + yOffset, w, shadow ? _wm->_colorBlack : _textLines[i].chunks[j].fgcolor, kTextAlignLeft, 0, true);
 				xOffset += _textLines[i].chunks[j].getFont()->getStringWidth(_textLines[i].chunks[j].text);
 			}
 		}
@@ -1010,7 +1176,24 @@ int MacText::getLineWidth(int line, bool enforce, int col) {
 	if (_textLines[line].width != -1 && !enforce && col == -1)
 		return _textLines[line].width;
 
-	int width = 0;
+	if (!_textLines[line].picfname.empty()) {
+		const Surface *image = getImageSurface(_textLines[line].picfname);
+
+		if (image) {
+			float ratio = _maxWidth * _textLines[line].picpercent / 100.0 / (float)image->w;
+			_textLines[line].width = _maxWidth;
+			_textLines[line].height = image->h * ratio;
+			_textLines[line].charwidth = image->w * ratio;
+		} else {
+			_textLines[line].width = _maxWidth;
+			_textLines[line].height = 1;
+			_textLines[line].charwidth = 1;
+		}
+
+		return _textLines[line].width;
+	}
+
+	int width = _textLines[line].indent + _textLines[line].firstLineIndent;
 	int height = 0;
 	int charwidth = 0;
 
@@ -1199,7 +1382,7 @@ void MacText::resize(int w, int h) {
 	setMaxWidth(w);
 	if (_composeSurface->w != w || _composeSurface->h != h) {
 		delete _composeSurface;
-		_composeSurface = new Graphics::ManagedSurface(w, h, _wm->_pixelformat);
+		_composeSurface = new ManagedSurface(w, h, _wm->_pixelformat);
 		_dims.right = _dims.left + w;
 		_dims.bottom = _dims.top + h;
 
@@ -1332,7 +1515,7 @@ void MacText::draw(ManagedSurface *g, int x, int y, int w, int h, int xoff, int 
 	if (_textShadow)
 		g->blitFrom(*_shadowSurface, Common::Rect(MIN<int>(_surface->w, x), MIN<int>(_surface->h, y), MIN<int>(_surface->w, x + w), MIN<int>(_surface->h, y + h)), Common::Point(xoff + _textShadow, yoff + _textShadow));
 
-	g->transBlitFrom(*_surface, Common::Rect(MIN<int>(_surface->w, x), MIN<int>(_surface->h, y), MIN<int>(_surface->w, x + w), MIN<int>(_surface->h, y + h)), Common::Point(xoff, yoff), _bgcolor);
+	g->transBlitFrom(*_surface, Common::Rect(MIN<int>(_surface->w, x), MIN<int>(_surface->h, y), MIN<int>(_surface->w, x + w), MIN<int>(_surface->h, y + h)), Common::Point(xoff, yoff));
 
 	_contentIsDirty = false;
 	_cursorDirty = false;
@@ -2055,6 +2238,27 @@ int MacText::getMouseLine(int x, int y) {
 	return row + 1;
 }
 
+Common::U32String MacText::getMouseLink(int x, int y) {
+	Common::Point offset = calculateOffset();
+	x -= getDimensions().left - offset.x;
+	y -= getDimensions().top - offset.y;
+	y += _scrollPos;
+
+	int row, chunk;
+	getRowCol(x, y, nullptr, nullptr, &row, nullptr, &chunk);
+
+	if (chunk < 0)
+		return Common::U32String();
+
+	if (!_textLines[row].picfname.empty())
+		return _textLines[row].pictitle;
+
+	if (!_textLines[row].chunks[chunk].link.empty())
+		return _textLines[row].chunks[chunk].link;
+
+	return Common::U32String();
+}
+
 int MacText::getAlignOffset(int row) {
 	int alignOffset = 0;
 	if (_textAlignment == kTextAlignRight)
@@ -2064,7 +2268,7 @@ int MacText::getAlignOffset(int row) {
 	return alignOffset;
 }
 
-void MacText::getRowCol(int x, int y, int *sx, int *sy, int *row, int *col) {
+void MacText::getRowCol(int x, int y, int *sx, int *sy, int *row, int *col, int *chunk_) {
 	int nsx = 0, nsy = 0, nrow = 0, ncol = 0;
 
 	if (y > _textMaxHeight) {
@@ -2087,15 +2291,15 @@ void MacText::getRowCol(int x, int y, int *sx, int *sy, int *row, int *col) {
 	nrow = lb;
 
 	nsy = _textLines[nrow].y;
+	int chunk = -1;
 
 	if (_textLines[nrow].chunks.size() > 0) {
-		int alignOffset = getAlignOffset(nrow);
+		int alignOffset = getAlignOffset(nrow) + _textLines[nrow].indent + _textLines[nrow].firstLineIndent;;
 
 		int width = 0, pwidth = 0;
 		int mcol = 0, pmcol = 0;
 
-		uint chunk;
-		for (chunk = 0; chunk < _textLines[nrow].chunks.size(); chunk++) {
+		for (chunk = 0; chunk < (int)_textLines[nrow].chunks.size(); chunk++) {
 			pwidth = width;
 			pmcol = mcol;
 			if (!_textLines[nrow].chunks[chunk].text.empty()) {
@@ -2107,8 +2311,11 @@ void MacText::getRowCol(int x, int y, int *sx, int *sy, int *row, int *col) {
 				break;
 		}
 
-		if (chunk == _textLines[nrow].chunks.size())
-			chunk--;
+		if (chunk >= _textLines[nrow].chunks.size())
+			chunk = _textLines[nrow].chunks.size() - 1;
+
+		if (chunk_)
+			*chunk_ = (int)chunk;
 
 		Common::U32String str = _textLines[nrow].chunks[chunk].text;
 
@@ -2135,6 +2342,8 @@ void MacText::getRowCol(int x, int y, int *sx, int *sy, int *row, int *col) {
 		*col = ncol;
 	if (row)
 		*row = nrow;
+	if (chunk_)
+		*chunk_ = (int)chunk;
 }
 
 // If adjacent chunks have same format, then skip the format definition
@@ -2581,6 +2790,48 @@ void MacText::undrawCursor() {
 
 	Common::Point offset(calculateOffset());
 	_composeSurface->blitFrom(*_cursorSurface2, *_cursorRect, Common::Point(_cursorX + offset.x, _cursorY + offset.y));
+}
+
+void MacText::setImageArchive(Common::String fname) {
+	_imageArchive = Common::makeZipArchive(fname);
+
+	if (!_imageArchive)
+		warning("MacText::setImageArchive(): Could not find %s. Images will not be rendered", fname.c_str());
+}
+
+const Surface *MacText::getImageSurface(Common::String &fname) {
+#ifndef USE_PNG
+	warning("MacText::getImageSurface(): PNG support not compiled. Cannot load file %s", fname.c_str());
+
+	return nullptr;
+#else
+	if (_imageCache.contains(fname))
+		return _imageCache[fname]->getSurface();
+
+	if (!_imageArchive) {
+		warning("MacText::getImageSurface(): Image Archive was not loaded. Use setImageArchive()");
+		return nullptr;
+	}
+
+	Common::SeekableReadStream *stream = _imageArchive->createReadStreamForMember(fname);
+
+	if (!stream) {
+		warning("MacText::getImageSurface(): Cannot open file %s", fname.c_str());
+		return nullptr;
+	}
+
+	_imageCache[fname] = new Image::PNGDecoder();
+
+	if (!_imageCache[fname]->loadStream(*stream)) {
+		delete _imageCache[fname];
+
+		warning("MacText::getImageSurface(): Cannot load file %s", fname.c_str());
+
+		return nullptr;
+	}
+
+	return _imageCache[fname]->getSurface();
+#endif // USE_PNG
 }
 
 } // End of namespace Graphics

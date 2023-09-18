@@ -33,6 +33,7 @@ class RenderObject;
 
 // Graphics class that handles multilayered surface rendering with minimal redraw
 class GraphicsManager {
+	friend class NancyEngine;
 public:
 	GraphicsManager();
 
@@ -85,6 +86,8 @@ private:
 
 	Graphics::Screen _screen;
 	Common::Array<Font> _fonts;
+
+	Common::List<Common::Rect> _dirtyRects;
 
 	bool _isSuppressed;
 };

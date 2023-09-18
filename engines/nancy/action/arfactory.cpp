@@ -19,29 +19,34 @@
  *
  */
 
-#include "engines/nancy/action/recordtypes.h"
+#include "engines/nancy/action/navigationrecords.h"
+#include "engines/nancy/action/soundrecords.h"
+#include "engines/nancy/action/miscrecords.h"
+
 #include "engines/nancy/action/conversation.h"
+#include "engines/nancy/action/overlay.h"
 #include "engines/nancy/action/secondaryvideo.h"
 #include "engines/nancy/action/secondarymovie.h"
-#include "engines/nancy/action/overlay.h"
-#include "engines/nancy/action/orderingpuzzle.h"
-#include "engines/nancy/action/rotatinglockpuzzle.h"
-#include "engines/nancy/action/telephone.h"
-#include "engines/nancy/action/sliderpuzzle.h"
-#include "engines/nancy/action/passwordpuzzle.h"
-#include "engines/nancy/action/leverpuzzle.h"
-#include "engines/nancy/action/rippedletterpuzzle.h"
-#include "engines/nancy/action/towerpuzzle.h"
-#include "engines/nancy/action/riddlepuzzle.h"
-#include "engines/nancy/action/overridelockpuzzle.h"
-#include "engines/nancy/action/bombpuzzle.h"
-#include "engines/nancy/action/soundequalizerpuzzle.h"
-#include "engines/nancy/action/setplayerclock.h"
-#include "engines/nancy/action/raycastpuzzle.h"
-#include "engines/nancy/action/turningpuzzle.h"
-#include "engines/nancy/action/tangrampuzzle.h"
-#include "engines/nancy/action/safelockpuzzle.h"
-#include "engines/nancy/action/collisionpuzzle.h"
+
+#include "engines/nancy/action/puzzle/bombpuzzle.h"
+#include "engines/nancy/action/puzzle/collisionpuzzle.h"
+#include "engines/nancy/action/puzzle/leverpuzzle.h"
+#include "engines/nancy/action/puzzle/mazechasepuzzle.h"
+#include "engines/nancy/action/puzzle/orderingpuzzle.h"
+#include "engines/nancy/action/puzzle/overridelockpuzzle.h"
+#include "engines/nancy/action/puzzle/passwordpuzzle.h"
+#include "engines/nancy/action/puzzle/raycastpuzzle.h"
+#include "engines/nancy/action/puzzle/riddlepuzzle.h"
+#include "engines/nancy/action/puzzle/rippedletterpuzzle.h"
+#include "engines/nancy/action/puzzle/rotatinglockpuzzle.h"
+#include "engines/nancy/action/puzzle/safedialpuzzle.h"
+#include "engines/nancy/action/puzzle/setplayerclock.h"
+#include "engines/nancy/action/puzzle/sliderpuzzle.h"
+#include "engines/nancy/action/puzzle/soundequalizerpuzzle.h"
+#include "engines/nancy/action/puzzle/tangrampuzzle.h"
+#include "engines/nancy/action/puzzle/telephone.h"
+#include "engines/nancy/action/puzzle/towerpuzzle.h"
+#include "engines/nancy/action/puzzle/turningpuzzle.h"
 
 #include "engines/nancy/state/scene.h"
 
@@ -85,9 +90,9 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 			return new HotMultiframeSceneChange(CursorManager::kMoveDown);
 		}
 	case 22:
-		return new Hot1FrSceneChange(CursorManager::kTurnLeft);
+		return new Hot1FrSceneChange(CursorManager::kMoveLeft);
 	case 23:
-		return new Hot1FrSceneChange(CursorManager::kTurnRight);
+		return new Hot1FrSceneChange(CursorManager::kMoveRight);
 	case 24:
 		return new HotMultiframeMultisceneCursorTypeSceneChange();
 	case 40:
@@ -115,8 +120,15 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 		return new ConversationCel();
 	case 58:
 		return new ConversationSound();
+	case 59:
+		return new ConversationCelT();
 	case 60:
-		return new MapCall();
+		if (g_nancy->getGameType() <= kGameTypeNancy5) {
+			// Only used in tvd and nancy1
+			return new MapCall();
+		} else {
+			return new ConversationSoundT();
+		}
 	case 61:
 		return new MapCallHot1Fr();
 	case 62:
@@ -171,6 +183,8 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 		return new RemoveInventoryNoHS();
 	case 122:
 		return new ShowInventoryItem();
+	case 123:
+		return new InventorySoundOverride();
 	case 150:
 		return new PlayDigiSoundAndDie();
 	case 151:
@@ -210,11 +224,17 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 	case 209:
 		return new TurningPuzzle();
 	case 210:
-		return new SafeLockPuzzle();
+		return new SafeDialPuzzle();
 	case 211:
-		return new CollisionPuzzle();
+		return new CollisionPuzzle(CollisionPuzzle::PuzzleType::kCollision);
 	case 212:
 		return new OrderingPuzzle(OrderingPuzzle::PuzzleType::kOrderItems);
+	case 213:
+		return new CollisionPuzzle(CollisionPuzzle::PuzzleType::kTileMove);
+	case 214:
+		return new OrderingPuzzle(OrderingPuzzle::PuzzleType::kKeypad);
+	case 215:
+		return new MazeChasePuzzle();
 	default:
 		error("Action Record type %i is invalid!", type);
 		return nullptr;

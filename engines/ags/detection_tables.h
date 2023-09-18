@@ -633,6 +633,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "attackgame", "Attack Game" },
 	{ "atthecafe", "At the Café" },
 	{ "audioquest", "Audio Quest" },
+	{ "augustlonging", "The long August longing" },
 	{ "aunaturel", "Au Naturel" },
 	{ "automation", "Automation" },
 	{ "averyspecialdog", "A very special dog" },
@@ -871,6 +872,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "chalkman", "Chalkman" },
 	{ "chalksquest", "Chalk's Quest" },
 	{ "challengetentacle", "Challenge of the Tentacle" },
+	{ "chaluul", "Chaluul's Curse Remake" },
 	{ "chanceofthedead", "Chance Of The Dead" },
 	{ "charamba1", "Charamba, Chapter 1: Bitches in the Desert" },
 	{ "charamba2", "Charamba, Chapter 2: Hallowe'en" },
@@ -1227,6 +1229,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "fallensoldier", "Fallen soldier" },
 	{ "fallingdark", "Falling Dark" },
 	{ "fallingdark2", "Falling Dark 2: Relapse" },
+	{ "fallingskywards", "Falling Skywards" },
 	{ "familieherfurth", "Der neue Wahnsinn der Familie Herfurth" },
 	{ "fanbots", "Fanbots" },
 	{ "fantasymotus", "Fantasy Motus" },
@@ -2299,6 +2302,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "ourobouros", "I am Ourobouros" },
 	{ "outbreak", "Outbreak" },
 	{ "outbreakwarehouse", "Outbreak: The Warehouse" },
+	{ "outlawgold", "Outlaw's Gold" },
 	{ "outofgas", "Out of Gas" },
 	{ "outscore", "Outscore" },
 	{ "outtajuice", "Outta' Juice" },
@@ -2425,6 +2429,7 @@ const PlainGameDescriptor GAME_NAMES[] = {
 	{ "prodigal", "Prodigal" },
 	{ "prodigalshooter", "Prodigal Shooter" },
 	{ "profneely", "Professor Neely And The Death Ray Of Doom" },
+	{ "projectdevonia", "Project Devonia: \'Manticore\'" },
 	{ "projectevilspy2", "Project Evilspy II" },
 	{ "projectlazarus", "Project Lazarus" },
 	{ "projectmadness", "Project Madness" },
@@ -4117,6 +4122,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN_STEAM("neofeud", "neofeud.exe", "6e861b1f476ff7cdf036082abb271329", 2078740517),
 	GAME_ENTRY_EN("neofeud", "neofeud.exe", "6e861b1f476ff7cdf036082abb271329", 2078743375),
 	GAME_ENTRY_STEAM("nightmareframes", "Nightmare Frames.exe", "55a84a70f80cba8dd2373ea04c2b04ce", 2697804016),  // Eng-Esp
+	GAME_ENTRY("nightmareframes", "Nightmare Frames.exe", "55a84a70f80cba8dd2373ea04c2b04ce", 2697804015), // itch.io Eng-Esp
 	GAME_ENTRY("odissea", "ODISSEA.exe", "5bb86de9245242046c309711ff02dad3", 717438956),  // itch.io  Eng-Ita
 	GAME_ENTRY_EN_GOG("oott", "oott-tkc.exe", "11c2421258465cba4bd773c49d918ee3", 467834855),
 	GAME_ENTRY_EN_GOG("oott", "oott-tkc.exe", "11c2421258465cba4bd773c49d918ee3", 467845009),
@@ -4240,6 +4246,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_PLUGIN_GOG_NOLAUNCHLOAD("strangeland", "ac2game.dat", "c0d0009485795a4ff0cf9dbe5ad82a2f", 3183902196, nullptr), // Mac v3?
 	GAME_ENTRY_PLUGIN_STEAM_NOLAUNCHLOAD("strangeland", "Strangeland.exe", "c5978d50a9b7ee1c8a50a731847d8504", 3187004654, nullptr), // Win-Linux v3.0
 	GAME_ENTRY_PLUGIN_STEAM_NOLAUNCHLOAD("strangeland", "ac2game.dat", "e037ab3414dec971b90715c7dbb56f4c", 3183901914, nullptr), // Mac
+	GAME_ENTRY_PLUGIN_STEAM_NOLAUNCHLOAD("strangeland", "Strangeland.exe", "c5978d50a9b7ee1c8a50a731847d8504", 3186428869, nullptr), // Win 2.3
 	GAME_ENTRY("sulifallenharmony", "Suli Fallen Harmony.exe", "8a58836830dce896e4366f57791ab6cc", 35900870),  // v1.4 itch.io En-Fr
 	GAME_ENTRY_STEAM("sumatra", "sumatra fate of yandi.exe", "57c868b1a81c0335ab60970292cd79d8", 170088886),  // En-Fr-De-Es
 	GAME_ENTRY_STEAM("sumatra", "sumatra fate of yandi.exe", "b4407ac542f316456f549fc8a60dccae", 170634789),
@@ -4729,6 +4736,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	DEMO_ENTRY("politicalenemy", "Political Enemy.exe", "387ff720e746ae46e93f463fd58d77a4", 205108968),  // Eng-Ita
 	DEMO_ENTRY_EN("pq4sciish", "PQ4 Remake Demo.exe", "0564de07d3fd5c16e6947a647061913c", 6203078),
 	DEMO_ENTRY_EN("primordia", "primordia.exe", "22313e59c3233001488c26f18c80cc08", 727898212),
+	DEMO_ENTRY("projectdevonia", "PDM.ags", "7515c1b5f6e98027ee9fa146312609e1", 29295402),
 	DEMO_ENTRY_EN("prototypical", "Proto.exe", "06a03fe35791b0578068ab1873455463", 48507319),
 	DETECTION_ENTRY("proxecto", "proxec.exe", "465f972675db2da6040518221af5b0ba", 2636209, Common::UNK_LANG, "Demo/Galician", nullptr, ADGF_DEMO),
 	DETECTION_ENTRY("proxecto", "ac2game.ags", "03f06112d270c9108ca618ab7b3bd735", 2116513, Common::UNK_LANG, "Demo/Galician", nullptr, ADGF_DEMO),
@@ -5144,6 +5152,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("atthecafe", "At the cafe.exe", "615e73fc1874e92d60a1996c2330ea36", 3192558),  // Windows
 	GAME_ENTRY_EN("atthecafe", "At the cafe.ags", "c598263c0d04b74ba4f888287ceefaca", 1407438),  // Linux
 	GAME_ENTRY_EN("audioquest", "Audio Quest.exe", "06a03fe35791b0578068ab1873455463", 1638472),
+	GAME_ENTRY_EN("augustlonging", "The long August longing.exe", "5db720fe7ddec76ff9829c5b21905201", 18038972),
 	GAME_ENTRY_EN("aunaturel", "au naturel.exe", "6cddccb3744ec5c6af7c398fb7b3b11c", 8499426),
 	GAME_ENTRY_EN("automation", "automation.exe", "c16204dc8aa338e3199b2c62da0b33f4", 3943320),
 	GAME_ENTRY_EN_PLATFORM("automation", "automation.exe", "c16204dc8aa338e3199b2c62da0b33f4", 3942321, "OROW"),
@@ -5438,6 +5447,8 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY("challengetentacle", "Challenge of the Tentacle.ags", "b24cdc761ea244ed460f32329627cc45", 485577733),  // Linux En-De
 	GAME_ENTRY("challengetentacle", "Challenge of the Tentacle.exe", "44d2715f4d78a639a588e94cf19b5821", 489037341),  // Win En-De v1.0.2
 	GAME_ENTRY("challengetentacle", "Challenge of the Tentacle.ags", "deed6ad8466f2cdc31fe84112a2f949d", 485577737),  // Linux En-De v1.0.2
+	GAME_ENTRY_EN("chaluul", "Chaluuls_Curse.exe", "cb8f06d6a64aff7382fed5846f62ccdc", 52242488),  // Win/Mac
+	GAME_ENTRY_EN("chaluul", "Chaluuls_Curse.ags", "3d246c0271974ddbd4ada442066846eb", 49056804),  // Linux
 	GAME_ENTRY_EN("chanceofthedead", "chance.exe", "8418b150c267e4f1d462b9a5d60e507d", 5597569),
 	GAME_ENTRY_EN("charamba1", "Charamba.exe", "354e3016d64ac3378478d3d52ef0460d", 7468361),
 	GAME_ENTRY_EN("charamba2", "CharambaII.exe", "354e3016d64ac3378478d3d52ef0460d", 4975542),
@@ -5858,6 +5869,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY("fallensoldier", "fallen soldier.exe", "7a3096ac0237cb6aa8e1718e28caf039", 81522018),  // Eng-Swe
 	GAME_ENTRY_EN("fallingdark", "Falling Dark.exe", "23a67b6de10ec35e9f5a4dfc7d928222", 451738395),  //v1.4
 	GAME_ENTRY_EN("fallingdark2", "Falling Dark 2.exe", "0564de07d3fd5c16e6947a647061913c", 205636847),  //v1.06
+	GAME_ENTRY_EN("fallingskywards", "Falling Skywards.exe", "b36bda97ef129952eb2d18bf5087530c", 57272115),
 	GAME_ENTRY_LANG("familieherfurth", "Familie Herfurth.exe", "cefb80c104ab2a8bd1713d13d7c74d07", 5457327, Common::DE_DEU),  //v2.0
 	GAME_ENTRY_EN("fanbots", "Game.exe", "aecd482222ff54206e43a029b5f0b170", 8665702),  //MAGS
 	GAME_ENTRY_EN("fanbots", "Game.exe", "c58d7c2d20e502e72a504f3f23a1d6da", 12986310),  // 2.0.1
@@ -7139,6 +7151,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("outbreak", "outbreak.exe", "0500aacb6c176d47ac0f8158f055db83", 3271348),
 	GAME_ENTRY_EN("outbreakwarehouse", "OutbreakWarehouse.exe", "7971a7c02d414dc8cb33b6ec36080b91", 66202988),
 	GAME_ENTRY_EN("outbreakwarehouse", "OutbreakWarehouse.ags", "278fc0ec0486cfd6de9326d46d82c14a", 63705948),
+	GAME_ENTRY_EN("outlawgold", "Game.exe", "010029f483da2ba0a34c937ea9fd00a3", 108464409),
 	GAME_ENTRY_EN("outofgas", "OutOfGas.exe", "6b4ceb9e327ac99479c08d825461f4cb", 18187986),
 	GAME_ENTRY_EN("outofgas", "OutOfGas.exe", "f0e74b3673867316e1cb3120c4289c66", 18200877),  // v1.2
 	GAME_ENTRY_EN("outtajuice", "Outta' Juice.exe", "0241777c2537fc5d077c05cde10bfa9f", 6549919),
@@ -8208,6 +8221,7 @@ const AGSGameDescription GAME_DESCRIPTIONS[] = {
 	GAME_ENTRY_EN("underwateradv", "fishres.exe", "3128b9f90e2f954ba704414ae854d10b", 3970713),
 	GAME_ENTRY_EN("underworld", "Underworld.exe", "6cddccb3744ec5c6af7c398fb7b3b11c", 5147661),
 	GAME_ENTRY_EN("undyep1", "heyderundy.exe", "39fe9b76597c2d8c14922b8369a4a4db", 9842962),  // v1.2
+	GAME_ENTRY_EN("undyep1", "heyderundy.exe", "39fe9b76597c2d8c14922b8369a4a4db", 10055040),  // v1.3
 	GAME_ENTRY_EN("unexpectedguest", "unexpectedGuest.exe", "5e1d1fbbaadb46b5cfd5474d71080c9d", 4541793),
 	GAME_ENTRY_EN("unexpectedquest", "UQ.exe", "f120690b506dd63cd7d1112ea6af2f77", 1837663),
 	GAME_ENTRY_EN_PLATFORM("unfair", "Unfair.exe", "8d1ff95c16500befbdc72260d461d73f", 5203436, "MAGS"),

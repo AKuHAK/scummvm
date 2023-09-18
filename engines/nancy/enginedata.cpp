@@ -33,7 +33,6 @@ EngineData::EngineData(Common::SeekableReadStream *chunkStream) {
 }
 
 BSUM::BSUM(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	
 	Common::Serializer s(chunkStream, nullptr);
 	s.setVersion(g_nancy->getGameType());
 
@@ -43,6 +42,9 @@ BSUM::BSUM(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	s.skip(0x17, kGameTypeVampire, kGameTypeVampire);
 	s.skip(0x49, kGameTypeNancy1, kGameTypeNancy1);
 	s.skip(0x43, kGameTypeNancy2);
+
+	readFilename(s, conversationTextsFilename, kGameTypeNancy6);
+	readFilename(s, autotextFilename, kGameTypeNancy6);
 
 	s.syncAsUint16LE(firstScene.sceneID);
 	s.skip(0xC, kGameTypeVampire, kGameTypeVampire); // Palette name + unknown 2 bytes
@@ -89,8 +91,13 @@ VIEW::VIEW(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	readRect(*chunkStream, bounds);
 }
 
+PCAL::PCAL(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
+	uint num = chunkStream->readUint16LE();
+	readFilenameArray(*chunkStream, calNames, num);
+}
+
 INV::INV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-		Common::Serializer s(chunkStream, nullptr);
+	Common::Serializer s(chunkStream, nullptr);
 	s.setVersion(g_nancy->getGameType());
 
 	readRect(*chunkStream, scrollbarSrcBounds);
@@ -98,8 +105,8 @@ INV::INV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	s.syncAsUint16LE(scrollbarDefaultPos.y);
 	s.syncAsUint16LE(scrollbarMaxScroll);
 
-	readRectArray(s, ornamentSrcs, 6, kGameTypeVampire, kGameTypeNancy1);
-	readRectArray(s, ornamentDests, 6, kGameTypeVampire, kGameTypeNancy1);
+	readRectArray(s, ornamentSrcs, 6, 6, kGameTypeVampire, kGameTypeNancy1);
+	readRectArray(s, ornamentDests, 6, 6, kGameTypeVampire, kGameTypeNancy1);
 
 	uint numFrames = g_nancy->getStaticData().numCurtainAnimationFrames;
 
@@ -108,7 +115,7 @@ INV::INV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	readRect(s, curtainsScreenPosition);
 	s.syncAsUint16LE(curtainsFrameTime);
 
-	s.skip(2, kGameTypeNancy3); // Unknown, 3000
+	s.syncAsUint16LE(captionAutoClearTime, kGameTypeNancy3);
 
 	readFilename(s, inventoryBoxIconsImageName);
 	readFilename(s, inventoryCursorsImageName);
@@ -177,11 +184,8 @@ INV::INV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	assert(chunkStream);
-
 	bool isVampire = g_nancy->getGameType() == Nancy::GameType::kGameTypeVampire;
 
-	chunkStream->seek(0);
 	readRect(*chunkStream, scrollbarSrcBounds);
 
 	chunkStream->seek(0x20);
@@ -242,7 +246,7 @@ MAP::MAP(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	s.skip(0x20);
 
 	s.syncAsUint16LE(globeFrameTime, kGameTypeVampire, kGameTypeVampire);
-	readRectArray(s, globeSrcs, 8, kGameTypeVampire, kGameTypeVampire);
+	readRectArray(s, globeSrcs, 8, 8, kGameTypeVampire, kGameTypeVampire);
 	readRect(s, globeDest, kGameTypeVampire, kGameTypeVampire);
 
 	s.skip(2, kGameTypeNancy1);
@@ -310,11 +314,7 @@ HELP::HELP(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 CRED::CRED(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	assert(chunkStream);
-
 	bool isVampire = g_nancy->getGameType() == kGameTypeVampire;
-	chunkStream->seek(0);
-
 	readFilename(*chunkStream, imageName);
 
 	textNames.resize(isVampire ? 7 : 1);
@@ -332,38 +332,21 @@ CRED::CRED(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 MENU::MENU(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	readFilename(*chunkStream, _imageName);
-	chunkStream->skip(22);
+	Common::Serializer ser(chunkStream, nullptr);
+	ser.setVersion(g_nancy->getGameType());
+	readFilename(ser, _imageName);
+
+	ser.skip(22);
 
 	uint numOptions = 8;
 
-	_buttonDests.resize(numOptions);
-	_buttonDownSrcs.resize(numOptions);
+	readRectArray16(ser, _buttonDests, numOptions, numOptions, kGameTypeVampire, kGameTypeNancy1);
+	readRectArray16(ser, _buttonDownSrcs, numOptions, numOptions, kGameTypeVampire, kGameTypeNancy1);
 
-	if (g_nancy->getGameType() <= kGameTypeNancy1) {
-		for (uint i = 0; i < numOptions; ++i) {
-			Common::Rect &rect = _buttonDests[i];
-			rect.left = chunkStream->readSint16LE();
-			rect.top = chunkStream->readSint16LE();
-			rect.right = chunkStream->readSint16LE();
-			rect.bottom = chunkStream->readSint16LE();
-		}
-
-		for (uint i = 0; i < numOptions; ++i) {
-			Common::Rect &rect = _buttonDownSrcs[i];
-			rect.left = chunkStream->readSint16LE();
-			rect.top = chunkStream->readSint16LE();
-			rect.right = chunkStream->readSint16LE();
-			rect.bottom = chunkStream->readSint16LE();
-		}
-	} else {
-		_buttonHighlightSrcs.resize(numOptions);
-
-		readRectArray(*chunkStream, _buttonDests, numOptions);
-		readRectArray(*chunkStream, _buttonDownSrcs, numOptions);
-		readRectArray(*chunkStream, _buttonDisabledSrcs, numOptions);
-		readRectArray(*chunkStream, _buttonHighlightSrcs, numOptions);
-	}
+	readRectArray(ser, _buttonDests, numOptions, numOptions, kGameTypeNancy2);
+	readRectArray(ser, _buttonDownSrcs, numOptions, numOptions, kGameTypeNancy2);
+	readRectArray(ser, _buttonDisabledSrcs, numOptions, numOptions, kGameTypeNancy2);
+	readRectArray(ser, _buttonHighlightSrcs, numOptions, numOptions, kGameTypeNancy2);
 }
 
 SET::SET(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
@@ -371,7 +354,14 @@ SET::SET(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	chunkStream->skip(20); // image info
 	chunkStream->skip(16); // bounds for all scrollbars
 
-	uint numButtons = g_nancy->getGameType() == kGameTypeVampire ? 5 : 4;
+	uint numButtons;
+	if (g_nancy->getGameType() == kGameTypeVampire)  {
+		numButtons = 5;
+	} else if (g_nancy->getGameType() <= kGameTypeNancy5) {
+		numButtons = 4;
+	} else {
+		numButtons = 3;
+	}
 
 	readRectArray(*chunkStream, _scrollbarBounds, 3);
 	readRectArray(*chunkStream, _buttonDests, numButtons);
@@ -509,21 +499,21 @@ CLOK::CLOK(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	uint numFrames = s.getVersion() == kGameTypeVampire? 8 : 7;
 
 	readRectArray(s, animSrcs, numFrames);
-	readRectArray(s, animDests, numFrames, kGameTypeNancy2);
+	readRectArray(s, animDests, numFrames, numFrames, kGameTypeNancy2);
 
 	readRect(s, staticImageSrc, kGameTypeNancy2);
 	readRect(s, staticImageDest, kGameTypeNancy2);
 
 	readRectArray(s, hoursHandSrcs, 12);
-	readRectArray(s, hoursHandDests, 12, kGameTypeNancy2);
+	readRectArray(s, hoursHandDests, 12, 12, kGameTypeNancy2);
 
 	readRectArray(s, minutesHandSrcs, 4);
-	readRectArray(s, minutesHandDests, 4, kGameTypeNancy2);
+	readRectArray(s, minutesHandDests, 4, 4, kGameTypeNancy2);
 
 	readRect(s, screenPosition, kGameTypeVampire, kGameTypeVampire);
 
-	readRectArray(s, hoursHandDests, 12, kGameTypeVampire, kGameTypeVampire);
-	readRectArray(s, minutesHandDests, 4, kGameTypeVampire, kGameTypeVampire);
+	readRectArray(s, hoursHandDests, 12, 12, kGameTypeVampire, kGameTypeVampire);
+	readRectArray(s, minutesHandDests, 4, 4, kGameTypeVampire, kGameTypeVampire);
 
 	readRect(s, staticImageSrc, kGameTypeVampire, kGameTypeVampire);
 	readRect(s, staticImageDest, kGameTypeVampire, kGameTypeVampire);
@@ -534,25 +524,17 @@ CLOK::CLOK(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	s.skip(2, kGameTypeNancy5);
 	s.syncAsUint32LE(nancy5CountdownTime, kGameTypeNancy5);
 	s.skip(2, kGameTypeNancy5);
-	readRectArray(s, nancy5DaySrcs, 3, kGameTypeNancy5);
-	readRectArray(s, nancy5CountdownSrcs, 13, kGameTypeNancy5);
+	readRectArray(s, nancy5DaySrcs, 3, 3, kGameTypeNancy5);
+	readRectArray(s, nancy5CountdownSrcs, 13, 13, kGameTypeNancy5);
 }
 
 SPEC::SPEC(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	assert(chunkStream);
-
-	chunkStream->seek(0);
-
 	fadeToBlackNumFrames = chunkStream->readByte();
 	fadeToBlackFrameTime = chunkStream->readUint16LE();
 	crossDissolveNumFrames = chunkStream->readUint16LE();
 }
 
 RCLB::RCLB(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	assert(chunkStream);
-
-	chunkStream->seek(0);
-
 	lightSwitchID = chunkStream->readUint16LE();
 	unk2 = chunkStream->readUint16LE();
 
@@ -630,10 +612,6 @@ RCLB::RCLB(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 }
 
 RCPR::RCPR(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
-	assert(chunkStream);
-
-	chunkStream->seek(0);
-
 	readRectArray(*chunkStream, screenViewportSizes, 6);
 	viewportSizeUsed = chunkStream->readUint16LE();
 
@@ -696,6 +674,30 @@ ImageChunk::ImageChunk(Common::SeekableReadStream *chunkStream) : EngineData(chu
 	readFilename(*chunkStream, imageName);
 	width = chunkStream->readUint16LE();
 	height = chunkStream->readUint16LE();
+}
+
+CVTX::CVTX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
+	uint16 numEntries = chunkStream->readUint16LE();
+
+	char *buf = nullptr;
+	uint bufSize = 0;
+	Common::String keyName;
+
+	for (uint i = 0; i < numEntries; ++i) {
+		readFilename(*chunkStream, keyName);
+		uint16 stringSize = chunkStream->readUint16LE();
+		if (stringSize > bufSize) {
+			delete buf;
+			buf = new char[stringSize * 2];
+			bufSize = stringSize * 2;
+		}
+
+		chunkStream->read(buf, stringSize);
+		buf[stringSize] = '\0';
+		texts.setVal(keyName, buf);
+	}
+
+	delete buf;
 }
 
 } // End of namespace Nancy

@@ -59,7 +59,6 @@ enum CameraMovement {
 typedef Common::HashMap<uint16, Area *> AreaMap;
 typedef Common::Array<byte *> ColorMap;
 typedef Common::HashMap<uint16, int32> StateVars;
-typedef Common::HashMap<uint16, uint32> StateBits;
 
 enum {
 	kFreescapeDebugMove = 1 << 0,
@@ -68,15 +67,15 @@ enum {
 	kFreescapeDebugMedia = 1 << 4,
 };
 
-struct entrancesTableEntry {
-	int id;
-	int position[3];
-};
-
 struct soundFx {
 	int size;
 	int sampleRate;
 	byte *data;
+};
+
+struct CGAPaletteEntry {
+	int areaId;
+	byte *palette;
 };
 
 class SizedPCSpeaker : public Audio::PCSpeaker {
@@ -176,6 +175,8 @@ public:
 	Graphics::ManagedSurface *loadAndCenterScrImage(Common::SeekableReadStream *stream);
 	void loadPalettes(Common::SeekableReadStream *file, int offset);
 	void swapPalette(uint16 areaID);
+	virtual byte *findCGAPalette(uint16 levelID);
+	const CGAPaletteEntry *_rawCGAPaletteByArea;
 	Common::HashMap<uint16, byte *> _paletteByArea;
 	void loadColorPalette();
 
@@ -395,9 +396,10 @@ public:
 	void setGameBit(int index);
 	void clearGameBit(int index);
 	void toggleGameBit(int index);
+	uint16 getGameBit(int index);
 
 	StateVars _gameStateVars;
-	StateBits _gameStateBits;
+	uint32 _gameStateBits;
 	virtual bool checkIfGameEnded();
 	bool _forceEndGame;
 	bool _playerWasCrushed;
@@ -600,7 +602,7 @@ public:
 private:
 	void addECDs(Area *area);
 	void addECD(Area *area, const Math::Vector3d position, int index);
-	void restoreECD(Area *area, int index);
+	void restoreECD(Area &area, int index);
 	bool checkECD(uint16 areaID, int index);
 	bool tryDestroyECD(int index);
 	bool tryDestroyECDFullGame(int index);

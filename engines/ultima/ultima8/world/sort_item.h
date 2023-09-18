@@ -47,7 +47,7 @@ struct SortItem {
 			_syTop(0), _sxBot(0), _syBot(0),_fbigsq(false), _flat(false),
 			_occl(false), _solid(false), _draw(false), _roof(false),
 			_noisy(false), _anim(false), _trans(false), _fixed(false),
-			_land(false), _occluded(false), _clipped(false), _sprite(false),
+			_land(false), _occluded(false), _sprite(false),
 			_invitem(false) { }
 
 	SortItem                *_next;
@@ -108,7 +108,6 @@ struct SortItem {
 	bool 	_invitem : 1;        // Crusader inventory item, should appear above other things
 
 	bool    _occluded : 1;       // Set true if occluded
-	bool  	_clipped : 1;        // Clipped to RenderSurface
 
 	int32   _order;      // Rendering _order. -1 is not yet drawn
 
@@ -337,8 +336,8 @@ inline bool SortItem::overlap(const SortItem &si2) const {
 	// 'normal' of bot right line (-2, 1) of the bounding box
 	const int32 dot_bot_right = -point_bot_diff[0] - point_bot_diff[1] * 2;
 
-	const bool right_clear = _sxRight <= si2._sxLeft;
-	const bool left_clear = _sxLeft >= si2._sxRight;
+	const bool right_clear = _sxRight < si2._sxLeft;
+	const bool left_clear = _sxLeft > si2._sxRight;
 	const bool top_left_clear = dot_top_left >= 0;
 	const bool top_right_clear = dot_top_right >= 0;
 	const bool bot_left_clear = dot_bot_left >= 0;
@@ -415,7 +414,7 @@ inline bool SortItem::below(const SortItem &si2) const {
 	// If an object's base (z-bottom) is higher another's, it should be rendered after.
 	// This check must be on the z-bottom and not the z-top because two objects with the
 	// same z-position may have different heights (think of a mouse sorting vs the Avatar).
-	if (si1._z != si2._z)
+	if (si1._z != si2._z && (si1._solid == si2._solid || si1._trans == si2._trans))
 		return si1._z < si2._z;
 
 	// Are overlapping in all 3 dimensions if we come here
@@ -473,6 +472,18 @@ inline bool SortItem::below(const SortItem &si2) const {
 	// Roof always gets drawn first
 	if (si1._roof != si2._roof)
 		return si1._roof > si2._roof;
+
+	// X-Flat gets drawn after
+	bool xFlat1 = si1._xLeft == si1._x;
+	bool xFlat2 = si2._xLeft == si2._x;
+	if (xFlat1 != xFlat2)
+		return xFlat1 < xFlat2;
+
+	// Y-Flat gets drawn after
+	bool yFlat1 = si1._yFar == si1._y;
+	bool yFlat2 = si2._yFar == si2._y;
+	if (yFlat1 != yFlat2)
+		return yFlat1 < yFlat2;
 
 	// Partial in X + Y front
 	if (si1._x + si1._y != si2._x + si2._y)

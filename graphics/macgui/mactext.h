@@ -31,6 +31,14 @@
 #include "graphics/macgui/macwidget.h"
 #include "graphics/macgui/macwindow.h"
 
+namespace Common {
+class Archive;
+}
+
+namespace Image {
+class PNGDecoder;
+}
+
 namespace Graphics {
 
 class MacMenu;
@@ -53,6 +61,7 @@ struct MacFontRun {
 	bool wordContinuation;
 	const Font *font;
 	MacWindowManager *wm;
+	Common::String link;  // Substitute to return when hover or click
 
 	MacFontRun() {
 		wm = nullptr;
@@ -109,19 +118,18 @@ struct MacFontRun {
 };
 
 struct MacTextLine {
-	int width;
-	int height;
-	int y;
-	int charwidth;
-	bool paragraphEnd;
+	int width = -1;
+	int height = -1;
+	int y = 0;
+	int charwidth = -1;
+	bool paragraphEnd = false;
+	int indent = 0; // in units
+	int firstLineIndent = 0; // in pixels
+	Common::String picfname;
+	Common::U32String picalt, pictitle;
+	uint16 picpercent = 50;
 
 	Common::Array<MacFontRun> chunks;
-
-	MacTextLine() {
-		width = height = charwidth = -1;
-		y = 0;
-		paragraphEnd = false;
-	}
 
 	MacFontRun &firstChunk() { return chunks[0]; }
 	MacFontRun &lastChunk() { return chunks[chunks.size() - 1]; }
@@ -179,7 +187,7 @@ public:
 	void drawToPoint(ManagedSurface *g, Common::Rect srcRect, Common::Point dstPoint);
 	void drawToPoint(ManagedSurface *g, Common::Point dstPoint);
 
-	Graphics::ManagedSurface *getSurface() { return _surface; }
+	ManagedSurface *getSurface() { return _surface; }
 	int getInterLinear() { return _interLinear; }
 	void setInterLinear(int interLinear);
 	void setMaxWidth(int maxWidth);
@@ -227,6 +235,9 @@ public:
 	int getMouseWord(int x, int y);
 	int getMouseItem(int x, int y);
 	int getMouseLine(int x, int y);
+	Common::U32String getMouseLink(int x, int y);
+
+	void setImageArchive(Common::String name);
 
 private:
 	MacFontRun getTextChunks(int start, int end);
@@ -263,7 +274,7 @@ public:
 	void insertChar(byte c, int *row, int *col);
 
 	void getChunkPosFromIndex(int index, uint &lineNum, uint &chunkNum, uint &offset);
-	void getRowCol(int x, int y, int *sx, int *sy, int *row, int *col);
+	void getRowCol(int x, int y, int *sx, int *sy, int *row, int *col, int *chunk_ = nullptr);
 	Common::U32String getTextChunk(int startRow, int startCol, int endRow, int endCol, bool formatted = false, bool newlines = true);
 
 	Common::U32String getSelection(bool formatted = false, bool newlines = true);
@@ -288,6 +299,13 @@ public:
 	void setSelRange(int selStart, int selEnd);
 
 	void scroll(int delta);
+
+	// Markdown
+public:
+	void setMarkdownText(const Common::U32String &str);
+
+private:
+	const Surface *getImageSurface(Common::String &fname);
 
 private:
 	void init();
@@ -376,6 +394,11 @@ private:
 	SelectedText _selectedText;
 
 	MacMenu *_menu;
+
+#ifdef USE_PNG
+	Common::HashMap<Common::String, Image::PNGDecoder *> _imageCache;
+#endif
+	Common::Archive *_imageArchive = nullptr;
 };
 
 } // End of namespace Graphics

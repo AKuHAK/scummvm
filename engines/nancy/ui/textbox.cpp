@@ -84,6 +84,10 @@ void Textbox::registerGraphics() {
 }
 
 void Textbox::updateGraphics() {
+	if (_autoClearTime && g_nancy->getTotalPlayTime() > _autoClearTime) {
+		clear();
+	}
+
 	if (_needsTextRedraw) {
 		drawTextbox();
 	}
@@ -193,24 +197,17 @@ void Textbox::drawTextbox() {
 						break;
 					}
 
-					if (curToken[1] == '0' && colorTokens.size() == 0) {
+					if (curToken[1] == '0' && colorTokens.size() % 2 == 0) {
 						// Found a color end token ("c0") without a corresponding begin ("c1"),
-						// insert a fake one at the beginning of the queue to make the color logic work.
-						// This happens in nancy5's intro
-						colorTokens.push(0);
+						// or following another color end token. This is invalid, so we just skip it
+						// This happens in nancy4's intro, and nancy5's beginning cutscene
+						continue;
 					}
 
 					if (curToken[1] == '1' && colorTokens.size() % 2 == 1) {
 						// Found a color begin token ("c1") following another color begin token.
 						// This is invalid, so we just skip it
 						// This probably also happens somewhere
-						continue;
-					}
-
-					if (curToken[1] == '0' && colorTokens.size() % 2 == 0) {
-						// Found a color end token ("c0") following another color end token.
-						// This is invalid, so we just skip it
-						// This happens in nancy5's intro
 						continue;
 					}
 					
@@ -359,14 +356,19 @@ void Textbox::clear() {
 		_fontIDOverride = -1;
 		onScrollbarMove();
 		_needsRedraw = true;
+		_autoClearTime = 0;
 	}
 }
 
-void Textbox::addTextLine(const Common::String &text) {
-	// Scan for the hotspot token and assume the text is the main text if not found
+void Textbox::addTextLine(const Common::String &text, uint32 autoClearTime) {
 	_textLines.push_back(text);
-
 	_needsTextRedraw = true;
+
+	if (autoClearTime != 0) {
+		// Start a timer, after which the textbox will automatically be cleared.
+		// Currently only used by inventory closed captions
+		_autoClearTime = g_nancy->getTotalPlayTime() + autoClearTime;
+	}
 }
 
 // A text line will often be broken up into chunks separated by nulls, use
