@@ -45,7 +45,6 @@ protected:
 	int16 _scrolledX, _scrolledY;
 	int _scrollbarWidth;
 	uint16 _limitH;
-	uint32 _reflowCmd;
 	int _textWidth;
 
 	Common::String _imageArchive;
@@ -54,6 +53,8 @@ public:
 	RichTextWidget(GuiObject *boss, int x, int y, int w, int h, bool scale, const Common::U32String &text, const Common::U32String &tooltip = Common::U32String());
 	RichTextWidget(GuiObject *boss, int x, int y, int w, int h, const Common::U32String &text, const Common::U32String &tooltip = Common::U32String());
 	RichTextWidget(GuiObject *boss, const Common::String &name, const Common::U32String &text, const Common::U32String &tooltip = Common::U32String());
+
+	~RichTextWidget();
 
 	void reflowLayout() override;
 	void draw() override;

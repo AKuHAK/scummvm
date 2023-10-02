@@ -119,7 +119,8 @@ Scene::Scene() :
 		_difficulty(0),
 		_activeConversation(nullptr),
 		_lightning(nullptr),
-		_destroyOnExit(false) {}
+		_destroyOnExit(false),
+		_hotspotDebug(50) {}
 
 Scene::~Scene()  {
 	delete _helpButton;
@@ -190,7 +191,10 @@ void Scene::onStateEnter(const NancyState::NancyState prevState) {
 }
 
 bool Scene::onStateExit(const NancyState::NancyState nextState) {
-	g_nancy->_graphicsManager->screenshotScreen(_lastScreenshot);
+	if (_state == kRun) {
+		// Exiting the state outside the kRun state means we've encountered an error
+		g_nancy->_graphicsManager->screenshotScreen(_lastScreenshot);
+	}
 
 	if (nextState != NancyState::kPause) {
 		_timers.pushedPlayTime = g_nancy->getTotalPlayTime();
@@ -218,6 +222,11 @@ void Scene::changeScene(const SceneChangeDescription &sceneDescription) {
 	if (sceneDescription.sceneID == 9999 || _state == kLoad) {
 		return;
 	}
+
+	// Increment scene count on scene exit in order to:
+	// - keep values needed for the kSceneCount dependency correct
+	// - make sure we don't increment when loading a save
+	_flags.sceneCounts.getOrCreateVal(_sceneState.currentScene.sceneID)++;
 
 	_sceneState.nextScene = sceneDescription;
 	_state = kLoad;
@@ -258,9 +267,21 @@ byte Scene::getPlayerTOD() const {
 		} else {
 			return kPlayerDuskDawn;
 		}
-	} else {
+	} else if (g_nancy->getGameType() <= kGameTypeNancy5) {
 		// nancy2 and up removed dusk/dawn
 		if (_timers.playerTime.getHours() >= 6 && _timers.playerTime.getHours() < 18) {
+			return kPlayerDay;
+		} else {
+			return kPlayerNight;
+		}
+	} else {
+		// nancy6 added the day start/end times (in minutes) to BSUM
+		const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+		assert(bootSummary);
+
+		uint16 minutes = _timers.playerTime.getHours() * 60 + _timers.playerTime.getMinutes();
+
+		if (minutes >= bootSummary->dayStartMinutes && minutes < bootSummary->dayEndMinutes) {
 			return kPlayerDay;
 		} else {
 			return kPlayerNight;
@@ -269,30 +290,42 @@ byte Scene::getPlayerTOD() const {
 }
 
 void Scene::addItemToInventory(uint16 id) {
-	_flags.items[id] = g_nancy->_true;
-	if (_flags.heldItem == id) {
-		setHeldItem(-1);
-	}
-	
-	g_nancy->_sound->playSound("BUOK");
+	if (_flags.items[id] == g_nancy->_false) {
+		_flags.items[id] = g_nancy->_true;
+		if (_flags.heldItem == id) {
+			setHeldItem(-1);
+		}
+		
+		g_nancy->_sound->playSound("BUOK");
 
-	_inventoryBox.addItem(id);
+		_inventoryBox.addItem(id);
+	}
 }
 
 void Scene::removeItemFromInventory(uint16 id, bool pickUp) {
-	_flags.items[id] = g_nancy->_false;
+	if (_flags.items[id] == g_nancy->_true || getHeldItem() == id) {
+		_flags.items[id] = g_nancy->_false;
 
-	if (pickUp) {
-		setHeldItem(id);
+		if (pickUp) {
+			setHeldItem(id);
+		} else if (getHeldItem() == id) {
+			setHeldItem(-1);
+		}
+		
+		g_nancy->_sound->playSound("BUOK");
+
+		_inventoryBox.removeItem(id);
 	}
-	
-	g_nancy->_sound->playSound("BUOK");
-
-	_inventoryBox.removeItem(id);
 }
 
 void Scene::setHeldItem(int16 id)  {
 	_flags.heldItem = id; g_nancy->_cursorManager->setCursorItemID(id);
+}
+
+void Scene::setNoHeldItem() {
+	if (getHeldItem() != -1) {
+		addItemToInventory(getHeldItem());
+	}
 }
 
 void Scene::installInventorySoundOverride(byte command, const SoundDescription &sound, const Common::String &caption, uint16 itemID) {
@@ -326,6 +359,10 @@ void Scene::installInventorySoundOverride(byte command, const SoundDescription &
 }
 
 void Scene::playItemCantSound(int16 itemID) {
+	if (ConfMan.getBool("subtitles") && g_nancy->getGameType() >= kGameTypeNancy2) {
+		_textbox.clear();
+	}
+
 	// Improvement: nancy2 never shows the caption text, even though it exists in the data; we show it
 	const INV *inventoryData = (const INV *)g_nancy->getEngineData("INV");
 	assert(inventoryData);
@@ -482,6 +519,7 @@ void Scene::registerGraphics() {
 	_viewport.registerGraphics();
 	_textbox.registerGraphics();
 	_inventoryBox.registerGraphics();
+	_hotspotDebug.registerGraphics();
 
 	if (_menuButton) {
 		_menuButton->registerGraphics();
@@ -703,6 +741,11 @@ void Scene::init() {
 		_lightning = new Misc::Lightning();
 	}
 
+	Common::Rect vpPos = _viewport.getScreenPosition();
+	_hotspotDebug._drawSurface.create(vpPos.width(), vpPos.height(), g_nancy->_graphicsManager->getScreenPixelFormat());
+	_hotspotDebug.moveTo(vpPos);
+	_hotspotDebug.setTransparent(true);
+
 	registerGraphics();
 	g_nancy->_graphicsManager->redrawAll();
 }
@@ -748,6 +791,7 @@ void Scene::load() {
 	}
 
 	clearSceneData();
+	g_nancy->_graphicsManager->suppressNextDraw();
 
 	// Scene IDs are prefixed with S inside the cif tree; e.g 100 -> S100
 	Common::String sceneName = Common::String::format("S%u", _sceneState.nextScene.sceneID);
@@ -785,9 +829,11 @@ void Scene::load() {
 	// Search for Action Records, maximum for a scene is 30
 	Common::SeekableReadStream *actionRecordChunk = nullptr;
 
-	while (actionRecordChunk = sceneIFF.getChunkStream("ACT", _actionManager._records.size()), actionRecordChunk != nullptr) {
+	uint numRecords = 0;
+	while (actionRecordChunk = sceneIFF.getChunkStream("ACT", numRecords), actionRecordChunk != nullptr) {
 		_actionManager.addNewActionRecord(*actionRecordChunk);
 		delete actionRecordChunk;
+		++numRecords;
 	}
 
 	if (_sceneState.currentScene.paletteID == -1) {
@@ -828,11 +874,7 @@ void Scene::load() {
 	_inventorySoundOverrides.clear();
 
 	_timers.sceneTime = 0;
-
-	_flags.sceneCounts.getOrCreateVal(_sceneState.currentScene.sceneID)++;
-
 	g_nancy->_sound->recalculateSoundEffects();
-	g_nancy->_graphicsManager->suppressNextDraw();
 
 	_state = kStartSound;
 }

@@ -60,11 +60,21 @@ struct BSUM : public EngineData {
 	Common::Rect helpButtonHighlightSrc;
 	Common::Rect clockHighlightSrc;
 
+	// Transparent color
+	byte paletteTrans = 0;
+	byte rTrans = 0;
+	byte gTrans = 0;
+	byte bTrans = 0;
+
 	uint16 horizontalEdgesSize;
 	uint16 verticalEdgesSize;
 
+	uint16 numFonts;
+
 	uint16 playerTimeMinuteLength;
 	uint16 buttonPressTimeDelay;
+	uint16 dayStartMinutes = 0;
+	uint16 dayEndMinutes = 0;
 	byte overrideMovementTimeDeltas;
 	uint16 slowMovementTimeDelta;
 	uint16 fastMovementTimeDelta;
@@ -135,17 +145,23 @@ struct TBOX : public EngineData {
 	Common::Point scrollbarDefaultPos;
 	uint16 scrollbarMaxScroll;
 
-	uint16 firstLineOffset;
-	uint16 lineHeight;
-	uint16 borderWidth;
-	uint16 maxWidthDifference;
+	uint16 upOffset;
+	uint16 downOffset;
+	uint16 leftOffset;
+	uint16 rightOffset;
 
 	Common::Array<Common::Rect> ornamentSrcs;
 	Common::Array<Common::Rect> ornamentDests;
 
 	uint16 defaultFontID;
+	uint16 defaultTextColor;
 	uint16 conversationFontID;
 	uint16 highlightConversationFontID;
+	uint16 tabWidth;
+	uint16 pageScrollPercent;
+
+	uint32 textBackground;
+	uint32 highlightTextBackground;
 };
 
 // Contains data about the map state. Only used in TVD and nancy1
@@ -325,10 +341,10 @@ struct CLOK : public EngineData {
 	Common::Rect staticImageSrc;
 	Common::Rect staticImageDest;
 
-	uint32 timeToKeepOpen;
-	uint16 frameTime;
+	uint32 timeToKeepOpen = 0;
+	uint16 frameTime = 0;
 
-	uint32 nancy5CountdownTime;
+	uint32 nancy5CountdownTime = 0;
 	Common::Array<Common::Rect> nancy5DaySrcs;
 	Common::Array<Common::Rect> nancy5CountdownSrcs;
 };
@@ -417,6 +433,16 @@ struct CVTX : public EngineData {
 	CVTX(Common::SeekableReadStream *chunkStream);
 
 	Common::HashMap<Common::String, Common::String> texts;
+};
+
+struct TABL : public EngineData {
+	TABL(Common::SeekableReadStream *chunkStream);
+
+	Common::String soundBaseName;
+	Common::Array<uint16> startIDs;
+	Common::Array<uint16> correctIDs;
+	Common::Array<Common::Rect> srcRects;
+	Common::Array<Common::String> strings;
 };
 
 } // End of namespace Nancy

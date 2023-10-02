@@ -24,6 +24,7 @@
 #include "engines/nancy/resource.h"
 #include "engines/nancy/graphics.h"
 #include "engines/nancy/util.h"
+#include "engines/nancy/enginedata.h"
 
 namespace Nancy {
 
@@ -36,18 +37,21 @@ void Font::read(Common::SeekableReadStream &stream) {
 	readFilename(stream, imageName);
 
 	g_nancy->_resource->loadImage(imageName, _image);
+	_image.setTransparentColor(g_nancy->_graphicsManager->getTransColor());
 
-	char desc[0x20];
-	stream.read(desc, 0x20);
-	desc[0x1F] = '\0';
+	char desc[31];
+	stream.read(desc, 30);
+	desc[30] = '\0';
 	_description = desc;
-	stream.skip(8);
-	_colorCoordsOffset.x = stream.readUint16LE();
-	_colorCoordsOffset.y = stream.readUint16LE();
 
-	stream.skip(2);
+	_color0CoordsOffset.x = stream.readUint32LE();
+	_color0CoordsOffset.y = stream.readUint32LE();
+	_color1CoordsOffset.x = stream.readUint32LE();
+	_color1CoordsOffset.y = stream.readUint32LE();
+
 	_spaceWidth = stream.readUint16LE();
-	stream.skip(2);
+	_charSpace = stream.readSint16LE() - 1; // Account for the added pixel in readRect
+
 	_uppercaseOffset					= stream.readUint16LE();
 	_lowercaseOffset					= stream.readUint16LE();
 	_digitOffset						= stream.readUint16LE();
@@ -110,56 +114,40 @@ void Font::read(Common::SeekableReadStream &stream) {
 		}
 
 		_maxCharWidth = MAX<int>(cur.width(), _maxCharWidth);
-		_fontHeight = MAX<int>(cur.height(), _maxCharWidth);
+		_fontHeight = MAX<int>(cur.height(), _fontHeight);
 	}
+
+	_textboxData = (const TBOX *)g_nancy->getEngineData("TBOX");
+	assert(_textboxData);
 }
 
 int Font::getCharWidth(uint32 chr) const {
-	return getCharacterSourceRect(chr).width();
+	return getCharacterSourceRect(chr).width() + _charSpace;
 }
 
 void Font::drawChar(Graphics::Surface *dst, uint32 chr, int x, int y, uint32 color) const {
 	Common::Rect srcRect = getCharacterSourceRect(chr);
-	if (color != 0) {
-		srcRect.translate(_colorCoordsOffset.x, _colorCoordsOffset.y);
+	if (color == 0) {
+		srcRect.translate(_color0CoordsOffset.x, _color0CoordsOffset.y);
+	} else if (color == 1) {
+		srcRect.translate(_color1CoordsOffset.x, _color1CoordsOffset.y);
 	}
 
 	uint vampireAdjust = g_nancy->getGameType() == kGameTypeVampire ? 1 : 0;
-	uint width = MAX<int>(srcRect.width() - vampireAdjust, 0);
+	srcRect.setWidth(MAX<int>(srcRect.width() - vampireAdjust, 0));
 	uint height = srcRect.height();
 	uint yOffset = getFontHeight() - height;
-	height = MAX<int>(height - vampireAdjust, 0);
+	srcRect.setHeight(MAX<int>(height - vampireAdjust, 0));
 
-	for (uint curY = 0; curY < height; ++curY) {
-		for (uint curX = 0; curX < width; ++curX) {
-			switch (g_nancy->_graphicsManager->getInputPixelFormat().bytesPerPixel) {
-			case 1: {
-				byte colorID = *(const byte *)_image.getBasePtr(srcRect.left + curX, srcRect.top + curY);
+	// Create a wrapper ManagedSurface to handle blitting/format differences
+	Graphics::ManagedSurface dest;
+	dest.w = dst->w;
+	dest.h = dst->h;
+	dest.pitch = dst->pitch;
+	dest.setPixels(dst->getPixels());
+	dest.format = dst->format;
 
-				if (colorID != _transColor) {
-					uint8 palette[1 * 3];
-					_image.grabPalette(palette, colorID, 1);
-					*(uint16 *)dst->getBasePtr(x + curX, y + yOffset + curY) = dst->format.RGBToColor(palette[0], palette[1], palette[2]);
-				}
-
-				break;
-			}
-			case 2: {
-				uint16 curColor = *(const uint16 *)_image.getBasePtr(srcRect.left + curX, srcRect.top + curY);
-
-				if (curColor != _transColor) {
-					uint8 r, g, b;
-					_image.format.colorToRGB(curColor, r, g, b);
-					*(uint16 *)dst->getBasePtr(x + curX, y + yOffset + curY) = dst->format.RGBToColor(r, g, b);
-				}
-
-				break;
-			}
-			default:
-				break;
-			}
-		}
-	}
+	dest.blitFrom(_image, srcRect, Common::Point(x, y + yOffset));
 }
 
 void Font::wordWrap(const Common::String &str, int maxWidth, Common::Array<Common::String> &lines, int initWidth) const {
@@ -281,6 +269,14 @@ Common::Rect Font::getCharacterSourceRect(char chr) const {
 		case '\xdf':
 			offset = _eszettOffset;
 			break;
+		case '\x92':
+			if (g_nancy->getGameType() == kGameTypeNancy4) {
+				// Improvement: we fix a specific broken string in nancy4 ("It's too dark..." when entering a dark staircase)
+				offset = _apostropheOffset;
+			} else {
+				offset = -1;
+			}
+			break;
 		default:
 			offset = -1;
 			break;
@@ -291,6 +287,9 @@ Common::Rect Font::getCharacterSourceRect(char chr) const {
 		offset = chr + _lowercaseOffset - 0x61;
 	} else if (isDigit(chr)) {
 		offset = chr + _digitOffset - 0x30;
+	} else if (chr == '\t') {
+		ret.setWidth((_spaceWidth - 1) * _textboxData->tabWidth);
+		return ret;
 	} else if (isSpace(chr)) {
 		ret.setWidth(_spaceWidth - 1);
 		return ret;

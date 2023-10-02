@@ -67,6 +67,10 @@ static const byte kFlagCursor						= 3;
 static const byte kContinueSceneSound				= 1;
 static const byte kLoadSceneSound					= 0;
 
+// Scene rotation special values
+static const uint16 kInvertedNode					= 77;
+static const uint16 kNoAutoScroll					= 333;
+
 // Clock bump types
 static const byte kAbsoluteClockBump 				= 1;
 static const byte kRelativeClockBump 				= 2;
@@ -79,6 +83,30 @@ static const byte kPlayerDuskDawn					= 2;
 // Video
 static const byte kSmallVideoFormat					= 1;
 static const byte kLargeVideoFormat					= 2;
+
+// Overlay
+static const byte kPlayOverlayPlain					= 1;
+static const byte kPlayOverlayTransparent			= 2;
+
+static const byte kPlayOverlaySceneChange			= 1;
+static const byte kPlayOverlayNoSceneChange			= 2;
+
+static const byte kPlayOverlayStatic				= 1;
+static const byte kPlayOverlayAnimated				= 2;
+
+static const byte kPlayOverlayOnce					= 1;
+static const byte kPlayOverlayLoop					= 2;
+
+static const byte kPlayOverlayForward				= 1;
+static const byte kPlayOverlayReverse				= 2;
+
+static const byte kPlayOverlayWithHotspot			= 1;
+static const byte kPlayOverlayNoHotspot				= 2;
+
+// Table access
+static const byte kNoChangeTableValue				= 0;
+static const byte kIncrementTableValue				= 1;
+static const byte kDecrementTableValue				= 2;
 
 enum MovementDirection : byte { kUp = 1, kDown = 2, kLeft = 4, kRight = 8, kMoveFast = 16 };
 
@@ -131,7 +159,7 @@ struct SceneChangeWithFlag {
 	SceneChangeDescription _sceneChange;
 	FlagDescription _flag;
 
-	void readData(Common::SeekableReadStream &stream, bool longFormat = false);
+	void readData(Common::SeekableReadStream &stream, bool reverseFormat = false);
 	void execute();
 };
 
@@ -143,13 +171,14 @@ struct HotspotDescription {
 	void readData(Common::SeekableReadStream &stream);
 };
 
-// Describes a single bitmap draw
-struct BitmapDescription {
-	uint16 frameID = 0;
+// Describes a blit operation, dependent on a background frame
+struct FrameBlitDescription {
+	uint16 frameID = 0; // Frame ID of the Scene background
+	uint hasHotspot = kPlayOverlayNoHotspot;
 	Common::Rect src;
 	Common::Rect dest;
 
-	void readData(Common::SeekableReadStream &stream, bool frameIsLong = false);
+	void readData(Common::SeekableReadStream &stream, bool longFormat = false);
 };
 
 // Describes 10 event flag changes to be executed when an action is triggered

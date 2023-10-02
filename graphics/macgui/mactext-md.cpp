@@ -25,7 +25,7 @@
 
 namespace Graphics {
 
-#define PR(x) ((x && x->data) ? Common::String((const char *)(x)->data , (x)->size).c_str() : "(null)")
+#define PR(x) ((x && x->data) ? Common::toPrintable(Common::String((const char *)(x)->data , (x)->size)).c_str() : "(null)")
 
 struct MDState {
 	Common::List<int> listNum;
@@ -36,7 +36,7 @@ void render_blockcode(Common::SDDataBuffer *ob, const Common::SDDataBuffer *text
 	if (!text)
 		return;
 
-	Common::String res = Common::String::format("\n\016+0001" "\001\016t%04x" "%s" "\001\016tffff" "\n\016-0001",
+	Common::String res = Common::String::format("\n\001\016+0001" "\001\016t%04x" "%s" "\001\016tffff" "\n\001\016-0001",
 			kMacFontMonaco, Common::String((const char *)text->data , text->size).c_str());
 
 	sd_bufput(ob, res.c_str(), res.size());
@@ -64,7 +64,7 @@ void render_header(Common::SDDataBuffer *ob, const Common::SDDataBuffer *text, i
 
 	debug(1, "render_header(%s)", PR(text));
 
-	Common::String res = Common::String::format("\016+00%01x0" "%s" "\001\016-00f0\n", level, Common::String((const char *)text->data , text->size).c_str());
+	Common::String res = Common::String::format("\001\016+00%01x0" "%s" "\001\016-00f0\n", level, Common::String((const char *)text->data , text->size).c_str());
 
 	sd_bufput(ob, res.c_str(), res.size());
 }
@@ -78,7 +78,7 @@ void render_list_start(Common::SDDataBuffer *ob, const Common::SDDataBuffer *tex
 
 	mdstate->listNum.push_back(flags & MKD_LIST_ORDERED ? 1 : -1);
 
-	sd_bufput(ob, "\016+0001", 6);
+	sd_bufput(ob, "\001\016+0001", 7);
 
 	debug(1, "render_list_start(%s, %d)", PR(text), flags);
 }
@@ -89,7 +89,7 @@ void render_list(Common::SDDataBuffer *ob, const Common::SDDataBuffer *text, int
 	mdstate->listNum.pop_back();
 
 	sd_bufput(ob, text->data, text->size);
-	sd_bufput(ob, "\n\016-0001", 7);
+	sd_bufput(ob, "\n\001\016-0001", 8);
 
 	debug(1, "render_list(%s, %d)", PR(text), flags);
 }
@@ -133,21 +133,33 @@ void render_table(Common::SDDataBuffer *ob, const Common::SDDataBuffer *header, 
 	if (!body)
 		return;
 
-	warning("STUB: render_table(%s, %s)", PR(header), PR(body));
+	Common::String res = Common::String::format("\001\016Th" "%s" "\001\016Tb" "%s" "\001\016TB",
+			Common::String((const char *)header->data , header->size).c_str(), Common::String((const char *)body->data , body->size).c_str());
+
+	sd_bufput(ob, res.c_str(), res.size());
+
+	debug(1, "render_table(%s, %s)", PR(header), PR(body));
 }
 
 void render_table_row(Common::SDDataBuffer *ob, const Common::SDDataBuffer *text, void *opaque) {
 	if (!text)
 		return;
 
-	warning("STUB: render_table_row(%s)", PR(text));
+	Common::String res = Common::String::format("\001\016Tr" "%s\n", Common::String((const char *)text->data , text->size).c_str());
+	sd_bufput(ob, res.c_str(), res.size());
+
+	debug(1, "render_table_row(%s)", PR(text));
 }
 
 void render_table_cell(Common::SDDataBuffer *ob, const Common::SDDataBuffer *text, int flags, void *opaque) {
 	if (!text)
 		return;
 
-	warning("STUB: render_table_cell(%s)", PR(text));
+	Common::String res = Common::String::format("\001\016Tc%02x" "%s" "\001\016TC", flags, Common::String((const char *)text->data , text->size).c_str());
+
+	sd_bufput(ob, res.c_str(), res.size());
+
+	debug(1, "render_table_cell(%s), flags: %d", PR(text), flags);
 }
 
 int render_autolink(Common::SDDataBuffer *ob, const Common::SDDataBuffer *link, Common::MKDAutolink type, void *opaque) {
@@ -327,7 +339,7 @@ void MacText::setMarkdownText(const Common::U32String &str) {
 	mdState.linkg = 0;
 	mdState.linkb = 0xff;
 
-	Common::SDMarkdown md(0, 16, &cb, &mdState);
+	Common::SDMarkdown md(Common::MKDEXT_TABLES, 16, &cb, &mdState);
 	Common::String rendered = md.render((const byte *)input.c_str(), input.size());
 
 	setText(rendered);

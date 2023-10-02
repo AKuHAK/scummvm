@@ -41,7 +41,8 @@ enum GameType {
 };
 
 enum NancyGameFlags {
-	GF_COMPRESSED = 1 << 0
+	GF_COMPRESSED 		= 1 << 0,
+	GF_PLG_BYTE_IN_BSUM	= 1 << 1
 };
 
 struct NancyGameDescription {
@@ -55,6 +56,10 @@ enum NancyDebugChannels {
 	kDebugScene			= 1 << 2,
 	kDebugSound			= 1 << 3
 };
+
+#define GAMEOPTION_PLAYER_SPEECH GUIO_GAMEOPTIONS1
+#define GAMEOPTION_CHARACTER_SPEECH GUIO_GAMEOPTIONS2
+#define GAMEOPTION_AUTO_MOVE GUIO_GAMEOPTIONS3
 
 } // End of namespace Nancy
 

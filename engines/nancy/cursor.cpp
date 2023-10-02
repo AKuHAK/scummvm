@@ -43,20 +43,10 @@ void CursorManager::init(Common::SeekableReadStream *chunkStream) {
 
 	chunkStream->seek(0);
 
-	switch(g_nancy->getGameType()) {
-	case kGameTypeVampire:
-		// fall thorugh
-	case kGameTypeNancy1:
-		_numCursorTypes = 4;
-		break;
-	case kGameTypeNancy2:
-		_numCursorTypes = 5;
-		break;
-	case kGameTypeNancy3:
-		_numCursorTypes = 8;
-		break;
-	default:
-		_numCursorTypes = 12;
+	if (g_nancy->getGameType() == kGameTypeVampire) {
+		_numCursorTypes = g_nancy->getStaticData().numNonItemCursors / 2;
+	} else {
+		_numCursorTypes = g_nancy->getStaticData().numNonItemCursors / 3;
 	}
 
 	uint numCursors = g_nancy->getStaticData().numNonItemCursors + g_nancy->getStaticData().numItems * _numCursorTypes;
@@ -106,8 +96,7 @@ void CursorManager::setCursor(CursorType type, int16 itemID) {
 
 	_hasItem = false;
 
-	// kNormalArrow, kHotspotArrow, kExit, kTurnLeft and kTurnRight are
-	// cases where the selected cursor is _always_ shown, regardless
+	// For all cases below, the selected cursor is _always_ shown, regardless
 	// of whether or not an item is held. All other types of cursor
 	// are overridable when holding an item. Every item cursor has
 	// _numItemCursor variants, one corresponding to every numbered
@@ -141,6 +130,14 @@ void CursorManager::setCursor(CursorType type, int16 itemID) {
 		}
 
 		return;
+	case kInvertedRotateLeft:
+		// Only valid for nancy6 and up
+		if (gameType >= kGameTypeNancy6) {
+			_curCursorID = kInvertedRotateLeft;
+			return;
+		}
+		
+		// fall through
 	case kRotateLeft:
 		// Only valid for nancy6 and up
 		if (gameType >= kGameTypeNancy6) {
@@ -159,6 +156,14 @@ void CursorManager::setCursor(CursorType type, int16 itemID) {
 		}
 
 		break;
+	case kInvertedRotateRight:
+		// Only valid for nancy6 and up
+		if (gameType >= kGameTypeNancy6) {
+			_curCursorID = kInvertedRotateRight;
+			return;
+		}
+
+		// fall through
 	case kRotateRight:
 		// Only valid for nancy6 and up
 		if (gameType >= kGameTypeNancy6) {
@@ -197,6 +202,26 @@ void CursorManager::setCursor(CursorType type, int16 itemID) {
 		}
 
 		break;
+	case kMoveForward:
+		// Only valid for nancy4 and up
+		if (gameType >= kGameTypeNancy4) {
+			_curCursorID = kMoveForward;
+			return;
+		} else {
+			type = kHotspot;
+		}
+
+		break;
+	case kMoveBackward:
+		// Only valid for nancy4 and up
+		if (gameType >= kGameTypeNancy4) {
+			_curCursorID = kMoveBackward;
+			return;
+		} else {
+			type = kHotspot;
+		}
+
+		break;
 	case kExit:
 		// Not valid in TVD
 		if (gameType != kGameTypeVampire) {
@@ -205,13 +230,11 @@ void CursorManager::setCursor(CursorType type, int16 itemID) {
 		}
 
 		break;
-	case kSwivelLeft:
-		// Only valid for nancy6 and up, but we don't need a check for now
-		_curCursorID = kSwivelLeft;
+	case kRotateCW:
+		_curCursorID = kRotateCW;
 		return;
-	case kSwivelRight:
-		// Only valid for nancy6 and up, but we don't need a check for now
-		_curCursorID = kSwivelRight;
+	case kRotateCCW:
+		_curCursorID = kRotateCCW;
 		return;
 	default:
 		break;

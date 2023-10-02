@@ -41,7 +41,7 @@ public:
 
 	void read(Common::SeekableReadStream &stream);
 
-	int getFontHeight() const override { return _fontHeight; }
+	int getFontHeight() const override { return _fontHeight - 1; }
 	int getMaxCharWidth() const override { return _maxCharWidth; }
 	int getCharWidth(uint32 chr) const override;
 	int getKerningOffset(uint32 left, uint32 right) const override { return 1; }
@@ -57,8 +57,10 @@ private:
 	Common::Rect getCharacterSourceRect(char chr) const;
 
 	Common::String _description;
-	Common::Point _colorCoordsOffset; // Added to source rects when colored text is requested
-	uint16 _spaceWidth;
+	Common::Point _color0CoordsOffset;
+	Common::Point _color1CoordsOffset; // Added to source rects when colored text is requested
+	int16 _charSpace = 0;
+	uint16 _spaceWidth = 0;
 
 	// Specific offsets into the _characterRects array
 	uint16 _uppercaseOffset			= 0;
@@ -114,9 +116,11 @@ private:
 
 	Graphics::ManagedSurface _image;
 
-	int _fontHeight;
-	int _maxCharWidth;
-	uint _transColor;
+	const struct TBOX *_textboxData = nullptr;
+
+	int _fontHeight = 0;
+	int _maxCharWidth = 0;
+	uint _transColor = 0;
 };
 
 } // End of namespace Nancy

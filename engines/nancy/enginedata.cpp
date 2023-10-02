@@ -22,6 +22,7 @@
 #include "engines/nancy/enginedata.h"
 #include "engines/nancy/nancy.h"
 #include "engines/nancy/util.h"
+#include "engines/nancy/graphics.h"
 
 #include "common/serializer.h"
 
@@ -53,9 +54,14 @@ BSUM::BSUM(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	s.syncAsUint16LE(startTimeHours);
 	s.syncAsUint16LE(startTimeMinutes);
 
-	s.skip(0xA7, kGameTypeVampire, kGameTypeNancy2);
-	s.skip(4, kGameTypeNancy3, kGameTypeNancy3);
-	s.skip(3, kGameTypeNancy4);
+	s.skip(0xA4, kGameTypeVampire, kGameTypeNancy2);
+	s.skip(3); // Number of object, frame, and logo images
+	if (g_nancy->getGameFlags() & GF_PLG_BYTE_IN_BSUM) {
+		// There's a weird version of nancy3 with an extra byte counting the number of partner logos.
+		// On first glance this seems to be the only difference, but it'll need to be checked more thoroughly
+		// TODO
+		s.skip(1);
+	}
 
 	s.skip(8, kGameTypeVampire, kGameTypeVampire);
 	readRect(s, extraButtonHotspot, kGameTypeVampire, kGameTypeVampire);
@@ -72,15 +78,27 @@ BSUM::BSUM(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	readRect(s, helpButtonHighlightSrc, kGameTypeNancy2);
 	readRect(s, clockHighlightSrc, kGameTypeNancy2);
 
-	s.skip(0xE, kGameTypeVampire, kGameTypeVampire);
-	s.skip(9, kGameTypeNancy1);
+	s.skip(0x2, kGameTypeVampire, kGameTypeVampire);
+	s.syncAsByte(paletteTrans, kGameTypeVampire, kGameTypeVampire);
+	s.skip(0x2, kGameTypeVampire, kGameTypeVampire);
+	s.syncAsByte(rTrans);
+	s.syncAsByte(gTrans);
+	s.syncAsByte(bTrans);
+	s.skip(6); // Black and white
+
 	s.syncAsUint16LE(horizontalEdgesSize);
 	s.syncAsUint16LE(verticalEdgesSize);
 
-	s.skip(0x1A, kGameTypeVampire, kGameTypeVampire);
-	s.skip(0x1C, kGameTypeNancy1);
+	s.syncAsUint16LE(numFonts);
+
+	// Skip data for debug features (diagnostics, version...)
+	s.skip(0x18, kGameTypeVampire, kGameTypeVampire);
+	s.skip(0x1A, kGameTypeNancy1);
+
 	s.syncAsSint16LE(playerTimeMinuteLength);
 	s.syncAsUint16LE(buttonPressTimeDelay);
+	s.syncAsUint16LE(dayStartMinutes, kGameTypeNancy6);
+	s.syncAsUint16LE(dayEndMinutes, kGameTypeNancy6);
 	s.syncAsByte(overrideMovementTimeDeltas);
 	s.syncAsSint16LE(slowMovementTimeDelta);
 	s.syncAsSint16LE(fastMovementTimeDelta);
@@ -165,18 +183,18 @@ INV::INV(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 		if (s.getVersion() == kGameTypeNancy2) {
 			s.syncBytes(textBuf, 60);
 			textBuf[59] = '\0';
-			item.specificCantText = (char *)textBuf;
+			assembleTextLine((char *)textBuf, item.specificCantText, 60);
 
 			s.syncBytes(textBuf, 60);
 			textBuf[59] = '\0';
-			item.generalCantText = (char *)textBuf;
+			assembleTextLine((char *)textBuf, item.generalCantText, 60);
 
 			item.specificCantSound.readNormal(*chunkStream);
 			item.generalCantSound.readNormal(*chunkStream);
 		} else if (s.getVersion() >= kGameTypeNancy3) {
 			s.syncBytes(textBuf, 60);
 			textBuf[59] = '\0';
-			item.specificCantText = (char *)textBuf;
+			assembleTextLine((char *)textBuf, item.specificCantText, 60);
 
 			item.specificCantSound.readNormal(*chunkStream);
 		}
@@ -195,35 +213,48 @@ TBOX::TBOX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	scrollbarDefaultPos.y = chunkStream->readUint16LE();
 	scrollbarMaxScroll = chunkStream->readUint16LE();
 
-	firstLineOffset = chunkStream->readUint16LE() + 1;
-	lineHeight = chunkStream->readUint16LE() + (isVampire ? 1 : 0);
-	borderWidth = chunkStream->readUint16LE() - 1;
-	maxWidthDifference = chunkStream->readUint16LE();
+	upOffset = chunkStream->readUint16LE() + 1;
+	downOffset = chunkStream->readUint16LE();
+	leftOffset = chunkStream->readUint16LE() - 1;
+	rightOffset = chunkStream->readUint16LE();
 
-	if (isVampire) {
-		ornamentSrcs.resize(14);
-		ornamentDests.resize(14);
+	readRectArray(*chunkStream, ornamentSrcs, 14);
+	readRectArray(*chunkStream, ornamentDests, 14);
 
-		chunkStream->seek(0x3E);
-		for (uint i = 0; i < 14; ++i) {
-			readRect(*chunkStream, ornamentSrcs[i]);
-		}
-
-		for (uint i = 0; i < 14; ++i) {
-			readRect(*chunkStream, ornamentDests[i]);
-		}
-	}
-
-	chunkStream->seek(0x1FE);
 	defaultFontID = chunkStream->readUint16LE();
+	defaultTextColor = chunkStream->readUint16LE();
 
 	if (g_nancy->getGameType() >= kGameTypeNancy2) {
-		chunkStream->skip(2);
 		conversationFontID = chunkStream->readUint16LE();
 		highlightConversationFontID = chunkStream->readUint16LE();
 	} else {
 		conversationFontID = defaultFontID;
 		highlightConversationFontID = defaultFontID;
+	}
+
+	tabWidth = chunkStream->readUint16LE();
+	pageScrollPercent = chunkStream->readUint16LE(); // Not implemented yet
+
+	Graphics::PixelFormat format = g_nancy->_graphicsManager->getInputPixelFormat();
+	if (g_nancy->getGameType() >= kGameTypeNancy2) {
+		byte r, g, b;
+		r = chunkStream->readByte();
+		g = chunkStream->readByte();
+		b = chunkStream->readByte();
+
+		textBackground =			(r << format.rShift) |
+									(g << format.gShift) |
+									(b << format.bShift);
+
+		r = chunkStream->readByte();
+		g = chunkStream->readByte();
+		b = chunkStream->readByte();
+
+		highlightTextBackground =	(r << format.rShift) |
+									(g << format.gShift) |
+									(b << format.bShift);
+	} else {
+		textBackground = highlightTextBackground = 0;
 	}
 }
 
@@ -658,13 +689,13 @@ RCPR::RCPR(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 	Common::String tmp;
 	while (chunkStream->pos() < chunkStream->size()) {
 		readFilename(*chunkStream, tmp);
-		if (tmp.hasPrefix("Wall")) {
+		if (tmp.hasPrefixIgnoreCase("Wall")) {
 			wallNames.push_back(tmp);
-		} else if (tmp.hasPrefix("SpW")) {
+		} else if (tmp.hasPrefixIgnoreCase("SpW")) {
 			specialWallNames.push_back(tmp);
-		} else if (tmp.hasPrefix("Ceil")) {
+		} else if (tmp.hasPrefixIgnoreCase("Ceil")) {
 			ceilingNames.push_back(tmp);
-		} else if (tmp.hasPrefix("Floor")) {
+		} else if (tmp.hasPrefixIgnoreCase("Floor")) {
 			floorNames.push_back(tmp);
 		}
 	}
@@ -687,17 +718,49 @@ CVTX::CVTX(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
 		readFilename(*chunkStream, keyName);
 		uint16 stringSize = chunkStream->readUint16LE();
 		if (stringSize > bufSize) {
-			delete buf;
+			delete[] buf;
 			buf = new char[stringSize * 2];
 			bufSize = stringSize * 2;
 		}
 
-		chunkStream->read(buf, stringSize);
-		buf[stringSize] = '\0';
-		texts.setVal(keyName, buf);
+		if (buf) {
+			chunkStream->read(buf, stringSize);
+			buf[stringSize] = '\0';
+			texts.setVal(keyName, buf);
+		} else {
+			texts.setVal(keyName, Common::String());
+		}
 	}
 
-	delete buf;
+	delete[] buf;
+}
+
+TABL::TABL(Common::SeekableReadStream *chunkStream) : EngineData(chunkStream) {
+	uint numEntries = chunkStream->readUint16LE();
+
+	readFilename(*chunkStream, soundBaseName);
+
+	startIDs.resize(numEntries);
+	for (uint i = 0; i < numEntries; ++i) {
+		startIDs[i] = chunkStream->readUint16LE();
+	}
+	chunkStream->skip((20 - numEntries) * 2);
+
+	correctIDs.resize(numEntries);
+	for (uint i = 0; i < numEntries; ++i) {
+		correctIDs[i] = chunkStream->readUint16LE();
+	}
+	chunkStream->skip((20 - numEntries) * 2);
+
+	readRectArray(*chunkStream, srcRects, numEntries, 20);
+
+	char buf[1000];
+	strings.resize(numEntries);
+	for (uint i = 0; i < numEntries; ++i) {
+		chunkStream->read(buf, 1000);
+		assembleTextLine(buf, strings[i], 1000);
+	}
+	chunkStream->skip((20 - numEntries) * 1000);
 }
 
 } // End of namespace Nancy

@@ -139,11 +139,7 @@ void ConversationSound::execute() {
 		}
 
 		// Remove held item and re-add it to inventory
-		int heldItem = NancySceneState.getHeldItem();
-		if (heldItem != -1) {
-			NancySceneState.addItemToInventory(heldItem);
-			NancySceneState.setHeldItem(-1);
-		}
+		NancySceneState.setNoHeldItem();
 
 		// Move the mouse to the default position defined in CURS
 		const Common::Point initialMousePos = g_nancy->_cursorManager->getPrimaryVideoInitialPos();
@@ -169,7 +165,10 @@ void ConversationSound::execute() {
 	case kRun:
 		if (!_hasDrawnTextbox) {
 			_hasDrawnTextbox = true;
+			const TBOX *textboxData = (const TBOX *)g_nancy->getEngineData("TBOX");
+			assert(textboxData);
 			NancySceneState.getTextbox().clear();
+			NancySceneState.getTextbox().setOverrideFont(textboxData->conversationFontID);
 
 			if (ConfMan.getBool("subtitles")) {
 				NancySceneState.getTextbox().addTextLine(_text);
@@ -287,14 +286,14 @@ void ConversationSound::execute() {
 void ConversationSound::readCaptionText(Common::SeekableReadStream &stream) {
 	char *rawText = new char[1500];
 	stream.read(rawText, 1500);
-	UI::Textbox::assembleTextLine(rawText, _text, 1500);
+	assembleTextLine(rawText, _text, 1500);
 	delete[] rawText;
 }
 
 void ConversationSound::readResponseText(Common::SeekableReadStream &stream, ResponseStruct &response) {
 	char *rawText = new char[400];
 	stream.read(rawText, 400);
-	UI::Textbox::assembleTextLine(rawText, response.text, 400);
+	assembleTextLine(rawText, response.text, 400);
 	delete[] rawText;
 }
 
@@ -348,6 +347,17 @@ void ConversationSound::addConditionalDialogue() {
 			
 			newResponse.sceneChange.sceneID = res.sceneID;
 			newResponse.sceneChange.continueSceneSound = kContinueSceneSound;
+
+			// Check if the response is a repeat. This can happen when multiple condition combinations
+			// trigger the same response.
+			for (uint i = 0; i < _responses.size() - 1; ++i) {
+				if (	_responses[i].soundName == newResponse.soundName &&
+						_responses[i].text == newResponse.text &&
+						_responses[i].sceneChange.sceneID == newResponse.sceneChange.sceneID) {
+					_responses.pop_back();
+					break;
+				}
+			}
 		}
 	}
 }
@@ -639,7 +649,7 @@ void ConversationCel::registerGraphics() {
 void ConversationCel::updateGraphics() {
 	uint32 currentTime = g_nancy->getTotalPlayTime();
 
-	if (_state == kRun && currentTime > _nextFrameTime && _curFrame <= _lastFrame) {
+	if (_state == kRun && currentTime > _nextFrameTime && _curFrame < MIN<uint>(_lastFrame + 1, _celNames[0].size())) {
 		for (uint i = 0; i < _celRObjects.size(); ++i) {
 			Cel &cel = loadCel(_celNames[i][_curFrame], _treeNames[i]);
 			if (_overrideTreeRects[i] == kCelOverrideTreeRectsOn) {
@@ -722,7 +732,7 @@ void ConversationCel::readData(Common::SeekableReadStream &stream) {
 }
 
 bool ConversationCel::isVideoDonePlaying() {
-	return _curFrame >= _lastFrame && _nextFrameTime <= g_nancy->getTotalPlayTime();
+	return _curFrame >= MIN<uint>(_lastFrame, _celNames[0].size()) && _nextFrameTime <= g_nancy->getTotalPlayTime();
 }
 
 ConversationCel::Cel &ConversationCel::loadCel(const Common::String &name, const Common::String &treeName) {

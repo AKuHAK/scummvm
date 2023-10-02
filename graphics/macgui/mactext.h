@@ -117,9 +117,24 @@ struct MacFontRun {
 	Common::String getEncodedText();
 };
 
+struct MacTextLine;
+
+struct MacTextTableCell {
+	Common::Array<MacTextLine> text;
+	uint16 flags = 0;
+	ManagedSurface surf;
+	int textWidth = -1;
+};
+
+struct MacTextTableRow {
+	Common::Array<MacTextTableCell> cells;
+	int heght = -1;
+};
+
 struct MacTextLine {
 	int width = -1;
 	int height = -1;
+	int minWidth = -1;
 	int y = 0;
 	int charwidth = -1;
 	bool paragraphEnd = false;
@@ -128,6 +143,7 @@ struct MacTextLine {
 	Common::String picfname;
 	Common::U32String picalt, pictitle;
 	uint16 picpercent = 50;
+	Common::Array<MacTextTableRow> *table = nullptr;
 
 	Common::Array<MacFontRun> chunks;
 
@@ -248,6 +264,7 @@ private:
 	void insertTextFromClipboard();
 	// getStringWidth for mactext version, because we may have the plain bytes mode
 	int getStringWidth(MacFontRun &format, const Common::U32String &str);
+	int getStringMaxWordWidth(MacFontRun &format, const Common::U32String &str);
 	int getAlignOffset(int row);
 	MacFontRun getFgColor();
 
@@ -323,6 +340,8 @@ private:
 	 */
 	int getLineWidth(int line, bool enforce = false, int col = -1);
 
+	int getLineWidth(MacTextLine *line, bool enforce = false, int col = -1);
+
 	/**
 	 * Rewraps paragraph containing given text row.
 	 * When text is modified, we redo whole thing again without touching
@@ -330,7 +349,7 @@ private:
 	 */
 	void reshuffleParagraph(int *row, int *col);
 
-	void chopChunk(const Common::U32String &str, int *curLine);
+	void chopChunk(const Common::U32String &str, int *curLine, int indent, int maxWidth);
 	void splitString(const Common::U32String &str, int curLine = -1);
 	void render(int from, int to, int shadow);
 	void render(int from, int to);
@@ -342,6 +361,8 @@ private:
 
 	void startMarking(int x, int y);
 	void updateTextSelection(int x, int y);
+
+	void processTable(int line);
 
 public:
 	int _cursorX, _cursorY;
@@ -383,6 +404,8 @@ protected:
 	MacFontRun _currentFormatting;
 
 	bool _macFontMode;
+
+	bool _inTable = false;
 
 private:
 	ManagedSurface *_cursorSurface;

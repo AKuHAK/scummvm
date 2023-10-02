@@ -23,6 +23,7 @@
 #include "engines/nancy/action/soundrecords.h"
 #include "engines/nancy/action/miscrecords.h"
 
+#include "engines/nancy/action/autotext.h"
 #include "engines/nancy/action/conversation.h"
 #include "engines/nancy/action/overlay.h"
 #include "engines/nancy/action/secondaryvideo.h"
@@ -32,9 +33,11 @@
 #include "engines/nancy/action/puzzle/collisionpuzzle.h"
 #include "engines/nancy/action/puzzle/leverpuzzle.h"
 #include "engines/nancy/action/puzzle/mazechasepuzzle.h"
+#include "engines/nancy/action/puzzle/mouselightpuzzle.h"
 #include "engines/nancy/action/puzzle/orderingpuzzle.h"
 #include "engines/nancy/action/puzzle/overridelockpuzzle.h"
 #include "engines/nancy/action/puzzle/passwordpuzzle.h"
+#include "engines/nancy/action/puzzle/peepholepuzzle.h"
 #include "engines/nancy/action/puzzle/raycastpuzzle.h"
 #include "engines/nancy/action/puzzle/riddlepuzzle.h"
 #include "engines/nancy/action/puzzle/rippedletterpuzzle.h"
@@ -47,6 +50,7 @@
 #include "engines/nancy/action/puzzle/telephone.h"
 #include "engines/nancy/action/puzzle/towerpuzzle.h"
 #include "engines/nancy/action/puzzle/turningpuzzle.h"
+#include "engines/nancy/action/puzzle/twodialpuzzle.h"
 
 #include "engines/nancy/state/scene.h"
 
@@ -111,7 +115,10 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 	case 53:
 		return new PlaySecondaryMovie();
 	case 54:
-		return new Overlay(false); // PlayStaticBitmapAnimation
+		if (g_nancy->getGameType() <= kGameTypeNancy1) {
+			return new Overlay(false); // PlayStaticBitmapAnimation
+		}
+		// fall through
 	case 55:
 		return new Overlay(true); // PlayIntStaticBitmapAnimation
 	case 56:
@@ -130,9 +137,20 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 			return new ConversationSoundT();
 		}
 	case 61:
-		return new MapCallHot1Fr();
+		if (g_nancy->getGameType() <= kGameTypeNancy5) {
+			// Only used in tvd and nancy1
+			return new MapCallHot1Fr();
+		} else {
+			return new Autotext();
+		}
 	case 62:
 		return new MapCallHotMultiframe();
+	case 65:
+		return new TableIndexOverlay();
+	case 66:
+		return new TableIndexPlaySound();
+	case 67:
+		return new TableIndexSetValueHS();
 	case 75:
 		return new TextBoxWrite();
 	case 76:
@@ -186,9 +204,9 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 	case 123:
 		return new InventorySoundOverride();
 	case 150:
-		return new PlayDigiSoundAndDie();
+		return new PlayDigiSound();
 	case 151:
-		return new PlayDigiSoundAndDie();
+		return new PlayDigiSound();
 	case 152:
 		return new PlaySoundPanFrameAnchorAndDie();
 	case 153:
@@ -199,6 +217,8 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 		return new StopSound(); // StopAndUnloadSound, but we always unload
 	case 157:
 		return new PlayDigiSoundCC();
+	case 158:
+		return new PlayRandomSound();
 	case 160:
 		return new HintSystem();
 	case 170:
@@ -235,8 +255,13 @@ ActionRecord *ActionManager::createActionRecord(uint16 type) {
 		return new OrderingPuzzle(OrderingPuzzle::PuzzleType::kKeypad);
 	case 215:
 		return new MazeChasePuzzle();
+	case 216:
+		return new PeepholePuzzle();
+	case 217:
+		return new MouseLightPuzzle();
+	case 220:
+		return new TwoDialPuzzle();
 	default:
-		error("Action Record type %i is invalid!", type);
 		return nullptr;
 	}
 }
