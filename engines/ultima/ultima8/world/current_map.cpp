@@ -35,6 +35,7 @@
 #include "ultima/ultima8/games/game_data.h"
 #include "ultima/ultima8/graphics/main_shape_archive.h"
 #include "ultima/ultima8/gumps/game_map_gump.h"
+#include "ultima/ultima8/misc/box.h"
 #include "ultima/ultima8/misc/direction_util.h"
 #include "ultima/ultima8/world/get_object.h"
 
@@ -47,7 +48,8 @@ namespace Ultima8 {
 
 typedef Std::list<Item *> item_list;
 
-static const int INT_MAX_VALUE = 0x7fffffff;
+const int INT_MAX_VALUE = 0x7fffffff;
+const int INT_MIN_VALUE = -INT_MAX_VALUE - 1;
 
 CurrentMap::CurrentMap() : _currentMap(0), _eggHatcher(0),
 	  _fastXMin(-1), _fastYMin(-1), _fastXMax(-1), _fastYMax(-1) {
@@ -726,55 +728,35 @@ const Std::list<Item *> *CurrentMap::getItemList(int32 gx, int32 gy) const {
 	return &_items[gx][gy];
 }
 
-
-bool CurrentMap::isValidPosition(int32 x, int32 y, int32 z,
-								 uint32 shape,
-								 ObjId item, const Item **support,
-								 ObjId *roof, const Item **blocker) const {
-	const ShapeInfo *si = GameData::get_instance()->
-	                getMainShapes()->getShapeInfo(shape);
+PositionInfo CurrentMap::getPositionInfo(int32 x, int32 y, int32 z, uint32 shape, ObjId id) const {
+	const ShapeInfo *si = GameData::get_instance()->getMainShapes()->getShapeInfo(shape);
 	int32 xd, yd, zd;
 	// Note: this assumes the shape to be placed is not flipped
 	si->getFootpadWorld(xd, yd, zd, 0);
+	Box target(x, y, z, xd, yd, zd);
+	Box empty;
 
-	return isValidPosition(x, y, z,
-	                       INT_MAX_VALUE / 2, INT_MAX_VALUE / 2, INT_MAX_VALUE / 2,
-	                       xd, yd, zd,
-	                       si->_flags, item, support, roof, blocker);
+	return getPositionInfo(target, empty, si->_flags, id);
 }
 
-bool CurrentMap::isValidPosition(int32 x, int32 y, int32 z,
-								 int xd, int yd, int zd,
-								 uint32 shapeflags,
-								 ObjId item, const Item **support,
-								 ObjId *roof, const Item **blocker) const {
-	return isValidPosition(x, y, z,
-	                       INT_MAX_VALUE / 2, INT_MAX_VALUE / 2, INT_MAX_VALUE / 2,
-	                       xd, yd, zd,
-	                       shapeflags, item, support, roof, blocker);
-}
+PositionInfo CurrentMap::getPositionInfo(const Box &target, const Box &start, uint32 shapeflags, ObjId id) const {
+	PositionInfo info;
+	static const uint32 flagmask = (ShapeInfo::SI_SOLID | ShapeInfo::SI_DAMAGING | ShapeInfo::SI_LAND | ShapeInfo::SI_ROOF);
+	static const uint32 supportmask = (ShapeInfo::SI_SOLID | ShapeInfo::SI_LAND | ShapeInfo::SI_ROOF);
+	static const uint32 landmask = (ShapeInfo::SI_LAND | ShapeInfo::SI_ROOF);
+	static const uint32 blockmask = (ShapeInfo::SI_SOLID | ShapeInfo::SI_DAMAGING);
 
-
-bool CurrentMap::isValidPosition(int32 x, int32 y, int32 z,
-								 int32 startx, int32 starty, int32 startz,
-								 int xd, int yd, int zd,
-								 uint32 shapeflags,
-								 ObjId item_, const Item **support_,
-								 ObjId *roof_, const Item **blocker_) const {
-	static const uint32 flagmask = (ShapeInfo::SI_SOLID | ShapeInfo::SI_DAMAGING |
-	                         ShapeInfo::SI_ROOF);
-	static const uint32 blockflagmask = (ShapeInfo::SI_SOLID | ShapeInfo::SI_DAMAGING);
-
-	bool valid = true;
-	const Item *support = nullptr;
-	const Item *blocker = nullptr;
-	ObjId roof = 0;
+	int32 supportz = INT_MIN_VALUE;
+	int32 landz = INT_MIN_VALUE;
 	int32 roofz = INT_MAX_VALUE;
 
-	int minx = ((x - xd) / _mapChunkSize) - 1;
-	int maxx = (x / _mapChunkSize) + 1;
-	int miny = ((y - yd) / _mapChunkSize) - 1;
-	int maxy = (y / _mapChunkSize) + 1;
+	int32 midx = target._x - target._xd / 2;
+	int32 midy = target._y - target._yd / 2;
+
+	int minx = ((target._x - target._xd) / _mapChunkSize) - 1;
+	int maxx = (target._x / _mapChunkSize) + 1;
+	int miny = ((target._y - target._yd) / _mapChunkSize) - 1;
+	int maxy = (target._y / _mapChunkSize) + 1;
 	clipMapChunks(minx, maxx, miny, maxy);
 
 	for (int cx = minx; cx <= maxx; cx++) {
@@ -783,75 +765,60 @@ bool CurrentMap::isValidPosition(int32 x, int32 y, int32 z,
 			for (iter = _items[cx][cy].begin();
 				 iter != _items[cx][cy].end(); ++iter) {
 				const Item *item = *iter;
-				if (item->getObjId() == item_)
+				if (item->getObjId() == id)
 					continue;
 				if (item->hasExtFlags(Item::EXT_SPRITE))
 					continue;
 
 				const ShapeInfo *si = item->getShapeInfo();
-				//!! need to check is_sea() and is_land() maybe?
 				if (!(si->_flags & flagmask))
 					continue; // not an interesting item
 
-				int32 ix, iy, iz, ixd, iyd, izd;
-				item->getFootpadWorld(ixd, iyd, izd);
-				item->getLocation(ix, iy, iz);
-
-#if 0
-				if (item->getShape() == 145) {
-					debugC(kDebugObject, "Shape 145: (%d, %d, %d)-(%d, %d, %d) %s",
-						ix - ixd, iy - iyd, iz, ix, iy, iz + izd,
-						si->is_solid() ? "solid" : "not solid");
-				}
-#endif
+				Box ib = item->getWorldBox();
 
 				// check overlap
-				if ((si->_flags & shapeflags & blockflagmask) &&
-				        /* not non-overlapping */
-				        !(x <= ix - ixd || x - xd >= ix ||
-				          y <= iy - iyd || y - yd >= iy ||
-				          z + zd <= iz || z >= iz + izd) &&
-				        /* non-overlapping start position */
-				        (startx <= ix - ixd || startx - xd >= ix ||
-				         starty <= iy - iyd || starty - yd >= iy ||
-				         startz + zd <= iz || startz >= iz + izd)) {
+				if ((si->_flags & shapeflags & blockmask) &&
+					target.overlaps(ib) && !start.overlaps(ib)) {
 					// overlapping an item. Invalid position
 #if 0
 					debugC(kDebugObject, "%s", item->dumpInfo().c_str());
 #endif
-					if (blocker == nullptr) {
-						blocker = item;
+					if (info.blocker == nullptr) {
+						info.blocker = item;
 					}
-					valid = false;
 				}
 
 				// check xy overlap
-				if (!(x <= ix - ixd || x - xd >= ix ||
-				      y <= iy - iyd || y - yd >= iy)) {
+				if (target._x > ib._x - ib._xd && target._x - target._xd < ib._x &&
+					target._y > ib._y - ib._yd && target._y - target._yd < ib._y) {
 					// check support
-					if (support == nullptr && si->is_solid() &&
-					        iz + izd == z) {
-						support = item;
+					if (si->_flags & supportmask && ib._z + ib._zd > supportz && ib._z + ib._zd <= target._z) {
+						supportz = ib._z + ib._zd;
 					}
 
 					// check roof
-					if (si->is_roof() && iz < roofz && iz >= z + zd) {
-						roof = item->getObjId();
-						roofz = iz;
+					if (si->is_roof() && ib._z < roofz && ib._z >= target._z + target._zd) {
+						info.roof = item;
+						roofz = ib._z;
+					}
+				}
+
+				// check xy center
+				if (midx >= ib._x - ib._xd && midx <= ib._x && midy >= ib._y - ib._yd && midy <= ib._y) {
+					// check land
+					if (si->_flags & landmask && ib._z + ib._zd > landz && ib._z + ib._zd <= target._z) {
+						info.land = item;
+						landz = ib._z + ib._zd;
 					}
 				}
 			}
 		}
 	}
 
-	if (support_)
-		*support_ = support;
-	if (blocker_)
-		*blocker_ = blocker;
-	if (roof_)
-		*roof_ = roof;
-
-	return valid;
+	info.valid = info.blocker == nullptr;
+	// Partial support allowed if land is close
+	info.supported = supportz == target._z && landz + 8 >= target._z;
+	return info;
 }
 
 bool CurrentMap::scanForValidPosition(int32 x, int32 y, int32 z, const Item *item,
@@ -1158,8 +1125,11 @@ bool CurrentMap::sweepTest(const int32 start[3], const int32 end[3],
 						        (i == 2 && ext[i] == 0 && oext[i] == 0 &&
 						         oext[0] == 64 && oext[1] == 64))
 							touch = true; // touch at start
-						if (A_min + vel[i] == B_max)
+						if (A_min + vel[i] == B_max) {
 							touch = true; // touch at end
+							if (i == 2)
+								touch_floor = true;
+						}
 
 						// - want to know when rear of A passes front of B
 						u_0[i] = ((B_max - A_min) * 0x4000) / vel[i];
@@ -1322,9 +1292,9 @@ uint32 CurrentMap::I_canExistAt(const uint8 *args, unsigned int argsize) {
 	//
 
 	const CurrentMap *cm = World::get_instance()->getCurrentMap();
-	bool valid = cm->isValidPosition(x, y, z, shape, 0, 0, 0);
+	PositionInfo info = cm->getPositionInfo(x, y, z, shape, 0);
 
-	if (valid)
+	if (info.valid)
 		return 1;
 	else
 		return 0;
@@ -1350,9 +1320,9 @@ uint32 CurrentMap::I_canExistAtPoint(const uint8 *args, unsigned int /*argsize*/
 	World_FromUsecodeXY(x, y);
 
 	const CurrentMap *cm = World::get_instance()->getCurrentMap();
-	bool valid = cm->isValidPosition(x, y, z, shape, 0, 0, 0);
+	PositionInfo info = cm->getPositionInfo(x, y, z, shape, 0);
 
-	if (valid)
+	if (info.valid)
 		return 1;
 	else
 		return 0;

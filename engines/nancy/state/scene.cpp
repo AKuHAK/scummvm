@@ -89,7 +89,7 @@ void Scene::SceneSummary::read(Common::SeekableReadStream &stream) {
 	ser.syncAsUint16LE((uint32 &)fastMoveTimeDelta);
 	ser.skip(1); // CD required for scene
 
-	const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+	auto *bootSummary = GetEngineData(BSUM);
 	assert(bootSummary);
 
 	if (bootSummary->overrideMovementTimeDeltas) {
@@ -98,6 +98,14 @@ void Scene::SceneSummary::read(Common::SeekableReadStream &stream) {
 	}
 
 	delete[] buf;
+}
+
+void Scene::SceneSummary::readTerse(Common::SeekableReadStream &stream) {
+	char *buf = new char[0x32];
+	stream.read(buf, 0x32);
+	description = buf;
+	readFilename(stream, videoFile);
+	sound.readTerse(stream);
 }
 
 Scene::Scene() :
@@ -120,6 +128,7 @@ Scene::Scene() :
 		_activeConversation(nullptr),
 		_lightning(nullptr),
 		_destroyOnExit(false),
+		_isRunningAd(false),
 		_hotspotDebug(50) {}
 
 Scene::~Scene()  {
@@ -219,28 +228,36 @@ bool Scene::onStateExit(const NancyState::NancyState nextState) {
 }
 
 void Scene::changeScene(const SceneChangeDescription &sceneDescription) {
-	if (sceneDescription.sceneID == 9999 || _state == kLoad) {
+	if (sceneDescription.sceneID == kNoScene || _state == kLoad) {
 		return;
 	}
-
-	// Increment scene count on scene exit in order to:
-	// - keep values needed for the kSceneCount dependency correct
-	// - make sure we don't increment when loading a save
-	_flags.sceneCounts.getOrCreateVal(_sceneState.currentScene.sceneID)++;
 
 	_sceneState.nextScene = sceneDescription;
 	_state = kLoad;
 }
 
-void Scene::pushScene() {
-	_sceneState.pushedScene = _sceneState.currentScene;
-	_sceneState.isScenePushed = true;
+void Scene::pushScene(int16 itemID) {
+	if (itemID == -1) {
+		_sceneState.pushedScene = _sceneState.currentScene;
+		_sceneState.isScenePushed = true;
+	} else {
+		_sceneState.pushedInvScene = _sceneState.currentScene;
+		_sceneState.isInvScenePushed = true;
+		_sceneState.pushedInvItemID = itemID;
+	}
 }
 
-void Scene::popScene() {
-	_sceneState.pushedScene.continueSceneSound = true;
-	changeScene(_sceneState.pushedScene);
-	_sceneState.isScenePushed = false;
+void Scene::popScene(bool inventory) {
+	if (!inventory) {
+		_sceneState.pushedScene.continueSceneSound = true;
+		changeScene(_sceneState.pushedScene);
+		_sceneState.isScenePushed = false;
+	} else {
+		_sceneState.pushedInvScene.continueSceneSound = true;
+		changeScene(_sceneState.pushedInvScene);
+		_sceneState.isInvScenePushed = false;
+		addItemToInventory(_sceneState.pushedInvItemID);
+	}
 }
 
 void Scene::setPlayerTime(Time time, byte relative) {
@@ -252,7 +269,7 @@ void Scene::setPlayerTime(Time time, byte relative) {
 		_timers.playerTime = _timers.playerTime.getDays() * 86400000 + time;
 	}
 
-	const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+	auto *bootSummary = GetEngineData(BSUM);
 	assert(bootSummary);
 
 	_timers.playerTimeNextMinute = g_nancy->getTotalPlayTime() + bootSummary->playerTimeMinuteLength;
@@ -276,7 +293,7 @@ byte Scene::getPlayerTOD() const {
 		}
 	} else {
 		// nancy6 added the day start/end times (in minutes) to BSUM
-		const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+		auto *bootSummary = GetEngineData(BSUM);
 		assert(bootSummary);
 
 		uint16 minutes = _timers.playerTime.getHours() * 60 + _timers.playerTime.getMinutes();
@@ -364,7 +381,7 @@ void Scene::playItemCantSound(int16 itemID) {
 	}
 
 	// Improvement: nancy2 never shows the caption text, even though it exists in the data; we show it
-	const INV *inventoryData = (const INV *)g_nancy->getEngineData("INV");
+	auto *inventoryData = GetEngineData(INV);
 	assert(inventoryData);
 
 	if (itemID < 0) {
@@ -570,13 +587,21 @@ void Scene::synchronize(Common::Serializer &ser) {
 
 		g_nancy->_sound->stopAllSounds();
 
-		load();
+		load(true);
 	}
 
 	ser.syncAsUint16LE(_sceneState.pushedScene.sceneID);
 	ser.syncAsUint16LE(_sceneState.pushedScene.frameID);
 	ser.syncAsUint16LE(_sceneState.pushedScene.verticalOffset);
 	ser.syncAsByte(_sceneState.isScenePushed);
+
+	// Inventory scene "stack" was introduced in nancy7
+	if (g_nancy->getGameType() >= kGameTypeNancy7) {
+		ser.syncAsUint16LE(_sceneState.pushedInvScene.sceneID);
+		ser.syncAsUint16LE(_sceneState.pushedInvScene.frameID);
+		ser.syncAsUint16LE(_sceneState.pushedInvScene.verticalOffset);
+		ser.syncAsByte(_sceneState.isInvScenePushed);
+	}
 
 	// hardcoded number of logic conditions, check if there can ever be more/less
 	for (uint i = 0; i < 30; ++i) {
@@ -611,6 +636,10 @@ void Scene::synchronize(Common::Serializer &ser) {
 	ser.syncArray(_flags.items.data(), g_nancy->getStaticData().numItems, Common::Serializer::Byte);
 	ser.syncAsSint16LE(_flags.heldItem);
 	g_nancy->_cursorManager->setCursorItemID(_flags.heldItem);
+
+	if (g_nancy->getGameType() >= kGameTypeNancy7) {
+		ser.syncArray(_flags.disabledItems.data(), g_nancy->getStaticData().numItems, Common::Serializer::Byte);
+	}
 
 	ser.syncAsUint32LE((uint32 &)_timers.lastTotalTime);
 	ser.syncAsUint32LE((uint32 &)_timers.sceneTime);
@@ -687,6 +716,9 @@ void Scene::synchronize(Common::Serializer &ser) {
 		}
 	}
 
+	_isRunningAd = false;
+	ConfMan.removeKey("restore_after_ad", ConfMan.kTransientDomain);
+
 	g_nancy->_graphicsManager->suppressNextDraw();
 }
 
@@ -695,8 +727,8 @@ UI::Clock *Scene::getClock() {
 }
 
 void Scene::init() {
-	const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
-	const HINT *hintData = (const HINT *)g_nancy->getEngineData("HINT");
+	auto *bootSummary = GetEngineData(BSUM);
+	auto *hintData = GetEngineData(HINT);
 	assert(bootSummary);
 
 	_flags.eventFlags.resize(g_nancy->getStaticData().numEventFlags, g_nancy->_false);
@@ -704,6 +736,7 @@ void Scene::init() {
 	_flags.sceneCounts.clear();
 
 	_flags.items.resize(g_nancy->getStaticData().numItems, g_nancy->_false);
+	_flags.disabledItems.resize(_flags.items.size(), 0);
 
 	_timers.lastTotalTime = 0;
 	_timers.playerTime = bootSummary->startTimeHours * 3600000;
@@ -713,7 +746,13 @@ void Scene::init() {
 	_timers.playerTimeNextMinute = 0;
 	_timers.pushedPlayTime = 0;
 
-	changeScene(bootSummary->firstScene);
+	if (ConfMan.hasKey("load_ad", ConfMan.kTransientDomain)) {
+		changeScene(bootSummary->adScene);
+		ConfMan.removeKey("load_ad", ConfMan.kTransientDomain);
+		_isRunningAd = true;
+	} else {
+		changeScene(bootSummary->firstScene);
+	}
 
 	if (hintData) {
 		_hintsRemaining.clear();
@@ -769,6 +808,11 @@ void Scene::specialEffect(byte type, uint16 fadeToBlackTime, uint16 frameTime) {
 	_specialEffects.back().init();
 }
 
+void Scene::specialEffect(byte type, uint16 totalTime, uint16 fadeToBlackTime, Common::Rect rect) {
+	_specialEffects.push(Misc::SpecialEffect(type, totalTime, fadeToBlackTime, rect));
+	_specialEffects.back().init();
+}
+
 PuzzleData *Scene::getPuzzleData(const uint32 tag) {
 	// Lazy initialization ensures both init() and synchronize() will not need
 	// to care about which puzzles a specific game has
@@ -785,7 +829,7 @@ PuzzleData *Scene::getPuzzleData(const uint32 tag) {
 	}
 }
 
-void Scene::load() {
+void Scene::load(bool fromSaveFile) {
 	if (_specialEffects.size()) {
 		_specialEffects.front().onSceneChange();
 	}
@@ -802,12 +846,18 @@ void Scene::load() {
 	}
 
 	Common::SeekableReadStream *sceneSummaryChunk = sceneIFF.getChunkStream("SSUM");
+	if (sceneSummaryChunk) {
+		_sceneState.summary.read(*sceneSummaryChunk);
+	} else {
+		sceneSummaryChunk = sceneIFF.getChunkStream("TSUM");
+		if (sceneSummaryChunk) {
+			_sceneState.summary.readTerse(*sceneSummaryChunk);
+		}
+	}
 
 	if (!sceneSummaryChunk) {
 		error("Invalid IFF Chunk SSUM");
 	}
-
-	_sceneState.summary.read(*sceneSummaryChunk);
 
 	delete sceneSummaryChunk;
 
@@ -876,6 +926,12 @@ void Scene::load() {
 	_timers.sceneTime = 0;
 	g_nancy->_sound->recalculateSoundEffects();
 
+	// Increment the number of times we've visited this scene, unless we're
+	// loading from a save
+	if (!fromSaveFile) {
+		_flags.sceneCounts.getOrCreateVal(_sceneState.currentScene.sceneID)++;
+	}
+
 	_state = kStartSound;
 }
 
@@ -887,18 +943,6 @@ void Scene::run() {
 	}
 
 	Time currentPlayTime = g_nancy->getTotalPlayTime();
-
-	if (_specialEffects.size()) {
-		if (_specialEffects.front().isInitialized()) {
-			if (_specialEffects.front().isDone()) {
-				_specialEffects.pop();
-				g_nancy->_graphicsManager->redrawAll();
-			}
-		} else {
-			_specialEffects.front().afterSceneChange();
-		}
-	}
-
 	Time deltaTime = currentPlayTime - _timers.lastTotalTime;
 	_timers.lastTotalTime = currentPlayTime;
 
@@ -910,7 +954,7 @@ void Scene::run() {
 
 	// Calculate the in-game time (playerTime)
 	if (currentPlayTime > _timers.playerTimeNextMinute) {
-		const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+		auto *bootSummary = GetEngineData(BSUM);
 		assert(bootSummary);
 
 		_timers.playerTime += 60000; // Add a minute
@@ -928,6 +972,18 @@ void Scene::run() {
 
 	if (_lightning) {
 		_lightning->run();
+	}
+
+	// Do this after the first records are processed to fix the text in nancy3 intro
+	if (_specialEffects.size()) {
+		if (_specialEffects.front().isInitialized()) {
+			if (_specialEffects.front().isDone()) {
+				_specialEffects.pop();
+				g_nancy->_graphicsManager->redrawAll();
+			}
+		} else {
+			_specialEffects.front().afterSceneChange();
+		}
 	}
 
 	g_nancy->_sound->soundEffectMaintenance();
@@ -1007,7 +1063,7 @@ void Scene::handleInput() {
 
 		if (_menuButton->_isClicked) {
 			if (_buttonPressActivationTime == 0) {
-				const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+				auto *bootSummary = GetEngineData(BSUM);
 				assert(bootSummary);
 
 				g_nancy->_sound->playSound("BUOK");
@@ -1025,7 +1081,7 @@ void Scene::handleInput() {
 
 		if (_helpButton->_isClicked) {
 			if (_buttonPressActivationTime == 0) {
-				const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+				auto *bootSummary = GetEngineData(BSUM);
 				assert(bootSummary);
 
 				g_nancy->_sound->playSound("BUOK");
@@ -1040,13 +1096,13 @@ void Scene::handleInput() {
 }
 
 void Scene::initStaticData() {
-	const BSUM *bootSummary = (const BSUM *)g_nancy->getEngineData("BSUM");
+	auto *bootSummary = GetEngineData(BSUM);
 	assert(bootSummary);
 
 	const ImageChunk *fr0 = (const ImageChunk *)g_nancy->getEngineData("FR0");
 	assert(fr0);
 
-	const MAP *mapData = (const MAP *)g_nancy->getEngineData("MAP");
+	auto *mapData = GetEngineData(MAP);
 
 	_frame.init(fr0->imageName);
 	_viewport.init();

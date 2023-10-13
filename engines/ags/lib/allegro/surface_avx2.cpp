@@ -31,7 +31,8 @@
 namespace AGS3 {
 
 inline __m256i simd2BppTo4Bpp(__m256i pixels) {
-	__m256i x = _mm256_unpacklo_epi16(pixels, _mm256_setzero_si256());
+	__m128i x128 = _mm256_castsi256_si128(pixels);
+	__m256i x = _mm256_cvtepu16_epi32(x128);
 
 	// c is the extracted 5/6 bit color from the image
 	__m256i c = _mm256_srli_epi32(x, 11);
@@ -396,11 +397,11 @@ inline void drawPixelSIMD(byte *destPtr, const byte *srcP2, __m256i tint, __m256
 	if (DestBytesPerPixel == 4)
 		destCol = _mm256_loadu_si256((const __m256i *)destPtr);
 	else
-		destCol = simd2BppTo4Bpp(_mm256_and_si256(_mm256_loadu_si256((const __m256i *)destPtr), _mm256_set_epi64x(0, 0, -1, -1)));
+		destCol = simd2BppTo4Bpp(_mm256_loadu_si256((const __m256i *)destPtr));
 	if (SrcBytesPerPixel == 4)
 		srcCols = _mm256_loadu_si256((const __m256i *)(srcP2 + xDir * xCtrBpp));
 	else
-		srcCols = simd2BppTo4Bpp(_mm256_and_si256(_mm256_loadu_si256((const __m256i *)(srcP2 + xDir * xCtrBpp)), _mm256_set_epi64x(0, 0, -1, -1)));
+		srcCols = simd2BppTo4Bpp(_mm256_loadu_si256((const __m256i *)(srcP2 + xDir * xCtrBpp)));
 
 	// we do this here because we need to check if we should skip the pixel before we blend it
 	__m256i mask1 = skipTrans ? _mm256_cmpeq_epi32(_mm256_and_si256(srcCols, maskedAlphas), transColors) : _mm256_setzero_si256();
@@ -487,7 +488,7 @@ static void drawInner4BppWithConv(BITMAP::DrawInnerArgs &args) {
 		xCtrBppStart = xCtrStart * SrcBytesPerPixel;
 		args.xStart = 0;
 	}
-	int destY = args.yStart, srcYCtr = 0, yCtr = 0, scaleYCtr = 0, yCtrHeight = (xCtrWidth % 4 == 0) ? args.dstRect.height() : (args.dstRect.height() - 1);
+	int destY = args.yStart, srcYCtr = 0, yCtr = 0, scaleYCtr = 0, yCtrHeight = (xCtrWidth % 8 == 0) ? args.dstRect.height() : (args.dstRect.height() - 1);
 	if (Scale) yCtrHeight = args.dstRect.height();
 	if (args.yStart < 0) {
 		yCtr = -args.yStart;
@@ -498,7 +499,7 @@ static void drawInner4BppWithConv(BITMAP::DrawInnerArgs &args) {
 		}
 	}
 	if (args.yStart + yCtrHeight > args.destArea.h) {
-		yCtrHeight = args.destArea.h - args.yStart;
+		yCtrHeight = (xCtrWidth % 8 == 0) ? args.destArea.h - args.yStart : args.destArea.h - args.yStart - 1;
 	}
 
 	byte *destP = (byte *)args.destArea.getBasePtr(0, destY);
@@ -573,7 +574,7 @@ static void drawInner4BppWithConv(BITMAP::DrawInnerArgs &args) {
 
 	// Get the last x values of the last row
 	int xCtr = xCtrStart, xCtrBpp = xCtrBppStart, destX = args.xStart;
-	// We have a picture that is a multiple of 4, so no extra pixels to draw
+	// We have a picture that is a multiple of 8, so no extra pixels to draw
 	if (xCtrWidth % 8 == 0) return;
 	// Drawing the last few not scaled pixels here.
 	// Same as the loop above but now we check if we are going to overflow,

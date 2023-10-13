@@ -89,7 +89,7 @@ void ActionManager::handleInput(NancyInput &input) {
 
 						// Re-add the object to the inventory unless it's marked as a one-time use
 						if (item == NancySceneState.getHeldItem() && item != -1) {
-							const INV *inventoryData = (const INV *)g_nancy->getEngineData("INV");
+							auto *inventoryData = GetEngineData(INV);
 							assert(inventoryData);
 
 							switch (inventoryData->itemDescriptions[item].keepItem) {
@@ -134,42 +134,42 @@ void ActionManager::addNewActionRecord(Common::SeekableReadStream &inputData) {
 }
 
 ActionRecord *ActionManager::createAndLoadNewRecord(Common::SeekableReadStream &inputData) {
-	inputData.seek(0x30);
-	byte ARType = inputData.readByte();
-	ActionRecord *newRecord = createActionRecord(ARType);
-
-	if (!newRecord) {
-		return nullptr;
-	}
-
 	inputData.seek(0);
 	char descBuf[0x30];
 	inputData.read(descBuf, 0x30);
 	descBuf[0x2F] = '\0';
+	byte ARType = inputData.readByte();
+	byte execType = inputData.readByte();
+	ActionRecord *newRecord = createActionRecord(ARType, &inputData);
+
+	if (!newRecord) {
+		newRecord = new Unimplemented();
+	}
+	
 	newRecord->_description = descBuf;
+	newRecord->_type = ARType;
+	newRecord->_execType = (ActionRecord::ExecutionType)execType;
 
-	newRecord->_type = inputData.readByte(); // redundant
-	newRecord->_execType = (ActionRecord::ExecutionType)inputData.readByte();
-
-	uint16 localChunkSize = inputData.pos();
 	newRecord->readData(inputData);
-	localChunkSize = inputData.pos() - localChunkSize;
-	localChunkSize += 0x32;
 
-	// If the localChunkSize is less than the total data, there must be dependencies at the end of the chunk
-	uint16 depsDataSize = (uint16)inputData.size() - localChunkSize;
-	if (depsDataSize > 0) {
+	// If the remaining data is less than the total data, there must be dependencies at the end of the chunk
+	int64 dataRemaining = inputData.size() - inputData.pos();
+	if (dataRemaining > 0 && newRecord->getRecordTypeName() != "Unimplemented") {
 		// Each dependency is 12 (up to nancy2) or 16 (nancy3 and up) bytes long
 		uint singleDepSize = g_nancy->getGameType() <= kGameTypeNancy2 ? 12 : 16;
-		uint numDependencies = depsDataSize / singleDepSize;
-		if (depsDataSize % singleDepSize) {
+		uint numDependencies = dataRemaining / singleDepSize;
+		if (dataRemaining % singleDepSize) {
 			warning("Action record type %u, %s has incorrect read size!\ndescription:\n%s",
 				newRecord->_type,
 				newRecord->getRecordTypeName().c_str(),
 				newRecord->_description.c_str());
 
 				delete newRecord;
-				return nullptr;
+				
+				newRecord = new Unimplemented();
+				newRecord->_description = descBuf;
+				newRecord->_type = ARType;
+				newRecord->_execType = (ActionRecord::ExecutionType)execType;
 		}
 
 		if (numDependencies == 0) {
@@ -180,7 +180,6 @@ ActionRecord *ActionManager::createAndLoadNewRecord(Common::SeekableReadStream &
 		depStack.push(&newRecord->_dependencies);
 
 		// Initialize the dependencies data
-		inputData.seek(localChunkSize);
 		for (uint16 i = 0; i < numDependencies; ++i) {
 			depStack.top()->children.push_back(DependencyRecord());
 			DependencyRecord &dep = depStack.top()->children.back();
@@ -258,8 +257,9 @@ void ActionManager::processActionRecords() {
 			record->execute();
 		}
 
-		if (NancySceneState._state == State::Scene::kLoad) {
-			// changeScene() must have been called, abort any further processing
+		if (g_nancy->getGameType() >= kGameTypeNancy4 && NancySceneState._state == State::Scene::kLoad) {
+			// changeScene() must have been called, abort any further processing.
+			// Both old and new behavior is needed (nancy3 intro narration, nancy4 garden gate)
 			return;
 		}
 	}
@@ -327,11 +327,15 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 				if (NancySceneState._flags.items[dep.label] == g_nancy->_false &&
 					dep.label != NancySceneState._flags.heldItem) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 			} else {
 				if (NancySceneState._flags.items[dep.label] == g_nancy->_true ||
 					dep.label == NancySceneState._flags.heldItem) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 			}
 
@@ -341,6 +345,8 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 				// nancy1 has code for some timer array that never gets used
 				// and is discarded from nancy2 onward
 				dep.satisfied = true;
+			} else {
+				dep.satisfied = false;
 			}
 
 			break;
@@ -354,7 +360,11 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 
 					if (elapsed >= dep.timeData) {
 						dep.satisfied = true;
+					} else {
+						dep.satisfied = false;
 					}
+				} else {
+					dep.satisfied = false;
 				}
 			} else {
 				dep.satisfied = NancySceneState.getLogicCondition(dep.label, dep.condition);
@@ -364,12 +374,16 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 		case DependencyType::kElapsedGameTime:
 			if (NancySceneState._timers.lastTotalTime >= dep.timeData) {
 				dep.satisfied = true;
+			} else {
+				dep.satisfied = false;
 			}
 
 			break;
 		case DependencyType::kElapsedSceneTime:
 			if (NancySceneState._timers.sceneTime >= dep.timeData) {
 				dep.satisfied = true;
+			} else {
+				dep.satisfied = false;
 			}
 
 			break;
@@ -393,24 +407,33 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 		case DependencyType::kSceneCount: {
 			// Check how many times a scene has been visited.
 			// This dependency type keeps its data in the time variables
+			// Note: nancy7 completely flipped the meaning of 1 and 2
 			int count = NancySceneState._flags.sceneCounts.contains(dep.hours) ?
 				NancySceneState._flags.sceneCounts[dep.hours] : 0;
 			switch (dep.milliseconds) {
 			case 1:
-				if (dep.seconds < count) {
+				if (	(dep.minutes < count && g_nancy->getGameType() <= kGameTypeNancy6) ||
+						(dep.minutes > count && g_nancy->getGameType() >= kGameTypeNancy7)) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 
 				break;
 			case 2:
-				if (dep.seconds > count) {
+				if (	(dep.minutes > count && g_nancy->getGameType() <= kGameTypeNancy6) ||
+						(dep.minutes < count && g_nancy->getGameType() >= kGameTypeNancy7)) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 
 				break;
 			case 3:
-				if (dep.seconds == count) {
+				if (dep.minutes == count) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 
 				break;
@@ -478,24 +501,32 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 		case DependencyType::kPlayerTOD:
 			if (dep.label == NancySceneState.getPlayerTOD()) {
 				dep.satisfied = true;
+			} else {
+				dep.satisfied = false;
 			}
 
 			break;
 		case DependencyType::kTimerLessThanDependencyTime:
 			if (NancySceneState._timers.timerTime <= dep.timeData) {
 				dep.satisfied = true;
+			} else {
+				dep.satisfied = false;
 			}
 
 			break;
 		case DependencyType::kTimerGreaterThanDependencyTime:
 			if (NancySceneState._timers.timerTime > dep.timeData) {
 				dep.satisfied = true;
+			} else {
+				dep.satisfied = false;
 			}
 
 			break;
 		case DependencyType::kDifficultyLevel:
 			if (dep.condition == NancySceneState._difficulty) {
 				dep.satisfied = true;
+			} else {
+				dep.satisfied = false;
 			}
 
 			break;
@@ -503,10 +534,14 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 			if (ConfMan.getBool("subtitles")) {
 				if (dep.condition == 2) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 			} else {
 				if (dep.condition == 1) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 			}
 
@@ -525,6 +560,8 @@ void ActionManager::processDependency(DependencyRecord &dep, ActionRecord &recor
 			if (!dep.stopEvaluating) {
 				if ((int)g_nancy->_randomSource->getRandomNumber(99) < dep.condition) {
 					dep.satisfied = true;
+				} else {
+					dep.satisfied = false;
 				}
 
 				dep.stopEvaluating = true;
@@ -582,7 +619,7 @@ void ActionManager::synchronizeMovieWithSound() {
 	// The heuristic for catching these cases relies on the scene having a movie and a sound
 	// record start at the same frame, and have a (valid) scene change to the same scene.
 	PlaySecondaryMovie *movie = nullptr;
-	PlayDigiSound *sound = nullptr;
+	PlaySound *sound = nullptr;
 
 	for (uint i = 0; i < _activatedRecordsThisFrame.size(); ++i) {
 		byte type = _activatedRecordsThisFrame[i]->_type;
@@ -590,7 +627,7 @@ void ActionManager::synchronizeMovieWithSound() {
 		if (type == 53) {
 			movie = (PlaySecondaryMovie *)_activatedRecordsThisFrame[i];
 		} else if (type == 150 || type == 151 || type == 157) {
-			sound = (PlayDigiSound *)_activatedRecordsThisFrame[i];
+			sound = (PlaySound *)_activatedRecordsThisFrame[i];
 		}
 
 		if (movie && sound) {
@@ -602,13 +639,13 @@ void ActionManager::synchronizeMovieWithSound() {
 		// A movie and a sound both got activated this frame, check if their scene changes match
 		if (	movie->_videoSceneChange == PlaySecondaryMovie::kMovieSceneChange &&
 				movie->_sceneChange.sceneID == sound->_sceneChange.sceneID &&
-				movie->_sceneChange.sceneID != 9999) {
+				movie->_sceneChange.sceneID != kNoScene) {
 			// They match, check how long the sound is...
 			Audio::Timestamp length = g_nancy->_sound->getLength(sound->_sound);
 
 			if (length.msecs() != 0) {
 				// ..and set the movie's playback speed to match
-				movie->_decoder.setRate(Common::Rational(movie->_decoder.getDuration().msecs(), length.msecs()));
+				movie->_decoder->setRate(Common::Rational(movie->_decoder->getDuration().msecs(), length.msecs()));
 			}
 		}
 	}

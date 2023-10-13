@@ -71,7 +71,6 @@ class SwordEngine;
 class ObjectMan;
 class ResMan;
 class Mouse;
-class Music;
 class Sound;
 class Screen;
 class Logic;
@@ -115,7 +114,7 @@ struct Button {
 
 class Control {
 public:
-	Control(SwordEngine *vm, Common::SaveFileManager *saveFileMan, ResMan *pResMan, ObjectMan *pObjMan, OSystem *system, Mouse *pMouse, Sound *pSound, Music *pMusic, Screen *pScreen, Logic *pLogic);
+	Control(SwordEngine *vm, Common::SaveFileManager *saveFileMan, ResMan *pResMan, ObjectMan *pObjMan, OSystem *system, Mouse *pMouse, Sound *pSound, Screen *pScreen, Logic *pLogic);
 
 	void getPlayerOptions();
 	void askForCdMessage(uint32 needCD, bool incorrectCDPhase);
@@ -151,7 +150,6 @@ private:
 	int32 implementConfirmation();
 	void removeConfirmation();
 
-	void setVolumes();
 	void volUp(int32 i, int32 j);
 	void volDown(int32 i, int32 j);
 	void renderVolumeLight(int32 i);
@@ -212,7 +210,6 @@ private:
 	ResMan *_resMan;
 	OSystem *_system;
 	Mouse *_mouse;
-	Music *_music;
 	Sound *_sound;
 	Screen *_screen;
 	Logic *_logic;

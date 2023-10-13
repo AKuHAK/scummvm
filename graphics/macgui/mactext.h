@@ -119,15 +119,50 @@ struct MacFontRun {
 
 struct MacTextLine;
 
-struct MacTextTableCell {
-	Common::Array<MacTextLine> text;
-	uint16 flags = 0;
-	ManagedSurface surf;
-	int textWidth = -1;
+class MacTextCanvas {
+public:
+	Common::Array<MacTextLine> _text;
+	uint16 _flags = 0;
+	ManagedSurface *_surface = nullptr, *_shadowSurface = nullptr;
+	int _maxWidth = 0;
+	int _textMaxWidth = 0;
+	int _textMaxHeight = 0;
+	TextAlign _textAlignment = kTextAlignRight;
+	int _interLinear = 0;
+	int _textShadow = 0;
+	MacWindowManager *_wm = nullptr;
+	uint32 _bgcolor = 0;
+	bool _macFontMode = true;
+	MacText *_macText;
+
+public:
+	~MacTextCanvas() {
+		delete _surface;
+		delete _shadowSurface;
+	}
+
+	void recalcDims();
+	void reallocSurface();
+	void render(int from, int to);
+	void render(int from, int to, int shadow);
+	int getAlignOffset(int row);
+
+	/**
+	 * Returns line width in pixels. This takes into account chunks.
+	 * The result is cached for faster subsequent calls.
+	 *
+	 * @param line Line number
+	 * @param enforce Flag for indicating skipping the cache and computing the width,
+	 *                must be called when text gets changed
+	 * @param col Compute line width up to specified column, including this column
+	 * @return line width in pixels, or 0 for non-existent lines
+	 */
+	int getLineWidth(int line, bool enforce = false, int col = -1);
+	int getLineHeight(int line);
 };
 
 struct MacTextTableRow {
-	Common::Array<MacTextTableCell> cells;
+	Common::Array<MacTextCanvas> cells;
 	int heght = -1;
 };
 
@@ -144,6 +179,7 @@ struct MacTextLine {
 	Common::U32String picalt, pictitle;
 	uint16 picpercent = 50;
 	Common::Array<MacTextTableRow> *table = nullptr;
+	ManagedSurface *tableSurface = nullptr;
 
 	Common::Array<MacFontRun> chunks;
 
@@ -159,6 +195,10 @@ struct MacTextLine {
 	 * @note If requested column is too big, returns last character in the line
 	 */
 	uint getChunkNum(int *col);
+
+	~MacTextLine() {
+		delete tableSurface;
+	}
 };
 
 struct SelectedText {
@@ -203,8 +243,8 @@ public:
 	void drawToPoint(ManagedSurface *g, Common::Rect srcRect, Common::Point dstPoint);
 	void drawToPoint(ManagedSurface *g, Common::Point dstPoint);
 
-	ManagedSurface *getSurface() { return _surface; }
-	int getInterLinear() { return _interLinear; }
+	ManagedSurface *getSurface() { return _canvas._surface; }
+	int getInterLinear() { return _canvas._interLinear; }
 	void setInterLinear(int interLinear);
 	void setMaxWidth(int maxWidth);
 	void setDefaultFormatting(uint16 fontId, byte textSlant, uint16 fontSize,
@@ -212,7 +252,7 @@ public:
 	const MacFontRun &getDefaultFormatting() { return _defaultFormatting; }
 
 	void setAlignOffset(TextAlign align);
-	TextAlign getAlign() { return _textAlignment; }
+	TextAlign getAlign() { return _canvas._textAlignment; }
 	virtual Common::Point calculateOffset();
 	void setActive(bool active) override;
 	void setEditable(bool editable);
@@ -262,10 +302,6 @@ private:
 	void appendText_(const Common::U32String &strWithFont, uint oldLen);
 	void deletePreviousCharInternal(int *row, int *col);
 	void insertTextFromClipboard();
-	// getStringWidth for mactext version, because we may have the plain bytes mode
-	int getStringWidth(MacFontRun &format, const Common::U32String &str);
-	int getStringMaxWordWidth(MacFontRun &format, const Common::U32String &str);
-	int getAlignOffset(int row);
 	MacFontRun getFgColor();
 
 public:
@@ -273,12 +309,12 @@ public:
 	void appendTextDefault(const Common::String &str, bool skipAdd = false);
 	void clearText();
 	void removeLastLine();
-	int getLineCount() { return _textLines.size(); }
+	int getLineCount() { return _canvas._text.size(); }
 	int getLineCharWidth(int line, bool enforce = false);
 	int getLastLineWidth();
-	int getTextHeight() { return _textMaxHeight; }
+	int getTextHeight() { return _canvas._textMaxHeight; }
 	int getLineHeight(int line);
-	int getTextMaxWidth() { return _textMaxWidth; }
+	int getTextMaxWidth() { return _canvas._textMaxWidth; }
 
 	void setText(const Common::U32String &str);
 
@@ -300,7 +336,7 @@ public:
 	Common::U32String cutSelection();
 	const SelectedText *getSelectedText() { return &_selectedText; }
 
-	int getLineSpacing() { return _interLinear; }
+	int getLineSpacing() { return _canvas._interLinear; }
 
 	/**
 	 * set the selection of mactext
@@ -320,27 +356,11 @@ public:
 	// Markdown
 public:
 	void setMarkdownText(const Common::U32String &str);
-
-private:
 	const Surface *getImageSurface(Common::String &fname);
 
 private:
 	void init();
 	bool isCutAllowed();
-
-	/**
-	 * Returns line width in pixels. This takes into account chunks.
-	 * The result is cached for faster subsequent calls.
-	 *
-	 * @param line Line number
-	 * @param enforce Flag for indicating skipping the cache and computing the width,
-	 *                must be called when text gets changed
-	 * @param col Compute line width up to specified column, including this column
-	 * @return line width in pixels, or 0 for non-existent lines
-	 */
-	int getLineWidth(int line, bool enforce = false, int col = -1);
-
-	int getLineWidth(MacTextLine *line, bool enforce = false, int col = -1);
 
 	/**
 	 * Rewraps paragraph containing given text row.
@@ -351,10 +371,7 @@ private:
 
 	void chopChunk(const Common::U32String &str, int *curLine, int indent, int maxWidth);
 	void splitString(const Common::U32String &str, int curLine = -1);
-	void render(int from, int to, int shadow);
-	void render(int from, int to);
 	void recalcDims();
-	void reallocSurface();
 
 	void drawSelection(int xoff, int yoff);
 	void updateCursorPos();
@@ -382,28 +399,15 @@ protected:
 	Common::U32String _str;
 	const MacFont *_macFont;
 
-	int _maxWidth;
-	int _interLinear;
-	int _textShadow;
-
 	bool _fixedDims;
 
 	int _selEnd;
 	int _selStart;
 
-	int _textMaxWidth;
-	int _textMaxHeight;
+	MacTextCanvas _canvas;
 
-	ManagedSurface *_surface;
-	ManagedSurface *_shadowSurface;
-
-	TextAlign _textAlignment;
-
-	Common::Array<MacTextLine> _textLines;
 	MacFontRun _defaultFormatting;
 	MacFontRun _currentFormatting;
-
-	bool _macFontMode;
 
 	bool _inTable = false;
 

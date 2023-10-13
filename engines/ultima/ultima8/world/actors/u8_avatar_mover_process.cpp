@@ -640,6 +640,14 @@ void U8AvatarMoverProcess::step(Animation::Sequence action, Direction direction,
 	Animation::Result res = avatar->tryAnim(action, direction);
 	Direction stepdir = direction;
 
+	// Ignore end off land if starting off land
+	if (res == Animation::END_OFF_LAND) {
+		int32 ax, ay, az;
+		avatar->getLocation(ax, ay, az);
+		if (!avatar->canExistAt(ax, ay, az, true))
+			res = Animation::SUCCESS;
+	}
+
 	if (res == Animation::FAILURE ||
 	        (action == Animation::step && res == Animation::END_OFF_LAND)) {
 		debug(6, "Step: end off land dir %d, try other dir", stepdir);
@@ -691,6 +699,13 @@ void U8AvatarMoverProcess::step(Animation::Sequence action, Direction direction,
 		action = Animation::stand;
 	}
 
+	if (action == Animation::walk && res == Animation::END_OFF_LAND) {
+		action = Animation::step;
+	}
+
+	if (action == Animation::run && res == Animation::END_OFF_LAND) {
+		action = Animation::walk;
+	}
 
 	bool moving = (action == Animation::run || action == Animation::walk);
 

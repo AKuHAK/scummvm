@@ -498,10 +498,10 @@ byte SoundManager::getVolume(const Common::String &chunkName) {
 }
 
 void SoundManager::setVolume(uint16 channelID, uint16 volume) {
-	if (channelID >= _channels.size())
+	if (channelID >= _channels.size() || !isSoundPlaying(channelID))
 		return;
 
-	_mixer->setChannelVolume(_channels[channelID].handle, volume);
+	_mixer->setChannelVolume(_channels[channelID].handle, volume * 255 / 100);
 }
 
 void SoundManager::setVolume(const SoundDescription &description, uint16 volume) {
@@ -759,7 +759,8 @@ void SoundManager::soundEffectMaintenance(uint16 channelID, bool force) {
 	}
 
 	// Check if the player has moved OR if the sound itself has moved, OR, if we're still interpolating
-	if (!_shouldRecalculate && !hasStepped && _positionLerp == 0) {
+	// Also, make sure we don't accidentally create a Scene state during game startup
+	if (!State::Scene::hasInstance() || (!_shouldRecalculate && !hasStepped && _positionLerp == 0)) {
 		return;
 	}
 	

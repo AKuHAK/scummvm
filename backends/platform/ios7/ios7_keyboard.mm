@@ -70,11 +70,13 @@
 
 	toolbar = [[UITabBar alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 0.0f, 0.0f)];
 	toolbar.barTintColor = keyboard.backgroundColor;
-	toolbar.tintColor = keyboard.tintColor;
+	toolbar.tintColor = [UIColor grayColor];
 	toolbar.translucent = NO;
 	toolbar.delegate = self;
 
 	toolbar.items = @[
+		// Keyboard layout button
+		[[[UITabBarItem alloc] initWithTitle:@"123" image:nil tag:0] autorelease],
 		// GMM button
 		[[[UITabBarItem alloc] initWithTitle:@"\u2630" image:nil tag:1] autorelease],
 		// Escape key
@@ -167,6 +169,9 @@
 
 -(void)selectUITabBarItem:(UITapGestureRecognizer *)recognizer {
 	switch ([[toolbar selectedItem] tag]) {
+	case 0:
+		[self switchKeyboardLayout];
+		break;
 	case 1:
 		[self mainMenuKey];
 		break;
@@ -382,12 +387,25 @@
 	[softKeyboard handleKeyPress:Common::KEYCODE_RETURN];
 }
 
+- (void) switchKeyboardLayout {
+	if ([self keyboardType] == UIKeyboardTypeDefault) {
+		[self setKeyboardType:UIKeyboardTypeNumberPad];
+		[[toolbar selectedItem] setTitle:@"abc"];
+	} else {
+		[self setKeyboardType:UIKeyboardTypeDefault];
+		[[toolbar selectedItem] setTitle:@"123"];
+	}
+
+	[self reloadInputViews];
+}
 @end
 
 
 @implementation SoftKeyboard {
 	BOOL _keyboardVisible;
 }
+
+@synthesize hwKeyboardConnected;
 
 #if TARGET_OS_IOS
 - (void)resizeParentFrame:(NSNotification*)notification keyboardDidShow:(BOOL)didShow
@@ -398,7 +416,15 @@
 
 	// Base the new frame size on the current parent frame size
 	CGRect newFrame = self.superview.frame;
-	newFrame.size.height += (keyboardFrame.size.height) * (didShow ? -1 : 1);
+	if ([self hwKeyboardConnected]) {
+		if (ConfMan.getBool("keyboard_fn_bar")) {
+			newFrame.size.height += (inputView.inputAccessoryView.frame.size.height) * (didShow ? -1 : 1);
+		} else {
+			return;
+		}
+	} else {
+		newFrame.size.height += (keyboardFrame.size.height) * (didShow ? -1 : 1);
+	}
 
 	// Resize with a fancy animation
 	NSNumber *rate = notification.userInfo[UIKeyboardAnimationDurationUserInfoKey];
@@ -449,6 +475,7 @@
 	inputView = [[TextInputHandler alloc] initWithKeyboard:self];
 	inputView.delegate = self;
 	inputView.clearsOnBeginEditing = YES;
+	inputView.keyboardType = UIKeyboardTypeDefault;
 	[inputView layoutIfNeeded];
 	_keyboardVisible = NO;
 	return self;

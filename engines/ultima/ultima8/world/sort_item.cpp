@@ -53,8 +53,8 @@ void SortItem::setBoxBounds(const Box& box, int32 sx, int32 sy) {
 	// Screenspace rect - replace with shape frame calculations
 	_sr.left = _sxLeft;
 	_sr.top = _syTop;
-	_sr.right = _sxRight;
-	_sr.bottom = _syBot;
+	_sr.right = _sxRight + 1;
+	_sr.bottom = _syBot + 1;
 
 	// These help out with sorting. We calc them now, so it will be faster
 	_fbigsq = box._xd == box._yd && box._xd >= 128;
@@ -107,6 +107,40 @@ bool SortItem::below(const SortItem &si2) const {
 			return false;
 	}
 
+	// Check with a tolerance based on footpad calculations
+	if (si1._zTop - 8 <= si2._z && si1._z < si2._zTop - 8)
+		return true;
+	if (si1._z >= si2._zTop - 8 && si1._zTop - 8 > si2._z)
+		return false;
+
+	// Y-flat vs non-flat handling
+	if (yFlat1 != yFlat2) {
+		// Check with a precision loss based on footpad calculations
+		if (si1._y / 32 <= si2._yFar / 32)
+			return true;
+		if (si1._yFar / 32 >= si2._y / 32)
+			return false;
+
+		int32 yCenter1 = (si1._yFar / 32 + si1._y / 32) / 2;
+		int32 yCenter2 = (si2._yFar / 32 + si2._y / 32) / 2;
+		if (yCenter1 != yCenter2)
+			return yCenter1 < yCenter2;
+	}
+
+	// X-flat vs non-flat handling
+	if (xFlat1 != xFlat2) {
+		// Check with a precision loss based on footpad calculations
+		if (si1._x / 32 <= si2._xLeft / 32)
+			return true;
+		if (si1._xLeft / 32 >= si2._x / 32)
+			return false;
+
+		int32 xCenter1 = (si1._xLeft / 32 + si1._x / 32) / 2;
+		int32 xCenter2 = (si2._xLeft / 32 + si2._x / 32) / 2;
+		if (xCenter1 != xCenter2)
+			return xCenter1 < xCenter2;
+	}
+
 	// Specialist z flat handling
 	if (si1._flat || si2._flat) {
 		// Lower z-bottom drawn before
@@ -146,40 +180,6 @@ bool SortItem::below(const SortItem &si2) const {
 			return si1._fbigsq > si2._fbigsq;
 	}
 
-	// Check with a tolerance based on footpad calculations
-	if (si1._zTop - 8 <= si2._z && si1._z < si2._zTop - 8)
-		return true;
-	if (si1._z >= si2._zTop - 8 && si1._zTop - 8 > si2._z)
-		return false;
-
-	// Y-flat vs non-flat handling
-	if (yFlat1 != yFlat2) {
-		// Check with a precision loss based on footpad calculations
-		if (si1._y / 32 <= si2._yFar / 32)
-			return true;
-		if (si1._yFar / 32 >= si2._y / 32)
-			return false;
-
-		int32 yCenter1 = (si1._yFar / 32 + si1._y / 32) / 2;
-		int32 yCenter2 = (si2._yFar / 32 + si2._y / 32) / 2;
-		if (yCenter1 != yCenter2)
-			return yCenter1 < yCenter2;
-	}
-
-	// X-flat vs non-flat handling
-	if (xFlat1 != xFlat2) {
-		// Check with a precision loss based on footpad calculations
-		if (si1._x / 32 <= si2._xLeft / 32)
-			return true;
-		if (si1._xLeft / 32 >= si2._x / 32)
-			return false;
-
-		int32 xCenter1 = (si1._xLeft / 32 + si1._x / 32) / 2;
-		int32 xCenter2 = (si2._xLeft / 32 + si2._x / 32) / 2;
-		if (xCenter1 != xCenter2)
-			return xCenter1 < xCenter2;
-	}
-
 	// Specialist handling for same location
 	if (si1._x == si2._x && si1._y == si2._y) {
 		// Trans always gets drawn after
@@ -203,29 +203,31 @@ bool SortItem::below(const SortItem &si2) const {
 	if (si1._z != si2._z)
 		return si1._z < si2._z;
 
-	// Higher screenspace left drawn before?
-	if (si1._sxLeft != si2._sxLeft)
-		return si1._sxLeft > si2._sxLeft;
+	if (xFlat1 || xFlat2 || yFlat1 || yFlat2) {
+		// Higher screenspace left drawn before?
+		if (si1._sxLeft != si2._sxLeft)
+			return si1._sxLeft > si2._sxLeft;
 
-	// Lower screenspace bottom drawn before?
-	if (si1._syBot != si2._syBot)
-		return si1._syBot < si2._syBot;
+		// Lower screenspace bottom drawn before?
+		if (si1._syBot != si2._syBot)
+			return si1._syBot < si2._syBot;
+	}
 
-	//// Partial in X + Y front
-	//if (si1._x + si1._y != si2._x + si2._y)
-	//	return (si1._x + si1._y < si2._x + si2._y);
+	// Partial in X + Y front
+	if (si1._x + si1._y != si2._x + si2._y)
+		return (si1._x + si1._y < si2._x + si2._y);
 
-	//// Partial in X + Y back
-	//if (si1._xLeft + si1._yFar != si2._xLeft + si2._yFar)
-	//	return (si1._xLeft + si1._yFar < si2._xLeft + si2._yFar);
+	// Partial in X + Y back
+	if (si1._xLeft + si1._yFar != si2._xLeft + si2._yFar)
+		return (si1._xLeft + si1._yFar < si2._xLeft + si2._yFar);
 
-	//// Partial in y?
-	//if (si1._y != si2._y)
-	//	return si1._y < si2._y;
+	// Partial in y?
+	if (si1._y != si2._y)
+		return si1._y < si2._y;
 
-	//// Partial in x?
-	//if (si1._x != si2._x)
-	//	return si1._x < si2._x;
+	// Partial in x?
+	if (si1._x != si2._x)
+		return si1._x < si2._x;
 
 	// Just sort by shape number
 	if (si1._shapeNum != si2._shapeNum)

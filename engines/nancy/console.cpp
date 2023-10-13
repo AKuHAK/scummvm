@@ -478,7 +478,7 @@ void NancyConsole::printActionRecord(const Nancy::Action::ActionRecord *record, 
 void NancyConsole::recursePrintDependencies(const Nancy::Action::DependencyRecord &record) {
 	using namespace Nancy::Action;
 
-	const INV *inventoryData = (const INV *)g_nancy->getEngineData("INV");
+	auto *inventoryData = GetEngineData(INV);
 	assert(inventoryData);
 
 	for (const DependencyRecord &dep : record.children) {
@@ -530,7 +530,7 @@ void NancyConsole::recursePrintDependencies(const Nancy::Action::DependencyRecor
 			debugPrintf("kSceneCount, scene ID %i, hit count %s %i",
 				dep.hours,
 				dep.milliseconds == 1 ? ">" : dep.milliseconds == 2 ? "<" : "==",
-				dep.seconds);
+				dep.minutes);
 			break;
 		case DependencyType::kElapsedPlayerDay :
 			debugPrintf("kElapsedPlayerDay");
@@ -685,8 +685,9 @@ bool NancyConsole::Cmd_scanForActionRecordType(int argc, const char **argv) {
 	}
 
 	Common::Array<Common::String> list;
-	// Action records only appear in the ciftree
+	// Action records only appear in the ciftree and promotree
 	g_nancy->_resource->list("ciftree", list, ResourceManager::kResTypeScript);
+	g_nancy->_resource->list("promotree", list, ResourceManager::kResTypeScript);
 
 	char descBuf[0x30];
 
@@ -815,7 +816,7 @@ bool NancyConsole::Cmd_getInventory(int argc, const char **argv) {
 	}
 
 	uint numItems = g_nancy->getStaticData().numItems;
-	const INV *inventoryData = (const INV *)g_nancy->getEngineData("INV");
+	auto *inventoryData = GetEngineData(INV);
 	assert(inventoryData);
 
 	debugPrintf("Total number of inventory items: %u\n", numItems);
@@ -852,7 +853,7 @@ bool NancyConsole::Cmd_getInventory(int argc, const char **argv) {
 }
 
 bool NancyConsole::Cmd_setInventory(int argc, const char **argv) {
-	const INV *inventoryData = (const INV *)g_nancy->getEngineData("INV");
+	auto *inventoryData = GetEngineData(INV);
 	assert(inventoryData);
 	
 	if (g_nancy->_gameFlow.curState != NancyState::kScene) {

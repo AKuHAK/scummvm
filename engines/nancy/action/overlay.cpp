@@ -192,30 +192,33 @@ void Overlay::execute() {
 					}
 				}
 
+				uint16 frameDiff = 1;
+				uint16 nextFrame = _currentFrame;
+
 				if (_nextFrameTime == 0) {
 					_nextFrameTime = _currentFrameTime + _frameTime;
 				} else {
-					_nextFrameTime += _frameTime;
+					uint32 timeDiff = _currentFrameTime - _nextFrameTime;
+					frameDiff = timeDiff / _frameTime;
+					_nextFrameTime += _frameTime * frameDiff;
 				}
 
-				uint16 nextFrame = _currentFrame;
-
 				if (_playDirection == kPlayOverlayReverse) {
-					if (nextFrame - 1 < _loopFirstFrame) {
+					if (nextFrame - frameDiff < _loopFirstFrame) {
 						// We keep looping if sound is present (nancy1 only)
 						if (_loop == kPlayOverlayLoop || (_sound.name != "NO SOUND" && g_nancy->getGameType() == kGameTypeNancy1)) {
-							nextFrame = _loopLastFrame;
+							nextFrame = _loopLastFrame - (frameDiff % (_loopLastFrame - _loopFirstFrame + 1));
 						}
 					} else {
-						--nextFrame;
+						nextFrame -= frameDiff;
 					}
 				} else {
-					if (nextFrame + 1 > _loopLastFrame) {
+					if (nextFrame + frameDiff > _loopLastFrame) {
 						if (_loop == kPlayOverlayLoop || (_sound.name != "NO SOUND" && g_nancy->getGameType() == kGameTypeNancy1)) {
-							nextFrame = _loopFirstFrame;
+							nextFrame = _loopFirstFrame + (frameDiff % (_loopLastFrame - _loopFirstFrame + 1));
 						}
 					} else {
-						++nextFrame;
+						nextFrame += frameDiff;
 					}
 				}
 
@@ -365,6 +368,50 @@ void Overlay::setFrame(uint frame) {
 	_needsRedraw = true;
 }
 
+void OverlayStaticTerse::readData(Common::SeekableReadStream &stream) {
+	readFilename(stream, _imageName);
+	_transparency = stream.readUint16LE();
+	_z = stream.readUint16LE();
+
+	Common::Rect dest, src;
+	readRect(stream, dest);
+	readRect(stream, src);
+
+	_srcRects.push_back(src);
+	_blitDescriptions.resize(1);
+	_blitDescriptions[0].src = Common::Rect(src.width(), src.height());
+	_blitDescriptions[0].dest = dest;
+
+	_overlayType = kPlayOverlayStatic;
+}
+
+void OverlayAnimTerse::readData(Common::SeekableReadStream &stream) {
+	readFilename(stream, _imageName);
+	stream.skip(2); // VIDEO_STOP_RENDERING, VIDEO_CONTINUE_RENDERING
+	_transparency = stream.readUint16LE();
+	_hasSceneChange = stream.readUint16LE();
+	_z = stream.readUint16LE();
+	_playDirection = stream.readUint16LE();
+	_loop = stream.readUint16LE();
+
+	_sceneChange.sceneID = stream.readUint16LE();
+	_sceneChange.continueSceneSound = kContinueSceneSound;
+	_sceneChange.listenerFrontVector.set(0, 0, 1);
+	_flagsOnTrigger.descs[0].label = stream.readSint16LE();
+	_flagsOnTrigger.descs[0].flag = stream.readUint16LE();
+
+	_firstFrame = _loopFirstFrame = stream.readUint16LE();
+	_loopLastFrame = stream.readUint16LE();
+
+	_blitDescriptions.resize(1);
+	readRect(stream, _blitDescriptions[0].dest);
+
+	readRectArray(stream, _srcRects, _loopLastFrame - _loopFirstFrame + 1);
+
+	_overlayType = kPlayOverlayAnimated;
+	_frameTime = Common::Rational(1000, 15).toInt(); // Always set to 15 fps
+}
+
 void TableIndexOverlay::readData(Common::SeekableReadStream &stream) {
 	_tableIndex = stream.readUint16LE();
 	Overlay::readData(stream);
@@ -377,7 +424,7 @@ void TableIndexOverlay::execute() {
 
 	TableData *playerTable = (TableData *)NancySceneState.getPuzzleData(TableData::getTag());
 	assert(playerTable);
-	const TABL *tabl = (const TABL *)g_nancy->getEngineData("TABL");
+	auto *tabl = GetEngineData(TABL);
 	assert(tabl);
 
 	if (_lastIndexVal != playerTable->currentIDs[_tableIndex - 1]) {

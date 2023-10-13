@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2023-09-30 07:11+0000\n"
-"PO-Revision-Date: 2023-09-17 10:13+0000\n"
+"POT-Creation-Date: 2023-10-12 21:54+0000\n"
+"PO-Revision-Date: 2023-10-13 08:41+0000\n"
 "Last-Translator: VAN-Gluon <van.gluonp@gmail.com>\n"
 "Language-Team: Japanese <https://translations.scummvm.org/projects/scummvm/"
 "scummvm/ja/>\n"
@@ -66,7 +66,7 @@ msgstr "上へ"
 #: gui/saveload-dialog.cpp:455 gui/saveload-dialog.cpp:526
 #: gui/saveload-dialog.cpp:828 gui/saveload-dialog.cpp:1220
 #: gui/shaderbrowser-dialog.cpp:81 gui/themebrowser.cpp:54
-#: gui/unknown-game-dialog.cpp:53 base/main.cpp:601
+#: gui/unknown-game-dialog.cpp:53 base/main.cpp:603
 #: dists/android.strings.xml.cpp:43 engines/engine.cpp:747
 #: backends/dialogs/gtk/gtk-dialogs.cpp:65
 #: backends/events/default/default-events.cpp:193
@@ -83,7 +83,7 @@ msgstr "上へ"
 #: engines/mohawk/riven_stacks/aspit.cpp:455
 #: engines/parallaction/saveload.cpp:270
 #: engines/scumm/dialog-createsession.cpp:47
-#: engines/scumm/dialog-sessionselector.cpp:67 engines/sword1/control.cpp:2900
+#: engines/scumm/dialog-sessionselector.cpp:67 engines/sword1/control.cpp:2797
 #: engines/wintermute/wintermute.cpp:182
 msgid "Cancel"
 msgstr "キャンセル"
@@ -273,7 +273,7 @@ msgstr "すでに別のストレージが使用されています。切断しま
 #: gui/downloaddialog.cpp:152 gui/filebrowser-dialog.cpp:135
 #: gui/fluidsynth-dialog.cpp:209 gui/launcher.cpp:426 gui/launcher.cpp:455
 #: gui/launcher.cpp:498 gui/options.cpp:3401 gui/options.cpp:3782
-#: base/main.cpp:601 backends/events/default/default-events.cpp:193
+#: base/main.cpp:603 backends/events/default/default-events.cpp:193
 #: engines/buried/buried.cpp:590 engines/director/events.cpp:89
 #: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/grim/grim.cpp:360
 #: engines/kyra/gui/saveload_eob.cpp:598 engines/kyra/gui/saveload_eob.cpp:631
@@ -323,9 +323,9 @@ msgstr "JSONコードの内容が不正です。"
 #: engines/scumm/scumm.cpp:1190 engines/scumm/scumm.cpp:1212
 #: engines/scumm/scumm.cpp:1565 engines/scumm/scumm.cpp:2038
 #: engines/scumm/scumm.cpp:2054 engines/sky/compact.cpp:140
-#: engines/sword1/animation.cpp:529 engines/sword1/animation.cpp:560
-#: engines/sword1/animation.cpp:568 engines/sword1/control.cpp:2900
-#: engines/sword1/logic.cpp:1686 engines/sword2/animation.cpp:426
+#: engines/sword1/animation.cpp:532 engines/sword1/animation.cpp:563
+#: engines/sword1/animation.cpp:571 engines/sword1/control.cpp:2797
+#: engines/sword1/logic.cpp:1702 engines/sword2/animation.cpp:426
 #: engines/sword2/animation.cpp:456 engines/sword2/animation.cpp:466
 #: engines/vcruise/vcruise.cpp:92 engines/vcruise/vcruise.cpp:102
 #: engines/zvision/file/save_manager.cpp:225
@@ -466,9 +466,9 @@ msgstr "DL完了。%dパック検出しました、%s %S"
 #: gui/downloadpacksdialog.cpp:296 gui/downloadpacksdialog.cpp:387
 #: gui/gui-manager.cpp:164 gui/imagealbum-dialog.cpp:131 gui/textviewer.cpp:53
 #: gui/unknown-game-dialog.cpp:53 backends/platform/android/options.cpp:492
-#: backends/platform/ios7/ios7_options.mm:197 engines/scumm/help.cpp:127
-#: engines/scumm/help.cpp:142 engines/scumm/help.cpp:167
-#: engines/scumm/help.cpp:193 engines/scumm/help.cpp:211
+#: engines/scumm/help.cpp:127 engines/scumm/help.cpp:142
+#: engines/scumm/help.cpp:167 engines/scumm/help.cpp:193
+#: engines/scumm/help.cpp:211
 msgid "Close"
 msgstr "閉じる"
 
@@ -550,7 +550,9 @@ msgstr "ゲームの言語です。スペイン語版を英語版に変換はし
 #: backends/platform/android/options.cpp:150
 #: backends/platform/android/options.cpp:151
 #: backends/platform/android/options.cpp:179
-#: backends/platform/ios7/ios7_options.mm:110 engines/ags/dialogs.cpp:63
+#: backends/platform/ios7/ios7_options.mm:130
+#: backends/platform/ios7/ios7_options.mm:131
+#: backends/platform/ios7/ios7_options.mm:156 engines/ags/dialogs.cpp:63
 msgid "<default>"
 msgstr "<デフォルト>"
 
@@ -569,14 +571,14 @@ msgid "Platform:"
 msgstr "プラットフォーム："
 
 #: gui/editgamedialog.cpp:191 gui/options.cpp:2004 gui/options.cpp:2178
+msgid "GFX"
+msgstr "GFX"
+
+#: gui/editgamedialog.cpp:191 gui/options.cpp:2004 gui/options.cpp:2178
 #: backends/graphics/atari/atari-graphics.cpp:953
 #: backends/graphics/sdl/sdl-graphics.cpp:426
 msgid "Graphics"
 msgstr "画像"
-
-#: gui/editgamedialog.cpp:191 gui/options.cpp:2004 gui/options.cpp:2178
-msgid "GFX"
-msgstr "GFX"
 
 #: gui/editgamedialog.cpp:197
 msgid "Override global graphic settings"
@@ -1395,7 +1397,7 @@ msgstr "垂直同期設定を変更できませんでした"
 msgid "the shader could not be changed"
 msgstr "シェーダーを変更できませんでした"
 
-#: gui/options.cpp:1390 backends/platform/ios7/ios7_options.mm:89
+#: gui/options.cpp:1390
 msgid "Touchpad mouse mode"
 msgstr "タッチパッドマウスモード"
 
@@ -2537,51 +2539,50 @@ msgstr "再生"
 msgid "Saves"
 msgstr "セーブ"
 
-#: base/main.cpp:601
+#: base/main.cpp:603
 msgid "Bad config file format. overwrite?"
 msgstr "無効な形式です。上書きしますか?"
 
 #. I18N: <Add a new folder> must match the translation done in backends/fs/android/android-saf-fs.h
-#: base/main.cpp:650
+#: base/main.cpp:652
 msgid ""
-"In this new version of ScummVM Android, significant changes were made to the "
-"file access system to allow support for modern versions of the Android "
+"In this new version of ScummVM for Android, significant changes were made to "
+"the file access system to allow support for modern versions of the Android "
 "Operating System.\n"
 "If you find that your existing added games or custom paths no longer work, "
-"please edit those paths and this time use the SAF system to browse to the "
-"desired locations.\n"
-"To do that:\n"
+"please edit those paths:\n"
+"  1. From the Launcher, go to **Game Options > Paths**. Select **Game Path** "
+"or **Extra Path**, as appropriate. \n"
+"  2. Inside the ScummVM file browser, select **Go Up** until you reach the "
+"root folderwhich has the **<Add a new folder>** option.\n"
+"  3. Double-tap **<Add a new folder>**. In your device's file browser, "
+"navigate to the foldercontaining all your game folders. For example, **SD "
+"Card > ScummVMgames** \n"
+"  4. Select **Use this folder**. \n"
+"  5. Select **Allow** to give ScummVM permission to access the folder. \n"
+"  6. In the ScummVM file browser, double-tap to browse through your added "
+"folder.Select the folder containing the game's files, then tap **Choose**. \n"
 "\n"
-"  1. For each game whose data is not found, go to the \"Paths\" tab in the "
-"\"Game Options\" and change the \"Game path\"\n"
-"  2. Inside the ScummVM file browser, use \"Go Up\" until you reach the "
-"\"root\" folder where you will see the \"<Add a new folder>\" option.\n"
-"  3. Choose that, then browse and select the \"parent\" folder for your "
-"games subfolders, e.g. \"SD Card > myGames\". Click on \"Use this folder\".\n"
-"  4. Then, a new folder \"myGames\" will appear on the \"root\" folder of "
-"the ScummVM browser.\n"
-"  5. Browse through this folder to your game data.\n"
-"\n"
-"Steps 2 and 3 need to be done only once for all of your games."
+"Repeat steps 1 and 6 for each game."
 msgstr ""
 "ScummVM Androidの新バージョンでは、Android OSの最新バージョンをサポートするた"
 "め、ファイルアクセスシステムに大幅な変更が加えられています。\n"
-"既存の追加されたゲームやカスタムパスが機能しなくなった場合は、それらのパスを"
-"編集し、SAFシステムを使用して目的の場所を参照してください。\n"
-"諸手順：\n"
-"\n"
-"  1. データが見つからない「ゲームオプション」の「パス」タブに移動し「ゲームパ"
-"ス」を選択\n"
+"既存の追加されたゲームやカスタムパスが機能しない場合、パスを編集してくださ"
+"い：\n"
+"  1. ランチャーから「ゲームオプション」の「パス」タブに移動し「ゲーム/エクス"
+"トラパス」を選択。\n"
 "  2. ScummVMファイルブラウザーでルートディレクトリーまで戻り「新規フォルダー"
-"作成」を選択\n"
-"  3. ゲームのサブフォルダーの親(例：「SD Card > myGames」)を選択し「このフォ"
-"ルダーを使用」\n"
-"  4. ScummVMブラウザーのルートディレクトリーに「myGames」が作成されます。\n"
-"  5. 作成されたフォルダーから、ゲームデータを探します。\n"
+"作成」を選択。\n"
+"  3. 「新規フォルダー作成」をダブルタップ。デバイスのブラウザーで、全てのゲー"
+"ムデータを含むフォルダーに移動(例：「SD Card > ScummVMgames」)。\n"
+"  4. 「このフォルダーを使用」を選択。\n"
+"  5. 「許可」を選択し、ScummVMにフォルダーへのアクセスを許可。\n"
+"  6. ScummVMファイルブラウザーで、追加したフォルダーをダブルタップして選択。"
+"ゲームデータを含むフォルダーを選択し「選択」をタップ。\n"
 "\n"
-"2.と3.は、ゲーム毎に一度だけ行う必要があります。"
+"ゲーム毎に上記を繰り返します。"
 
-#: base/main.cpp:669 base/main.cpp:690
+#: base/main.cpp:670 base/main.cpp:695
 #: engines/director/lingo/lingo-builtins.cpp:1261
 #: engines/director/lingo/xlibs/jitdraw3.cpp:123
 #: engines/director/lingo/xlibs/jitdraw3.cpp:131
@@ -2590,42 +2591,52 @@ msgstr "Ok"
 
 #. I18N: A button caption to dismiss amessage and read it later
 #. I18N: A button caption to dismiss a message and read it later
-#: base/main.cpp:671 base/main.cpp:692
+#: base/main.cpp:672 base/main.cpp:697
 msgid "Read Later"
 msgstr "後で読む"
 
 #. I18N: <Add a new folder> must match the translation done in backends/fs/android/android-saf-fs.h
-#: base/main.cpp:678
+#: base/main.cpp:679
 msgid ""
-"In this new version of ScummVM Android, significant changes were made to the "
-"file access system to allow support for modern versions of the Android "
+"In this new version of ScummVM for Android, significant changes were made to "
+"the file access system to allow support for modern versions of the Android "
 "Operating System.\n"
-"Thus, you need to set up SAF in order to be able to add the games.\n"
+"To add a game:\n"
 "\n"
-"  1. Inside the ScummVM file browser, use \"Go Up\" until you reach the "
-"\"root\" folder where you will see the \"<Add a new folder>\" option.\n"
-"  2. Choose that, then browse and select the \"parent\" folder for your "
-"games subfolders, e.g. \"SD Card > myGames\". Click on \"Use this folder\".\n"
-"  3. Then, a new folder \"myGames\" will appear on the \"root\" folder of "
-"the ScummVM browser.\n"
-"  4. Browse through this folder to your game data."
+"  1. Select **Add Game...** from the launcher. \n"
+"  2. Inside the ScummVM file browser, select **Go Up** until you reach the "
+"root folderwhich has the **<Add a new folder>** option.\n"
+"  3. Double-tap **<Add a new folder>**. In your device's file browser, "
+"navigate to the foldercontaining all your game folders. For example, **SD "
+"Card > ScummVMgames** \n"
+"  4. Select **Use this folder**. \n"
+"  5. Select **Allow** to give ScummVM permission to access the folder. \n"
+"  6. In the ScummVM file browser, double-tap to browse through your added "
+"folder.Select the sub-folder containing the game's files, then tap "
+"**Choose**.\n"
+"Repeat steps 1 and 6 for each game."
 msgstr ""
 "ScummVM Androidの新バージョンでは、Android OSの最新バージョンをサポートするた"
 "め、ファイルアクセスシステムに大幅な変更が加えられています。\n"
-"従って、ゲームを追加するためSAFを設定する必要があります。\n"
+"追加手順：\n"
 "\n"
-"  1. ScummVMファイルブラウザーでルートディレクトリーまで戻り「新規フォルダー"
-"作成」を選択\n"
-"  2. ゲームのサブフォルダーの親(例：「SD Card > myGames」)を選択し「このフォ"
-"ルダーを使用」\n"
-"  3. ScummVMブラウザーのルートディレクトリーに「myGames」が作成されます。\n"
-"  4. 作成されたフォルダーから、ゲームデータを探します。"
+"1. ランチャーから「ゲームオプション」の「パス」タブに移動し「ゲーム/エクスト"
+"ラパス」を選択。\n"
+"  2. ScummVMファイルブラウザーでルートディレクトリーまで戻り「新規フォルダー"
+"作成」を選択。\n"
+"  3. 「新規フォルダー作成」をダブルタップ。デバイスのブラウザーで、全てのゲー"
+"ムデータを含むフォルダーに移動(例：「SD Card > ScummVMgames」)。\n"
+"  4. 「このフォルダーを使用」を選択。\n"
+"  5. 「許可」を選択し、ScummVMにフォルダーへのアクセスを許可。\n"
+"  6. ScummVMファイルブラウザーで、追加したフォルダーをダブルタップして選択。"
+"ゲームデータを含むフォルダーを選択し「選択」をタップ。\n"
+"ゲーム毎に上記を繰り返します。"
 
-#: base/main.cpp:788
+#: base/main.cpp:797
 msgid "Error running game:"
 msgstr "ゲームを実行のエラー："
 
-#: base/main.cpp:835
+#: base/main.cpp:844
 msgid "Could not find any engine capable of running the selected game"
 msgstr "選択されたゲームに対応するエンジンが見つかりません"
 
@@ -2989,7 +3000,7 @@ msgstr "メインメニューに戻る(~R~)"
 #: engines/mm/xeen/saves.cpp:280 engines/mtropolis/saveload.cpp:76
 #: engines/neverhood/menumodule.cpp:923 engines/pegasus/pegasus.cpp:406
 #: engines/prince/saveload.cpp:54 engines/sci/engine/guest_additions.cpp:742
-#: engines/sci/engine/kfile.cpp:1076 engines/sherlock/scalpel/scalpel.cpp:1249
+#: engines/sci/engine/kfile.cpp:1083 engines/sherlock/scalpel/scalpel.cpp:1249
 #: engines/sherlock/tattoo/widget_files.cpp:74 engines/startrek/saveload.cpp:42
 #: engines/toltecs/menu.cpp:302 engines/toon/toon.cpp:3801
 #: engines/trecision/saveload.cpp:67 engines/tsage/scenes.cpp:628
@@ -3011,7 +3022,7 @@ msgstr "ゲームをセーブ："
 #: engines/neverhood/menumodule.cpp:923 engines/parallaction/metaengine.cpp:133
 #: engines/parallaction/saveload.cpp:208 engines/pegasus/pegasus.cpp:406
 #: engines/prince/saveload.cpp:54 engines/sci/engine/guest_additions.cpp:743
-#: engines/sci/engine/kfile.cpp:1076 engines/sherlock/scalpel/scalpel.cpp:1249
+#: engines/sci/engine/kfile.cpp:1083 engines/sherlock/scalpel/scalpel.cpp:1249
 #: engines/sherlock/tattoo/widget_files.cpp:74 engines/startrek/saveload.cpp:42
 #: engines/toltecs/menu.cpp:302 engines/toon/toon.cpp:3801
 #: engines/trecision/saveload.cpp:67 engines/tsage/scenes.cpp:628
@@ -3129,7 +3140,7 @@ msgid "ERROR: Could not copy the savegame to a new slot"
 msgstr "エラー：セーブデータを新規スロットへコピーできませんでした"
 
 #: engines/engine.cpp:636 engines/savestate.cpp:98
-#: backends/platform/ios7/ios7_osys_main.cpp:297 engines/mm/xeen/saves.cpp:293
+#: backends/platform/ios7/ios7_osys_main.cpp:291 engines/mm/xeen/saves.cpp:293
 #: engines/sky/metaengine.cpp:216
 msgid "Autosave"
 msgstr "自動セーブ"
@@ -4264,42 +4275,51 @@ msgstr "拡大モードOFF。ドラッグモードを有効にしています...
 msgid "Magnify Mode Off"
 msgstr "拡大モードOFF"
 
-#: backends/platform/android/android.cpp:1029
-msgid "Controls"
-msgstr "操作"
+#: backends/platform/android/android.cpp:1030
+#: backends/platform/ios7/ios7_osys_misc.mm:249
+#: backends/platform/ios7/ios7_osys_misc.mm:327
+msgid "Touch Controls"
+msgstr "タッチ操作"
 
-#: backends/platform/android/android.cpp:1032
+#: backends/platform/android/android.cpp:1033
 msgid ""
-"## Touch controls\n"
+"## Touch control modes\n"
+"The touch control mode can be changed by tapping or clicking on the "
+"controller icon in the upper right corner\n"
+"### Direct mouse \n"
 "\n"
-"The touch control scheme can be configured in the global settings. From the "
-"Launcher, go to **Options > Backend > Choose the preferred touch mode**.\n"
-"It's possible to configure the touch mode for three situations (ScummVM "
-"menus, 2D games and 3D games) and choose one of the three possible modes:\n"
+"The touch controls are direct. The pointer jumps to where the finger touches "
+"the screen (default for menus).\n"
 "\n"
-" * Direct mouse, the touch controls are direct. The pointer jumps to where "
-"the finger touches the screen (default for menus).\n"
-" * Touchpad emulation, the touch controls are indirect. The finger can be "
-"far away from the pointer and still move it, like on a laptop touchpad.\n"
-" * Gamepad emulation, the touch controls don't move any mouse. The fingers "
-"must be placed on lower left and right of the screen and respectively "
-"emulate a directional pad and action buttons.\n"
-" * The pointer speed setting in the **Controls tab** affects how far the "
-"pointer moves in response to a finger movement.\n"
+"  ![Direct mouse mode](mouse.png \"Direct mouse mode\")\n"
 "\n"
-"The touch mode can be switched at anytime by tapping on the controller icon, "
-"next to the menu icon at the top right of the screen.\n"
+"### Touchpad emulation \n"
 "\n"
-"To display or hide the small controller icon, from the Launcher select "
-"**Options** and then the **Backend** tab. Tick the **Show on-screen "
-"control** box to enable the controller icon.\n"
+"The touch controls are indirect, like on a laptop touchpad.\n"
 "\n"
-"## Two finger tap\n"
+"  ![Touchpad mode](touchpad.png \"Touchpad mode\")\n"
+"\n"
+"### Gamepad emulation \n"
+"\n"
+"Fingers must be placed on lower left and right of the screen to emulate a "
+"directional pad and action buttons.\n"
+"\n"
+"  ![Gamepad mode](gamepad.png \"Gamepad mode\")\n"
+"\n"
+"To select the preferred touch mode for menus, 2D games, and 3D games, go to "
+"**Global Options > Backend > Choose the preferred touch mode**.\n"
+"\n"
+"## Touch actions \n"
+"\n"
+"### Two finger scroll \n"
+"\n"
+"To scroll, slide two fingers up or down the screen\n"
+"### Two finger tap\n"
 "\n"
 "To do a two finger tap, hold one finger down and then tap with a second "
 "finger.\n"
 "\n"
-"## Three finger tap\n"
+"### Three finger tap\n"
 "\n"
 "To do a three finger tap, start with holding down one finger and "
 "progressively touch down the other two fingers, one at a time, while still "
@@ -4307,134 +4327,200 @@ msgid ""
 "fingers on a surface, but then slow down that movement so it is rhythmic, "
 "but not too slow.\n"
 "\n"
-"## Immersive Sticky fullscreen mode\n"
+"### Immersive Sticky fullscreen mode\n"
 "\n"
-"ScummVM for Android uses the Immersive Sticky fullscreen mode, which means "
-"that the Android system bar is hidden until the user swipes from an edge "
-"with a system bar. Swipe from the edge to reveal the system bars.  They "
-"remain semi-transparent and disappear after a few seconds unless you "
-"interact with them. Your swipe also registers in the game, so if you need to "
-"swipe from an edge with system bars, your game play is not interrupted.\n"
+"Swipe from the edge to reveal the system bars.  They remain semi-transparent "
+"and disappear after a few seconds unless you interact with them.\n"
 "\n"
-"## Global Main Menu\n"
+"### Global Main Menu\n"
 "\n"
-"To open the Global Main Menu, tap on the small menu icon at the top right of "
-"the screen.\n"
+"To open the Global Main Menu, tap on the menu icon at the top right of the "
+"screen.\n"
 "\n"
-"To display or hide the small menu icon, from the Launcher select **Options** "
-"and then the **Backend** tab. Tick the **Show on-screen control** box to "
-"enable the menu icon.\n"
+"  ![Menu icon](menu.png \"Menu icon\")\n"
 "\n"
 "## Virtual keyboard\n"
 "\n"
-"To open the virtual keyboard, long press on the small controller icon at the "
-"top right of the screen, or tap on any editable text field. To hide the "
-"virtual keyboard, tap the small controller icon (which became a keyboard "
-"one) again, or tap outside the text field.\n"
+"To open the virtual keyboard, long press on the controller icon at the top "
+"right of the screen, or tap on any editable text field. To hide the virtual "
+"keyboard, tap the controller icon again, or tap outside the text field.\n"
+"\n"
+"\n"
+"  ![Keybpard icon](keyboard.png \"Keyboard icon\")\n"
 "\n"
 msgstr ""
+"## タッチ操作モード\n"
+"右上のコントローラーアイコンをタップまたはクリックして切り替えます。\n"
+"### ダイレクトマウス\n"
+"\n"
+"タッチ操作はダイレクトです。指で触れた場所にポインターがジャンプします(デフォ"
+"ルト)。\n"
+"\n"
+"  ![Direct mouse mode](mouse.png \"Direct mouse mode\")\n"
+"\n"
+"### タッチパッドエミュレーション\n"
+"\n"
+"タッチパッドのように間接的なタッチ操作になります。\n"
+"\n"
+"  ![Touchpad mode](touchpad.png \"Touchpad mode\")\n"
+"\n"
+"### ゲームパッドエミュレーション\n"
+"\n"
+"方向パッドとアクションボタンをエミュレーションするには、画面の左下/右下に指を"
+"置く必要があります。\n"
+"\n"
+"  ![Gamepad mode](gamepad.png \"Gamepad mode\")\n"
+"\n"
+"メニュー・2D・3Dの優先タッチモードを選択するには「グローバルオプション」＞"
+"「バックエンド」＞「優先タッチモードの選択」に進みます。\n"
+"\n"
+"## タッチアクション\n"
+"\n"
+"### 2本指スクロール\n"
+"\n"
+"スクロールは、2本の指で上下にスライドします。\n"
+"### 2本指タップ\n"
+"\n"
+"1本目の指を押したまま、2本目の指でタップします。\n"
+"\n"
+"### 3本指タップ\n"
+"\n"
+"まず1本目の指を押し下げ、そのまま他の指を1本ずつタッチしていきます。指を叩く"
+"ようなイメージで、リズミカルに、しかし遅すぎず、ゆっくり押し下げてくださ"
+"い。\n"
+"\n"
+"### フルスクリーンモード\n"
+"\n"
+"端からスワイプすると、システムバーが表示されます。これは半透明で、放置すると"
+"数秒後に消えます。\n"
+"\n"
+"### グローバルメインメニュー\n"
+"\n"
+"メニューを開くには、画面右上のメニューアイコンをタップします。\n"
+"\n"
+"  ![Menu icon](menu.png \"Menu icon\")\n"
+"\n"
+"## 仮想キーボード\n"
+"\n"
+"画面右上のコントローラーアイコンを長押しするか、編集可能なテキストフィールド"
+"をタップして開きます。隠すにはコントローラーアイコンか、テキストフィールドの"
+"外側をタップします。\n"
+"\n"
+"\n"
+"  ![Keybpard icon](keyboard.png \"Keyboard icon\")\n"
+"\n"
 
-#: backends/platform/android/android.cpp:1070
+#: backends/platform/android/android.cpp:1089
+#: backends/platform/ios7/ios7_osys_misc.mm:306
+#: backends/platform/ios7/ios7_osys_misc.mm:350
 msgid "Adding Games"
 msgstr "ゲームを追加"
 
-#: backends/platform/android/android.cpp:1073
+#: backends/platform/android/android.cpp:1092
 msgid ""
-"## Adding SAF paths to ScummVM directory list\n"
+"## Adding Games \n"
 "\n"
-"Starting with version 2.7.0 of ScummVM for Android, significant changes were "
-"made to the file access system to allow support for modern versions of the "
-"Android Operating System.\n"
+"1. Select **Add Game...** from the launcher. \n"
 "\n"
-"If you find that your existing added games or custom paths no longer work, "
-"please edit those paths and this time use the SAF system to browse to the "
-"desired locations.\n"
+"2. Inside the ScummVM file browser, select **Go Up** until you reach the "
+"root folder which has the **<Add a new folder>** option. \n"
 "\n"
-"To do that:\n"
+"  ![ScummVM file browser root](browser-root.png \"ScummVM file browser root"
+"\")\n"
 "\n"
-"  1. For each game whose data is not found, go to the \"Paths\" tab in the "
-"\"Game Options\" and change the \"Game path\"\n"
+"3. Double-tap **<Add a new folder>**. In your device's file browser, "
+"navigate to the folder containing all your game folders. For example, **SD "
+"Card > ScummVMgames**. \n"
 "\n"
-"  2. Inside the ScummVM file browser, use \"Go Up\" until you reach the "
-"\"root\" folder where you will see the \"<Add a new folder>\" option.\n"
-"\n"
-"  ![File browser](browser-root.png \"Android browser\")\n"
-"\n"
-"    File Browser root with <Add a new folder> item\n"
-"\n"
-"  3. Choose that, then browse and select the \"parent\" folder for your "
-"games subfolders, e.g. \"SD Card > ScummVMgames\". Click on \"Use this folder"
-"\".\n"
-"\n"
-"  ![OS file browser root](fs-root.png \"OS file browser root\")\n"
-"\n"
-"    OS file browser root\n"
+"4. Select **Use this folder**. \n"
 "\n"
 "  ![OS selectable folder](fs-folder.png \"OS selectable folder\")\n"
 "\n"
-"    OS file browser selectable folder with \"Use this folder\" button\n"
+"5. Select **ALLOW** to give ScummVM permission to access the folder. \n"
 "\n"
 "  ![OS access permission dialog](fs-permission.png \"OS access permission"
 "\")\n"
 "\n"
-"    OS file browser ask to grant ScummVM directory access permission\n"
-"\n"
-"  4. Then, a new folder \"ScummVMgames\" will appear on the \"root\" folder "
-"of the ScummVM browser.\n"
+"6. In the ScummVM file browser, double-tap to browse through your added "
+"folder. Add a game by selecting the sub-folder containing the game files, "
+"then tap **Choose**. \n"
 "\n"
 "  ![SAF folder added](browser-folder-in-list.png \"SAF folder added\")\n"
 "\n"
-"    File browser with added SAF folder in root\n"
+"Step 2 and 3 are done only once. To add more games, repeat Steps 1 and 6. \n"
 "\n"
-"  5. Browse through this folder to your game data.\n"
-"\n"
-"Steps 2 and 3 need to be done only once for all of your games.\n"
-"\n"
-"\n"
-"## Removing SAF path authorizations\n"
-"\n"
-"In case you would like to revoke any of the granted SAF authorizations, "
-"there is an option for this in the \"Global Options > Backend\" tab as shown "
-"on the screenshot below:\n"
-"\n"
-"![\"Remove folder authorizations...\" button](gui-remove-permissions.png "
-"\"'Remove folder authorizations...' button\")\n"
-"\n"
-"    GUI tab with \"Remove folder authorizations...\" button\n"
-"\n"
-"![List of authorizations to revoked](gui-remove-list.png \"List of "
-"authorizations to revoke\")\n"
-"\n"
-"    GUI dialog with list of authorizations to revoke\n"
-"\n"
-"In case you revoke authorization to a path, still used for specific games/"
-"titles, please follow the procedure of fixing them outlined in the previous "
-"subheading.\n"
+"See our [Android documentation](https://docs.scummvm.org/en/latest/"
+"other_platforms/android.html) for more information.\n"
 msgstr ""
+"## ゲームの追加 \n"
+"\n"
+"1. ランチャーから「ゲームを追加」を選択します。\n"
+"\n"
+"2. ScummVMファイルブラウザーで「新規フォルダーを追加」があるルートフォルダー"
+"まで「上へ」を選択します。\n"
+"\n"
+"  ![ScummVM file browser root](browser-root.png \"ScummVM file browser root"
+"\")\n"
+"\n"
+"3. 「新規フォルダーを追加」をダブルタップします。デバイスのファイルブラウザー"
+"で、全てのゲームデータを含むフォルダーに移動します(例：「SD Card > "
+"ScummVMgames」)。\n"
+"\n"
+"4. 「このフォルダーを使用する」を選択します。\n"
+"\n"
+"  ![OS selectable folder](fs-folder.png \"OS selectable folder\")\n"
+"\n"
+"5. 「許可」を選択し、ScummVMにフォルダーへのアクセス許可を与えます。\n"
+"\n"
+"  ![OS access permission dialog](fs-permission.png \"OS access permission"
+"\")\n"
+"\n"
+"6. ScummVMファイルブラウザーで、ダブルタップして追加したフォルダーをブラウズ"
+"します。ゲームファイルを含むサブフォルダーを選択し「選択」をタップして追加し"
+"ます。\n"
+"\n"
+"  ![SAF folder added](browser-folder-in-list.png \"SAF folder added\")\n"
+"\n"
+"2.と3.は一度だけ行います。さらにゲームを追加する場合、1.と6.を繰り返しま"
+"す。\n"
+"\n"
+"詳しくは[Androidドキュメント](https://docs.scummvm.org/en/latest/"
+"other_platforms/android.html)をご覧ください。\n"
 
 #: backends/platform/android/options.cpp:131
+#: backends/platform/ios7/ios7_options.mm:163
 msgid "Show On-screen control"
 msgstr "画面上コントロールを表示する"
 
 #: backends/platform/android/options.cpp:132
+#: backends/platform/ios7/ios7_options.mm:110
 msgid "Choose the preferred touch mode:"
 msgstr "好みのタッチモードを選択："
 
 #: backends/platform/android/options.cpp:134
 #: backends/platform/android/options.cpp:165
-#: backends/platform/ios7/ios7_options.mm:96
+#: backends/platform/ios7/ios7_options.mm:115
+#: backends/platform/ios7/ios7_options.mm:142
 msgid "In menus"
 msgstr "メニューで"
 
 #: backends/platform/android/options.cpp:136
 #: backends/platform/android/options.cpp:154
 #: backends/platform/android/options.cpp:155
+#: backends/platform/ios7/ios7_options.mm:117
+#: backends/platform/ios7/ios7_options.mm:134
+#: backends/platform/ios7/ios7_options.mm:135
+#: backends/platform/ios7/ios7_osys_events.cpp:344
 msgid "Touchpad emulation"
 msgstr "タッチパッドを再現"
 
 #: backends/platform/android/options.cpp:137
 #: backends/platform/android/options.cpp:157
 #: backends/platform/android/options.cpp:158
+#: backends/platform/ios7/ios7_options.mm:118
+#: backends/platform/ios7/ios7_options.mm:137
+#: backends/platform/ios7/ios7_options.mm:138
+#: backends/platform/ios7/ios7_osys_events.cpp:346
 msgid "Direct mouse"
 msgstr "ダイレクトマウス"
 
@@ -4445,41 +4531,43 @@ msgid "Gamepad emulation"
 msgstr "ゲームパッドを再現"
 
 #: backends/platform/android/options.cpp:144
+#: backends/platform/ios7/ios7_options.mm:124
 msgid "In 2D games"
 msgstr "2Dゲームで"
 
 #: backends/platform/android/options.cpp:146
+#: backends/platform/ios7/ios7_options.mm:126
 msgid "In 3D games"
 msgstr "3Dゲームで"
 
 #: backends/platform/android/options.cpp:163
-#: backends/platform/ios7/ios7_options.mm:94
+#: backends/platform/ios7/ios7_options.mm:140
 msgid "Select the orientation:"
 msgstr "オリエンテーションを選択："
 
 #: backends/platform/android/options.cpp:167
 #: backends/platform/android/options.cpp:182
-#: backends/platform/ios7/ios7_options.mm:98
-#: backends/platform/ios7/ios7_options.mm:113
+#: backends/platform/ios7/ios7_options.mm:144
+#: backends/platform/ios7/ios7_options.mm:159
 msgid "Automatic"
 msgstr "オート"
 
 #: backends/platform/android/options.cpp:168
 #: backends/platform/android/options.cpp:183
-#: backends/platform/ios7/ios7_options.mm:99
-#: backends/platform/ios7/ios7_options.mm:114
+#: backends/platform/ios7/ios7_options.mm:145
+#: backends/platform/ios7/ios7_options.mm:160
 msgid "Portrait"
 msgstr "ポートレート"
 
 #: backends/platform/android/options.cpp:169
 #: backends/platform/android/options.cpp:184
-#: backends/platform/ios7/ios7_options.mm:100
-#: backends/platform/ios7/ios7_options.mm:115
+#: backends/platform/ios7/ios7_options.mm:146
+#: backends/platform/ios7/ios7_options.mm:161
 msgid "Landscape"
 msgstr "風景"
 
 #: backends/platform/android/options.cpp:175
-#: backends/platform/ios7/ios7_options.mm:106
+#: backends/platform/ios7/ios7_options.mm:152
 msgid "In games"
 msgstr "ゲーム内"
 
@@ -4504,99 +4592,294 @@ msgstr "ハードウェアスケーリング(高速・低画質)"
 msgid "Software scale (good quality, but slower)"
 msgstr "ソフトウェアスケーリング(低速・高画質)"
 
-#: backends/platform/ios7/ios7_options.mm:83
-msgid "Show On-screen control (iOS 15 and later)"
-msgstr "画面上コントロールを表示(iOS 15以上)"
+#: backends/platform/ios7/ios7_options.mm:96
+msgid "Show Gamepad Controller (iOS 15 and later)"
+msgstr "パッドコントロールを表示(iOS 15以上)"
 
-#: backends/platform/ios7/ios7_options.mm:84
-#: backends/platform/ios7/ios7_options.mm:85
-msgid "Control opacity"
-msgstr "操作の透明度"
+#: backends/platform/ios7/ios7_options.mm:97
+#: backends/platform/ios7/ios7_options.mm:98
+msgid "Gamepad opacity"
+msgstr "パッドの透明度"
 
-#: backends/platform/ios7/ios7_options.mm:90
-msgid "Mouse-click-and-drag mode"
-msgstr "クリック&ドラッグモード"
+#: backends/platform/ios7/ios7_options.mm:102
+msgid "Directional button:"
+msgstr "方向ボタン："
 
-#: backends/platform/ios7/ios7_options.mm:91
+#: backends/platform/ios7/ios7_options.mm:104
+msgid "Thumbstick"
+msgstr "サムスティック"
+
+#: backends/platform/ios7/ios7_options.mm:105
+msgid "Dpad"
+msgstr "十字キー"
+
+#: backends/platform/ios7/ios7_options.mm:107
 msgid "Show keyboard function bar"
 msgstr "キーボード機能バーを表示"
 
-#: backends/platform/ios7/ios7_options.mm:118
-msgid "Controls Help"
-msgstr "操作ヘルプ"
-
-#: backends/platform/ios7/ios7_options.mm:171
+#: backends/platform/ios7/ios7_osys_misc.mm:252
+#, fuzzy
+#| msgid ""
+#| "## Touch control modes\n"
+#| "The touch control mode can be changed by tapping or clicking on the "
+#| "controller icon in the upper right corner\n"
+#| "### Direct mouse \n"
+#| "\n"
+#| "The touch controls are direct. The pointer jumps to where the finger "
+#| "touches the screen (default for menus).\n"
+#| "\n"
+#| "  ![Direct mouse mode](mouse.png \"Direct mouse mode\")\n"
+#| "\n"
+#| "### Touchpad emulation \n"
+#| "\n"
+#| "The touch controls are indirect, like on a laptop touchpad.\n"
+#| "\n"
+#| "  ![Touchpad mode](touchpad.png \"Touchpad mode\")\n"
+#| "\n"
+#| "### Gamepad emulation \n"
+#| "\n"
+#| "Fingers must be placed on lower left and right of the screen to emulate a "
+#| "directional pad and action buttons.\n"
+#| "\n"
+#| "  ![Gamepad mode](gamepad.png \"Gamepad mode\")\n"
+#| "\n"
+#| "To select the preferred touch mode for menus, 2D games, and 3D games, go "
+#| "to **Global Options > Backend > Choose the preferred touch mode**.\n"
+#| "\n"
+#| "## Touch actions \n"
+#| "\n"
+#| "### Two finger scroll \n"
+#| "\n"
+#| "To scroll, slide two fingers up or down the screen\n"
+#| "### Two finger tap\n"
+#| "\n"
+#| "To do a two finger tap, hold one finger down and then tap with a second "
+#| "finger.\n"
+#| "\n"
+#| "### Three finger tap\n"
+#| "\n"
+#| "To do a three finger tap, start with holding down one finger and "
+#| "progressively touch down the other two fingers, one at a time, while "
+#| "still holding down the previous fingers. Imagine you are impatiently "
+#| "tapping your fingers on a surface, but then slow down that movement so it "
+#| "is rhythmic, but not too slow.\n"
+#| "\n"
+#| "### Immersive Sticky fullscreen mode\n"
+#| "\n"
+#| "Swipe from the edge to reveal the system bars.  They remain semi-"
+#| "transparent and disappear after a few seconds unless you interact with "
+#| "them.\n"
+#| "\n"
+#| "### Global Main Menu\n"
+#| "\n"
+#| "To open the Global Main Menu, tap on the menu icon at the top right of "
+#| "the screen.\n"
+#| "\n"
+#| "  ![Menu icon](menu.png \"Menu icon\")\n"
+#| "\n"
+#| "## Virtual keyboard\n"
+#| "\n"
+#| "To open the virtual keyboard, long press on the controller icon at the "
+#| "top right of the screen, or tap on any editable text field. To hide the "
+#| "virtual keyboard, tap the controller icon again, or tap outside the text "
+#| "field.\n"
+#| "\n"
+#| "\n"
+#| "  ![Keybpard icon](keyboard.png \"Keyboard icon\")\n"
+#| "\n"
 msgid ""
-"Gestures and controls:\n"
+"## Touch control modes\n"
+"The touch control mode can be changed by tapping or clicking on the "
+"controller icon in the upper right corner or by swiping two fingers from "
+"left to right.\n"
 "\n"
-"One finger tap: Left mouse click\n"
-"Two finger tap: Right mouse click\n"
-"Two finger double tap: ESC\n"
-"Two finger swipe (bottom to top): Toggles Click and drag mode\n"
-"Two finger swipe (left to right): Toggles between touch direct mode and "
-"touchpad mode\n"
-"Two finger swipe (right to left): Shows/hides on-screen controls\n"
-"Two finger swipe (top to bottom): Global Main Menu\n"
-"Three finger swipe: Arrow keys\n"
-"Pinch gesture: Enables/disables keyboard\n"
-"Keyboard spacebar: Pause"
+"### Direct mouse \n"
+"\n"
+"The touch controls are direct. The pointer jumps to where the finger touches "
+"the screen (default for menus).\n"
+"\n"
+"  ![Direct mouse mode](mouse.png \"Direct mouse mode\")\n"
+"\n"
+"### Touchpad emulation \n"
+"\n"
+"The touch controls are indirect, like on a laptop touchpad.\n"
+"\n"
+"  ![Touchpad mode](touchpad.png \"Touchpad mode\")\n"
+"\n"
+"To select the preferred touch mode for menus, 2D games, and 3D games, go to "
+"**Global Options > Backend > Choose the preferred touch mode**.\n"
+"\n"
+"## Touch actions \n"
+"\n"
+"### One finger tap \n"
+"\n"
+"Tap one finger to perform a left mouse click\n"
+"### Two fingers tap\n"
+"\n"
+"Tap two fingers to perform a right mouse click\n"
+"\n"
+"### One finger long press\n"
+"\n"
+"Touch and hold one finger for at least 0.5 seconds to perform a left mouse "
+"button hold and drag, such as for selection from action wheel in Curse of "
+"Monkey Island.\n"
+"\n"
+"### Two fingers long press\n"
+"\n"
+"Touch and hold two fingers for at least 0.5 seconds to perform a right mouse "
+"button hold and drag, such as for selection from action wheel in Tony "
+"Tough.\n"
+"\n"
+"### Virtual Gamepad \n"
+"\n"
+"Devices running iOS 15 or later can connect virtual gamepad controller by "
+"swiping two fingers from right to left or through **Global Options > "
+"Backend**. The directional button can be configured to either a thumbstick "
+"or a dpad.\n"
+"\n"
+"### Global Main Menu\n"
+"\n"
+"To open the Global Main Menu, tap on the menu icon at the top right of the "
+"screen or by swiping two fingers downwards.\n"
+"\n"
+"  ![Menu icon](menu.png \"Menu icon\")\n"
+"\n"
+"## Virtual keyboard\n"
+"\n"
+"To open the virtual keyboard, long press on the controller icon at the top "
+"right of the screen, perform a pinch gesture (zoom out) or tap on any "
+"editable text field. To hide the virtual keyboard, tap the controller icon "
+"again, do an opposite pinch gesture (zoom in) or tap outside the text "
+"field.\n"
+"\n"
+"\n"
+"  ![Keybpard icon](keyboard.png \"Keyboard icon\")\n"
+"\n"
 msgstr ""
-"ジェスチャーと操作：\n"
+"## タッチ操作モード\n"
+"右上のコントローラーアイコンをタップまたはクリックして切り替えます。\n"
+"### ダイレクトマウス\n"
 "\n"
-"指1本でタップ：クリック\n"
-"指2本でタップ：右クリック\n"
-"指2本で2回タップ：ESC\n"
-"指2本でスワイプ(下→上)：クリック/ドラッグモードの切替\n"
-"指2本でスワイプ(左→右)：ダイレクト/パッドモードの切替\n"
-"指2本でスワイプ(右→左)：画面上コントロールの表示/非表示\n"
-"指2本でスワイプ(上→下)：グローバルメインメニュー\n"
-"指3本でスワイプ：矢印キー\n"
-"ピンチ：キーボード有効化/無効化の切替\n"
-"スペースキー：ポーズ"
+"タッチ操作はダイレクトです。指で触れた場所にポインターがジャンプします(デフォ"
+"ルト)。\n"
+"\n"
+"  ![Direct mouse mode](mouse.png \"Direct mouse mode\")\n"
+"\n"
+"### タッチパッドエミュレーション\n"
+"\n"
+"タッチパッドのように間接的なタッチ操作になります。\n"
+"\n"
+"  ![Touchpad mode](touchpad.png \"Touchpad mode\")\n"
+"\n"
+"### ゲームパッドエミュレーション\n"
+"\n"
+"方向パッドとアクションボタンをエミュレーションするには、画面の左下/右下に指を"
+"置く必要があります。\n"
+"\n"
+"  ![Gamepad mode](gamepad.png \"Gamepad mode\")\n"
+"\n"
+"メニュー・2D・3Dの優先タッチモードを選択するには「グローバルオプション」＞"
+"「バックエンド」＞「優先タッチモードの選択」に進みます。\n"
+"\n"
+"## タッチアクション\n"
+"\n"
+"### 2本指スクロール\n"
+"\n"
+"スクロールは、2本の指で上下にスライドします。\n"
+"### 2本指タップ\n"
+"\n"
+"1本目の指を押したまま、2本目の指でタップします。\n"
+"\n"
+"### 3本指タップ\n"
+"\n"
+"まず1本目の指を押し下げ、そのまま他の指を1本ずつタッチしていきます。指を叩く"
+"ようなイメージで、リズミカルに、しかし遅すぎず、ゆっくり押し下げてくださ"
+"い。\n"
+"\n"
+"### フルスクリーンモード\n"
+"\n"
+"端からスワイプすると、システムバーが表示されます。これは半透明で、放置すると"
+"数秒後に消えます。\n"
+"\n"
+"### グローバルメインメニュー\n"
+"\n"
+"メニューを開くには、画面右上のメニューアイコンをタップします。\n"
+"\n"
+"  ![Menu icon](menu.png \"Menu icon\")\n"
+"\n"
+"## 仮想キーボード\n"
+"\n"
+"画面右上のコントローラーアイコンを長押しするか、編集可能なテキストフィールド"
+"をタップして開きます。隠すにはコントローラーアイコンか、テキストフィールドの"
+"外側をタップします。\n"
+"\n"
+"\n"
+"  ![Keybpard icon](keyboard.png \"Keyboard icon\")\n"
+"\n"
 
-#: backends/platform/ios7/ios7_options.mm:184
+#: backends/platform/ios7/ios7_osys_misc.mm:309
 msgid ""
-"Using the Apple TV remote control:\n"
+"## Adding Games \n"
 "\n"
-"Press Touch area: Left mouse click\n"
-"Press Play/Pause button: Right mouse click\n"
-"Press Back/Menu button in game: Global Main menu\n"
-"Press Back/Menu button in launcher: Apple TV Home\n"
-"Press and hold Play/Pause button: Show keyboard with extra keys\n"
-"Touch (not press) on top of Touch area: Up arrow key\n"
-"Touch (not press) on left of Touch area: Left arrow key\n"
-"Touch (not press) on right of Touch area: Right arrow key\n"
-"Touch (not press) on bottom of Touch area: Down arrow key\n"
-"Keyboard spacebar: Pause"
+"1. Copy the required game files to the ScummVM application. There are "
+"several ways to do that, see our [Transferring game files documentation]"
+"(https://docs.scummvm.org/en/latest/other_platforms/ios.html#transferring-"
+"game-files) for more information.\n"
+"\n"
+"2. Select **Add Game...** from the launcher. \n"
+"\n"
+"3. In the ScummVM file browser, double-tap to browse to your added folder. "
+"Add a game by selecting the sub-folder containing the game files, then tap "
+"**Choose**. \n"
+"\n"
+"To add more games, repeat the steps above. \n"
+"\n"
+"See our [iOS documentation](https://docs.scummvm.org/en/latest/"
+"other_platforms/ios.html) for more information.\n"
 msgstr ""
-"Apple TVのリモコン操作：\n"
+
+#: backends/platform/ios7/ios7_osys_misc.mm:330
+msgid ""
+"## Touch actions \n"
 "\n"
-"タッチエリアを押す：クリック\n"
-"再生/一時停止ボタン：右クリック\n"
-"ゲーム中に戻る/メニューボタン：グローバルメインメニュー\n"
-"ランチャーで戻る/メニューボタン：ホーム\n"
-"再生/一時停止ボタンを長押し：キーボードを表示\n"
-"タッチエリア上部にタッチ：上矢印キー\n"
-"タッチエリア左部にタッチ：左矢印キー\n"
-"タッチエリア右部にタッチ：右矢印キー\n"
-"タッチエリア下部にタッチ：下矢印キー\n"
-"スペースキー：ポーズ"
+"### Press Touch area \n"
+"\n"
+"Press Touch area to perform a left mouse click\n"
+"### Play/Pause\n"
+"\n"
+"Press Play/Pause to perform a right mouse click\n"
+"\n"
+"### Global Main Menu\n"
+"\n"
+"To open the Global Main Menu, press Back/Menu button.\n"
+"\n"
+"## Virtual keyboard\n"
+"\n"
+"To open the virtual keyboard, press and hold the Play/Pause button. To hide "
+"the virtual keyboard, press the Back/Menu button.\n"
+"\n"
+msgstr ""
 
-#: backends/platform/ios7/ios7_osys_events.cpp:424
-msgid "Mouse-click-and-drag mode enabled."
-msgstr "クリック&ドラッグモードが有効になりました。"
-
-#: backends/platform/ios7/ios7_osys_events.cpp:426
-msgid "Mouse-click-and-drag mode disabled."
-msgstr "クリック&ドラッグモードが無効になりました。"
-
-#: backends/platform/ios7/ios7_osys_events.cpp:447
-msgid "Touchpad mode enabled."
-msgstr "タッチパッド操作が有効になりました。"
-
-#: backends/platform/ios7/ios7_osys_events.cpp:449
-msgid "Touchpad mode disabled."
-msgstr "タッチパッド操作が無効になりました。"
+#: backends/platform/ios7/ios7_osys_misc.mm:353
+msgid ""
+"## Adding Games \n"
+"\n"
+"1. Copy the required game files to the ScummVM application. There are "
+"several ways to do that, see our [Transferring game files documentation]"
+"(https://docs.scummvm.org/en/latest/other_platforms/tvos.html#transferring-"
+"game-files) for more information.\n"
+"\n"
+"2. Select **Add Game...** from the launcher. \n"
+"\n"
+"3. In the ScummVM file browser, double-tap to browse to your added folder. "
+"Add a game by selecting the sub-folder containing the game files, then tap "
+"**Choose**. \n"
+"\n"
+"To add more games, repeat the steps above. \n"
+"\n"
+"See our [tvOS documentation](https://docs.scummvm.org/en/latest/"
+"other_platforms/tvos.html) for more information.\n"
+msgstr ""
 
 #: backends/platform/maemo/maemo.cpp:157
 msgid "Click Mode"
@@ -4606,7 +4889,7 @@ msgstr "クリックモード"
 msgid "Keyboard"
 msgstr "キーボード"
 
-#: backends/platform/sdl/sdl.cpp:1013
+#: backends/platform/sdl/sdl.cpp:1014
 msgid ""
 "## Keyboard shortcuts\n"
 "\n"
@@ -4623,24 +4906,37 @@ msgid ""
 "| --------------------------------\n"
 "| `Ctrl+F5` -- Displays the Global Main Menu\n"
 msgstr ""
+"## キーボードショートカット\n"
+"\n"
+"ScummVMは様々なゲーム内キーボードおよびマウスショートカットをサポートしてお"
+"り、バージョン 2.2.0 以降は「キーマップ」または設定ファイルで設定できます。\n"
+"\n"
+"ゲーム固有の操作については、プレイしているゲームの [wiki](https://wiki."
+"scummvm.org/index.php?title=Category:Supported_Games) を参照してください。\n"
+"\n"
+"デフォルトのショートカットを表に示します。\n"
+"\n"
+"| ショートカット      | 詳細\n"
+"| --------------------------------\n"
+"| `Ctrl+F5` -- グローバルメインメニューを表示\n"
 
-#: backends/platform/sdl/sdl.cpp:1025
+#: backends/platform/sdl/sdl.cpp:1026
 msgid "| `Cmd+q`    -- Quit (macOS)\n"
 msgstr "| `Cmd+q`    -- 終了(macOS)\n"
 
-#: backends/platform/sdl/sdl.cpp:1027
+#: backends/platform/sdl/sdl.cpp:1028
 msgid "| `Alt+F4`  -- Quit (Windows)\n"
 msgstr "| `Alt+F4`  -- 終了(Windows)\n"
 
-#: backends/platform/sdl/sdl.cpp:1029
+#: backends/platform/sdl/sdl.cpp:1030
 msgid "| `Ctrl+q`  -- Quit (Linux/Unix)\n"
 msgstr "| `Ctrl+q`  -- 終了(Linux/Unix)\n"
 
-#: backends/platform/sdl/sdl.cpp:1030
+#: backends/platform/sdl/sdl.cpp:1031
 msgid "| `Ctrl+z`  -- Quit (other platforms)\n"
 msgstr "| `Ctrl+z`  -- 終了(その他OS)\n"
 
-#: backends/platform/sdl/sdl.cpp:1033
+#: backends/platform/sdl/sdl.cpp:1034
 msgid ""
 "| `Ctrl+u`  -- Mutes all sounds\n"
 "| `Ctrl+m`  -- Toggles mouse capture\n"
@@ -4657,6 +4953,97 @@ msgid ""
 "opened with a long press of the middle mouse button or wheel.\n"
 "| `Ctrl+Alt+d` -- Opens the ScummVM debugger\n"
 msgstr ""
+"| `Ctrl+u`  -- すべてのサウンドをミュート\n"
+"| `Ctrl+m`  -- マウスキャプチャーを切り替え\n"
+"| `Ctrl+Alt` and `9` or `0` -- グラフィックフィルターを切り替え\n"
+"| `Ctrl+Alt` and `+` or `-` -- スケールファクターを増減\n"
+"| `Ctrl+Alt+a` -- アスペクト比補正のON/OFFを切り替え\n"
+"| `Ctrl+Alt+f` -- 最近傍補間/バイリニア補間の切り替え(フィルタリングのON/"
+"OFF)\n"
+"| `Ctrl+Alt+s` -- ストレッチモードを切り替え\n"
+"| `Alt+Enter`   -- フルスクリーン/ウィンドウモードの切り替え\n"
+"| `Alt+s`          -- スクリーンショットを撮る\n"
+"| `Ctrl+F7`       -- 仮想キーボードを開く(有効な場合)。マウスの中ボタン、また"
+"はホイール長押しでも対応可能。\n"
+"| `Ctrl+Alt+d` -- ScummVMデバッガーを開く\n"
+
+#: backends/platform/sdl/sdl.cpp:1048
+msgid ""
+"## Keyboard shortcuts\n"
+"\n"
+"ScummVM supports various in-game keyboard and mouse shortcuts, and since "
+"version 2.2.0 these can be manually configured in the **Keymaps tab**, or in "
+"the **configuration file**.\n"
+"\n"
+"For game-specific controls, see the [wiki entry](https://wiki.scummvm.org/"
+"index.php?title=Category:Supported_Games) for the game you are playing.\n"
+"\n"
+"Default shortcuts are shown in the table.\n"
+"\n"
+"| Shortcut      | Description      \n"
+"| --------------|------------------\n"
+"| `Ctrl+F5` | Displays the Global Main Menu\n"
+msgstr ""
+"## キーボードショートカット\n"
+"\n"
+"ScummVMは様々なゲーム内キーボードおよびマウスショートカットをサポートしてお"
+"り、バージョン 2.2.0 以降は「キーマップ」または設定ファイルで設定できます。\n"
+"\n"
+"ゲーム固有の操作については、プレイしているゲームの [wiki](https://wiki."
+"scummvm.org/index.php?title=Category:Supported_Games) を参照してください。\n"
+"\n"
+"デフォルトのショートカットを表に示します。\n"
+"\n"
+"| ショートカット      | 詳細      \n"
+"| --------------|------------------\n"
+"| `Ctrl+F5` | グローバルメインメニューを表示\n"
+
+#: backends/platform/sdl/sdl.cpp:1060
+msgid "| `Cmd+q`    | Quit (macOS)\n"
+msgstr "| `Cmd+q`    | 終了(macOS)\n"
+
+#: backends/platform/sdl/sdl.cpp:1062
+msgid "| `Alt+F4`  | Quit (Windows)\n"
+msgstr "| `Alt+F4`  | 終了(Windows)\n"
+
+#: backends/platform/sdl/sdl.cpp:1064
+msgid "| `Ctrl+q`  | Quit (Linux/Unix)\n"
+msgstr "| `Ctrl+q`  | 終了(Linux/Unix)\n"
+
+#: backends/platform/sdl/sdl.cpp:1065
+msgid "| `Ctrl+z`  | Quit (other platforms)\n"
+msgstr "| `Ctrl+z`  | 終了(その他OS)\n"
+
+#: backends/platform/sdl/sdl.cpp:1068
+msgid ""
+"| `Ctrl+u`  | Mutes all sounds\n"
+"| `Ctrl+m`  | Toggles mouse capture\n"
+"| `Ctrl+Alt` and `9` or `0` | Cycles forwards/backwards between graphics "
+"filters\n"
+"| `Ctrl+Alt` and `+` or `-` | Increases/decreases the scale factor\n"
+"| `Ctrl+Alt+a` | Toggles aspect ratio correction on/off\n"
+"| `Ctrl+Alt+f` | Toggles between nearest neighbor and bilinear interpolation "
+"(graphics filtering on/off)\n"
+"| `Ctrl+Alt+s` | Cycles through stretch modes\n"
+"| `Alt+Enter`   | Toggles full screen/windowed mode\n"
+"| `Alt+s`          | Takes a screenshot\n"
+"| `Ctrl+F7`       | Opens virtual keyboard (if enabled). This can also be "
+"opened with a long press of the middle mouse button or wheel.\n"
+"| `Ctrl+Alt+d` | Opens the ScummVM debugger\n"
+msgstr ""
+"| `Ctrl+u`  | すべてのサウンドをミュート\n"
+"| `Ctrl+m`  | マウスキャプチャーを切り替え\n"
+"| `Ctrl+Alt` and `9` or `0` | グラフィックフィルターを切り替え\n"
+"| `Ctrl+Alt` and `+` or `-` | スケールファクターを増減\n"
+"| `Ctrl+Alt+a` | アスペクト比補正のON/OFFを切り替え\n"
+"| `Ctrl+Alt+f` | 最近傍補間/バイリニア補間の切り替え(フィルタリングのON/"
+"OFF)\n"
+"| `Ctrl+Alt+s` | ストレッチモードを切り替え\n"
+"| `Alt+Enter`   | フルスクリーン/ウィンドウモードの切り替え\n"
+"| `Alt+s`          | スクリーンショットを撮る\n"
+"| `Ctrl+F7`       | 仮想キーボードを開く(有効な場合)。マウスの中ボタン、また"
+"はホイール長押しでも対応可能。\n"
+"| `Ctrl+Alt+d` | ScummVMデバッガーを開く\n"
 
 #: backends/platform/sdl/macosx/appmenu_osx.mm:248
 msgid "Hide ScummVM"
@@ -5076,7 +5463,7 @@ msgstr "ゲームスピードメニューを追加(PC版と同様)"
 #: engines/mads/nebular/dialogs_nebular.cpp:376
 #: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:936
 #: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:745
-#: engines/sci/engine/kfile.cpp:1206 engines/sherlock/scalpel/scalpel.cpp:1262
+#: engines/sci/engine/kfile.cpp:1213 engines/sherlock/scalpel/scalpel.cpp:1262
 #: engines/sherlock/tattoo/widget_files.cpp:93 engines/startrek/saveload.cpp:67
 #: engines/toltecs/menu.cpp:272 engines/toon/toon.cpp:3895
 #: engines/zvision/file/save_manager.cpp:61
@@ -5096,7 +5483,7 @@ msgstr "ゲームを復元する:"
 #: engines/mads/nebular/dialogs_nebular.cpp:376
 #: engines/mtropolis/saveload.cpp:120 engines/neverhood/menumodule.cpp:936
 #: engines/prince/saveload.cpp:63 engines/sci/engine/guest_additions.cpp:746
-#: engines/sci/engine/kfile.cpp:1206 engines/sherlock/scalpel/scalpel.cpp:1262
+#: engines/sci/engine/kfile.cpp:1213 engines/sherlock/scalpel/scalpel.cpp:1262
 #: engines/sherlock/tattoo/widget_files.cpp:93 engines/startrek/saveload.cpp:67
 #: engines/toltecs/menu.cpp:272 engines/toon/toon.cpp:3895
 #: engines/zvision/file/save_manager.cpp:61 engines/zvision/metaengine.cpp:267
@@ -5879,59 +6266,59 @@ msgstr "ゲームの明るいパレットモードを使用してグラフィッ
 msgid "Enable Text to Speech for Objects, Options, and the Bible Quote"
 msgstr "オブジェクト、オプション、聖書の引用の読み上げを有効化"
 
-#: engines/freescape/metaengine.cpp:35
+#: engines/freescape/metaengine.cpp:37
 msgid "Prerecorded sounds"
 msgstr "録音済みサウンド"
 
-#: engines/freescape/metaengine.cpp:36
+#: engines/freescape/metaengine.cpp:38
 msgid "Use high-quality pre-recorded sounds instead of pc speaker emulation"
 msgstr "スピーカーエミュレーションの代わりに高品質なサウンドを使用"
 
-#: engines/freescape/metaengine.cpp:46
+#: engines/freescape/metaengine.cpp:48
 msgid "Extended timer"
 msgstr "タイマー延長"
 
-#: engines/freescape/metaengine.cpp:47
+#: engines/freescape/metaengine.cpp:49
 msgid "Start the game timer at 99:59:59"
 msgstr "99:59:59でゲームを開始"
 
-#: engines/freescape/metaengine.cpp:57
+#: engines/freescape/metaengine.cpp:59
 msgid "Automatic drilling"
 msgstr "自動穿孔"
 
-#: engines/freescape/metaengine.cpp:58
+#: engines/freescape/metaengine.cpp:60
 msgid "Allow to succefully drill in any part of the area in Driller"
 msgstr "Drillerで任意の場所に穴を開けられるようにします"
 
-#: engines/freescape/metaengine.cpp:68
+#: engines/freescape/metaengine.cpp:70
 msgid "Disable demo mode"
 msgstr "デモを無効化"
 
-#: engines/freescape/metaengine.cpp:69
+#: engines/freescape/metaengine.cpp:71
 msgid "Never activate demo mode"
 msgstr "デモを起動させません"
 
-#: engines/freescape/metaengine.cpp:79
+#: engines/freescape/metaengine.cpp:81
 msgid "Disable sensors"
 msgstr "センサーを無効化"
 
-#: engines/freescape/metaengine.cpp:80
+#: engines/freescape/metaengine.cpp:82
 msgid "Sensors will not shoot the player"
 msgstr "センサーに撃たれなくなる"
 
-#: engines/freescape/metaengine.cpp:90
+#: engines/freescape/metaengine.cpp:92
 msgid "Disable falling"
 msgstr "落下を無効化"
 
-#: engines/freescape/metaengine.cpp:91
+#: engines/freescape/metaengine.cpp:93
 msgid "Player cannot fall over edges"
 msgstr "プレイヤーが落ちなくなる"
 
-#: engines/freescape/metaengine.cpp:101
+#: engines/freescape/metaengine.cpp:103
 msgid "Invert Y-axis on mouse"
 msgstr "マウスのY軸を反転"
 
-#: engines/freescape/metaengine.cpp:102
+#: engines/freescape/metaengine.cpp:104
 msgid "Use alternative camera controls"
 msgstr "異なるカメラ操作を使用"
 
@@ -7529,14 +7916,12 @@ msgstr ""
 "動作します。"
 
 #: engines/nancy/metaengine.cpp:60
-#, fuzzy
-#| msgid "Autosave"
 msgid "Auto Move"
-msgstr "自動セーブ"
+msgstr "オート移動"
 
 #: engines/nancy/metaengine.cpp:61
 msgid "Automatically rotate the viewport when the mouse reaches an edge."
-msgstr ""
+msgstr "マウスが端に達すると、自動で表示領域を回転させます。"
 
 #: engines/neverhood/dialogs.cpp:53
 msgid "Skip the Hall of Records storyboard scenes"
@@ -7868,7 +8253,7 @@ msgstr ""
 "不完全なゲームが検出されました。全てのCDからデータをコピーする必要がありま"
 "す。"
 
-#: engines/sci/engine/kfile.cpp:484 engines/sci/metaengine.cpp:370
+#: engines/sci/engine/kfile.cpp:491 engines/sci/metaengine.cpp:370
 msgid "(Autosave)"
 msgstr "(自動セーブ)"
 
@@ -7992,7 +8377,7 @@ msgstr ""
 "- ダウンロード先 http://www.sierrahelp.com/Files/Patches/GabrielKnight/"
 "GK2Subtitles.zip\n"
 
-#: engines/sci/sci.cpp:863
+#: engines/sci/sci.cpp:921
 msgid ""
 "Characters saved inside ScummVM are shown automatically. Character files "
 "saved in the original interpreter need to be put inside ScummVM's saved "
@@ -9211,23 +9596,23 @@ msgid ""
 "Removes some repetitive actions, adds possibility to change verbs by keyboard"
 msgstr "いくつかの反復操作を削除し、キーボードで動詞を変更可能にする"
 
-#: engines/sword1/animation.cpp:529
+#: engines/sword1/animation.cpp:532
 #, c-format
 msgid "PSX stream cutscene '%s' cannot be played in paletted mode"
 msgstr "PSXストリーム形式のムービー'%s'は、パレットモードで再生できません"
 
-#: engines/sword1/animation.cpp:560 engines/sword2/animation.cpp:456
+#: engines/sword1/animation.cpp:563 engines/sword2/animation.cpp:456
 msgid ""
 "MPEG-2 cutscenes found but ScummVM has been built without MPEG-2 support"
 msgstr ""
 "MPEG-2形式のムービーが見つかりましたが、ScummVMはMPEG-2をサポートしていません"
 
-#: engines/sword1/animation.cpp:567 engines/sword2/animation.cpp:465
+#: engines/sword1/animation.cpp:570 engines/sword2/animation.cpp:465
 #, c-format
 msgid "Cutscene '%s' not found"
 msgstr "ムービー'%s'が見つかりませんでした"
 
-#: engines/sword1/control.cpp:2898
+#: engines/sword1/control.cpp:2795
 msgid ""
 "ScummVM found that you have old saved games for Broken Sword 1 that should "
 "be converted.\n"
@@ -9243,7 +9628,7 @@ msgstr ""
 "OKを押すと、ただちに変換します。それ以外の場合は、次回起動時にもう一度尋ねら"
 "れます。\n"
 
-#: engines/sword1/control.cpp:3084
+#: engines/sword1/control.cpp:2981
 #, c-format
 msgid ""
 "Target new saved game already exists!\n"
@@ -9252,15 +9637,15 @@ msgstr ""
 "すでにセーブデータが存在します!\n"
 "古いフォーマット(%s)と新しいフォーマット(%s)の、どちらを残しますか?\n"
 
-#: engines/sword1/control.cpp:3087
+#: engines/sword1/control.cpp:2984
 msgid "Keep the old one"
 msgstr "古いフォーマットのデータを残す"
 
-#: engines/sword1/control.cpp:3087
+#: engines/sword1/control.cpp:2984
 msgid "Keep the new one"
 msgstr "新しいフォーマットのデータを残す"
 
-#: engines/sword1/logic.cpp:1686
+#: engines/sword1/logic.cpp:1702
 msgid "This is the end of the Broken Sword 1 Demo"
 msgstr "Broken Sword 1のデモはここで終了です"
 
@@ -10524,6 +10909,96 @@ msgstr ""
 "Arialが必要です。LiberationFontsを使用する場合、LiberationMono、"
 "LiberationSans、LiberationSerifが必要です。GNUFreeFontを使用する場合、"
 "FreeMono、FreeSans、FreeSerifが必要です。"
+
+#~ msgid "Controls Help"
+#~ msgstr "操作ヘルプ"
+
+#, fuzzy
+#~| msgid ""
+#~| "Gestures and controls:\n"
+#~| "\n"
+#~| "One finger tap: Left mouse click\n"
+#~| "Two finger tap: Right mouse click\n"
+#~| "Two finger double tap: ESC\n"
+#~| "Two finger swipe (bottom to top): Toggles Click and drag mode\n"
+#~| "Two finger swipe (left to right): Toggles between touch direct mode and "
+#~| "touchpad mode\n"
+#~| "Two finger swipe (right to left): Shows/hides on-screen controls\n"
+#~| "Two finger swipe (top to bottom): Global Main Menu\n"
+#~| "Three finger swipe: Arrow keys\n"
+#~| "Pinch gesture: Enables/disables keyboard\n"
+#~| "Keyboard spacebar: Pause"
+#~ msgid ""
+#~ "Gestures and controls:\n"
+#~ "\n"
+#~ "One finger tap: Left mouse click\n"
+#~ "Two finger tap: Right mouse click\n"
+#~ "Two finger double tap: ESC\n"
+#~ "Two finger swipe (left to right): Toggles between touch direct mode and "
+#~ "touchpad mode\n"
+#~ "Two finger swipe (right to left): Shows/hides on-screen controls\n"
+#~ "Two finger swipe (top to bottom): Global Main Menu\n"
+#~ "Three finger swipe: Arrow keys\n"
+#~ "Pinch gesture: Enables/disables keyboard\n"
+#~ "Keyboard spacebar: Pause"
+#~ msgstr ""
+#~ "ジェスチャーと操作：\n"
+#~ "\n"
+#~ "指1本でタップ：クリック\n"
+#~ "指2本でタップ：右クリック\n"
+#~ "指2本で2回タップ：ESC\n"
+#~ "指2本でスワイプ(下→上)：クリック/ドラッグモードの切替\n"
+#~ "指2本でスワイプ(左→右)：ダイレクト/パッドモードの切替\n"
+#~ "指2本でスワイプ(右→左)：画面上コントロールの表示/非表示\n"
+#~ "指2本でスワイプ(上→下)：グローバルメインメニュー\n"
+#~ "指3本でスワイプ：矢印キー\n"
+#~ "ピンチ：キーボード有効化/無効化の切替\n"
+#~ "スペースキー：ポーズ"
+
+#~ msgid ""
+#~ "Using the Apple TV remote control:\n"
+#~ "\n"
+#~ "Press Touch area: Left mouse click\n"
+#~ "Press Play/Pause button: Right mouse click\n"
+#~ "Press Back/Menu button in game: Global Main menu\n"
+#~ "Press Back/Menu button in launcher: Apple TV Home\n"
+#~ "Press and hold Play/Pause button: Show keyboard with extra keys\n"
+#~ "Touch (not press) on top of Touch area: Up arrow key\n"
+#~ "Touch (not press) on left of Touch area: Left arrow key\n"
+#~ "Touch (not press) on right of Touch area: Right arrow key\n"
+#~ "Touch (not press) on bottom of Touch area: Down arrow key\n"
+#~ "Keyboard spacebar: Pause"
+#~ msgstr ""
+#~ "Apple TVのリモコン操作：\n"
+#~ "\n"
+#~ "タッチエリアを押す：クリック\n"
+#~ "再生/一時停止ボタン：右クリック\n"
+#~ "ゲーム中に戻る/メニューボタン：グローバルメインメニュー\n"
+#~ "ランチャーで戻る/メニューボタン：ホーム\n"
+#~ "再生/一時停止ボタンを長押し：キーボードを表示\n"
+#~ "タッチエリア上部にタッチ：上矢印キー\n"
+#~ "タッチエリア左部にタッチ：左矢印キー\n"
+#~ "タッチエリア右部にタッチ：右矢印キー\n"
+#~ "タッチエリア下部にタッチ：下矢印キー\n"
+#~ "スペースキー：ポーズ"
+
+#~ msgid "Mouse-click-and-drag mode"
+#~ msgstr "クリック&ドラッグモード"
+
+#~ msgid "Mouse-click-and-drag mode enabled."
+#~ msgstr "クリック&ドラッグモードが有効になりました。"
+
+#~ msgid "Mouse-click-and-drag mode disabled."
+#~ msgstr "クリック&ドラッグモードが無効になりました。"
+
+#~ msgid "Touchpad mode enabled."
+#~ msgstr "タッチパッド操作が有効になりました。"
+
+#~ msgid "Touchpad mode disabled."
+#~ msgstr "タッチパッド操作が無効になりました。"
+
+#~ msgid "Control opacity"
+#~ msgstr "操作の透明度"
 
 #~ msgid ""
 #~ "The teenagent.dat file is compressed and zlib hasn't been included in "

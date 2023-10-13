@@ -5,6 +5,7 @@ MODULE_OBJS = \
   action/actionrecord.o \
   action/arfactory.o \
   action/autotext.o \
+  action/inventoryrecords.o \
   action/navigationrecords.o \
   action/soundrecords.o \
   action/miscrecords.o \
@@ -54,6 +55,7 @@ MODULE_OBJS = \
   state/setupmenu.o \
   misc/hypertext.o \
   misc/lightning.o \
+  misc/mousefollow.o \
   misc/specialeffect.o \
   commontypes.o \
   console.o \

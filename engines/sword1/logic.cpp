@@ -33,7 +33,6 @@
 #include "sword1/screen.h"
 #include "sword1/mouse.h"
 #include "sword1/sword1.h"
-#include "sword1/music.h"
 #include "sword1/swordres.h"
 #include "sword1/animation.h"
 #include "sword1/control.h"
@@ -50,7 +49,7 @@ namespace Sword1 {
 
 uint32 Logic::_scriptVars[NUM_SCRIPT_VARS];
 
-Logic::Logic(SwordEngine *vm, ObjectMan *pObjMan, ResMan *resMan, Screen *pScreen, Mouse *pMouse, Sound *pSound, Music *pMusic, Menu *pMenu, OSystem *system, Audio::Mixer *mixer)
+Logic::Logic(SwordEngine *vm, ObjectMan *pObjMan, ResMan *resMan, Screen *pScreen, Mouse *pMouse, Sound *pSound, Menu *pMenu, OSystem *system, Audio::Mixer *mixer)
 	: _rnd("sword1") {
 
 	_vm = vm;
@@ -58,7 +57,6 @@ Logic::Logic(SwordEngine *vm, ObjectMan *pObjMan, ResMan *resMan, Screen *pScree
 	_resMan = resMan;
 	_screen = pScreen;
 	_mouse = pMouse;
-	_music = pMusic;
 	_sound = pSound;
 	_menu = pMenu;
 	_textMan = NULL;
@@ -91,8 +89,10 @@ void Logic::initialize() {
 	_textMan = new Text(_vm, this, _objMan, _resMan, _screen,
 	                    (SwordEngine::_systemVars.language == BS1_CZECH) ? true : false);
 	_screen->useTextManager(_textMan);
-	_textRunning = _speechRunning = false;
-	_speechFinished = true;
+
+	SwordEngine::_systemVars.textRunning = false;
+	SwordEngine::_systemVars.speechRunning = 0;
+	SwordEngine::_systemVars.speechFinished = true;
 }
 
 void Logic::newScreen(uint32 screen) {
@@ -127,7 +127,7 @@ void Logic::newScreen(uint32 screen) {
 			_scriptVars[GEORGE_WALKING] = 0;
 		}
 		SwordEngine::_systemVars.justRestoredGame = 0;
-		_music->startMusic(_scriptVars[CURRENT_MUSIC], 1);
+		_sound->streamMusicFile(_scriptVars[CURRENT_MUSIC], 1);
 	} else { // if we haven't just restored a game, set George to stand, etc
 		compact->o_screen = _scriptVars[NEW_SCREEN]; //move the mega/player at this point between screens
 		fnStandAt(compact, PLAYER, _scriptVars[CHANGE_X], _scriptVars[CHANGE_Y], _scriptVars[CHANGE_DIR], _scriptVars[CHANGE_STANCE], 0, 0);
@@ -345,31 +345,41 @@ int Logic::logicArAnimate(Object *compact, uint32 id) {
 int Logic::speechDriver(Object *compact) {
 	if ((!_speechClickDelay) &&
 		((_mouse->testEvent() & BS1L_BUTTON_DOWN) || (_mouse->testEvent() & BS1R_BUTTON_DOWN)))
-		_speechFinished = true;
+		SwordEngine::_systemVars.speechFinished = true;
 
 	if (_speechClickDelay)
 		_speechClickDelay--;
 
-	if (_speechRunning) {
-		if (_sound->speechFinished())
-			_speechFinished = true;
+	if (SwordEngine::_systemVars.speechRunning >= 2) {
+		SwordEngine::_systemVars.speechRunning--;
+		if (SwordEngine::_systemVars.speechRunning == 1)
+			_sound->playSpeech();
+	} else if (SwordEngine::_systemVars.speechRunning == 1) {
+		if (_sound->checkSpeechStatus() == S_STATUS_FINISHED)
+			SwordEngine::_systemVars.speechFinished = true;
+
+		if (SwordEngine::_systemVars.speechFinished) {
+			_sound->stopSpeech();
+			free(_sound->_speechSample);
+			_sound->_speechSample = nullptr;
+		}
 	} else {
 		if (!compact->o_speech_time)
-			_speechFinished = true;
+			SwordEngine::_systemVars.speechFinished = true;
 		else
 			compact->o_speech_time--;
 	}
 
-	if (_speechFinished) {
-		if (_speechRunning)
-			_sound->stopSpeech();
+	if (SwordEngine::_systemVars.speechFinished) {
 		compact->o_logic = LOGIC_script;
-		if (_textRunning) {
+		if (SwordEngine::_systemVars.textRunning) {
 			_textMan->releaseText(compact->o_text_id);
 			_objMan->fetchObject(compact->o_text_id)->o_status = 0; // kill compact linking text sprite
 		}
-		_speechRunning = _textRunning = false;
-		_speechFinished = true;
+
+		SwordEngine::_systemVars.speechRunning = 0;
+		SwordEngine::_systemVars.textRunning = false;
+		SwordEngine::_systemVars.speechFinished = true;
 	}
 
 	if (compact->o_anim_resource) {
@@ -378,8 +388,8 @@ int Logic::speechDriver(Object *compact) {
 		animData += 4;
 		compact->o_anim_pc++; // go to next frame of anim
 
-		if (_speechFinished || (compact->o_anim_pc >= numFrames) ||
-		        (_speechRunning && (_sound->amISpeaking() == 0)))
+		if (SwordEngine::_systemVars.speechFinished || (compact->o_anim_pc >= numFrames) ||
+			(SwordEngine::_systemVars.speechRunning != 0 && (_sound->amISpeaking() == 0)))
 			compact->o_anim_pc = 0; //set to frame 0, closed mouth
 
 		AnimUnit *animPtr = (AnimUnit *)(animData + sizeof(AnimUnit) * compact->o_anim_pc);
@@ -972,9 +982,9 @@ int Logic::fnPlaySequence(Object *cpt, int32 id, int32 sequenceId, int32 d, int3
 
 	// A cutscene usually (always?) means the room will change. In the
 	// meantime, we don't want any looping sound effects still playing.
-	_sound->quitScreen();
+	_sound->clearAllFx();
 
-	MoviePlayer *player = makeMoviePlayer(sequenceId, _vm, _textMan, _resMan, _system);
+	MoviePlayer *player = makeMoviePlayer(sequenceId, _vm, _textMan, _resMan, _sound, _system);
 	if (player) {
 		_screen->clearScreen();
 		if (player->load(sequenceId))
@@ -1180,13 +1190,14 @@ int Logic::fnISpeak(Object *cpt, int32 id, int32 cdt, int32 textNo, int32 spr, i
 
 		_resMan->resClose(cpt->o_resource);
 	}
+
+	SwordEngine::_systemVars.speechRunning = 0;
 	if (SwordEngine::_systemVars.playSpeech)
-		_speechRunning = _sound->startSpeech(textNo >> 16, textNo & 0xFFFF);
-	else
-		_speechRunning = false;
-	_speechFinished = false;
-	if (SwordEngine::_systemVars.showText || (!_speechRunning)) {
-		_textRunning = true;
+		_sound->startSpeech(textNo >> 16, textNo & 0xFFFF); // This will set speechRunning
+
+	SwordEngine::_systemVars.speechFinished = false;
+	if (SwordEngine::_systemVars.showText || (SwordEngine::_systemVars.speechRunning == 0)) {
+		SwordEngine::_systemVars.textRunning = true;
 
 		char *text = _objMan->lockText(textNo);
 		cpt->o_speech_time = strlen(text) + 5;
@@ -1234,6 +1245,16 @@ int Logic::fnISpeak(Object *cpt, int32 id, int32 cdt, int32 textNo, int32 spr, i
 		textCpt->o_anim_x = textCpt->o_xcoord = CLIP<uint16>(textX, textLeftMargin, textRightMargin);
 		textCpt->o_anim_y = textCpt->o_ycoord = CLIP<uint16>(textY, textTopMargin, textBottomMargin);
 	}
+
+	if (SwordEngine::_systemVars.speechRunning != 0) {
+		// This helps delaying the speech to make it play in sync with the text
+		if (SwordEngine::_systemVars.realLanguage == Common::EN_ANY) {
+			SwordEngine::_systemVars.speechRunning = 2; // Verified from disasm
+		} else {
+			SwordEngine::_systemVars.speechRunning = 3; // International versions
+		}
+	}
+
 	return SCRIPT_STOP;
 }
 
@@ -1407,10 +1428,7 @@ int Logic::fnEnterSection(Object *cpt, int32 id, int32 screen, int32 d, int32 e,
 	if (screen >= TOTAL_SECTIONS)
 		error("mega %d tried entering section %d", id, screen);
 
-	/* if (cpt->o_type == TYPE_PLAYER)
-	   ^= this was the original condition from the game sourcecode.
-	   not sure why it doesn't work*/
-	if (id == PLAYER)
+	if (cpt->o_type == TYPE_PLAYER)
 		_scriptVars[NEW_SCREEN] = screen;
 	else
 		cpt->o_screen = screen; // move the mega
@@ -1630,26 +1648,24 @@ int Logic::fnPlayFx(Object *cpt, int32 id, int32 fxNo, int32 b, int32 c, int32 d
 }
 
 int Logic::fnStopFx(Object *cpt, int32 id, int32 fxNo, int32 b, int32 c, int32 d, int32 z, int32 x) {
-	_sound->fnStopFx(fxNo);
-	//_sound->removeFromQueue(fxNo);
+	_sound->stopSample(fxNo);
+	_sound->removeFromQueue(fxNo);
 	return SCRIPT_CONT;
 }
 
 int Logic::fnPlayMusic(Object *cpt, int32 id, int32 tuneId, int32 loopFlag, int32 c, int32 d, int32 z, int32 x) {
-	if (tuneId == 153)
-		return SCRIPT_CONT;
 	if (loopFlag == LOOPED)
 		_scriptVars[CURRENT_MUSIC] = tuneId; // so it gets restarted when saving & reloading
 	else
 		_scriptVars[CURRENT_MUSIC] = 0;
 
-	_music->startMusic(tuneId, loopFlag);
+	_sound->streamMusicFile(tuneId, loopFlag);
 	return SCRIPT_CONT;
 }
 
 int Logic::fnStopMusic(Object *cpt, int32 id, int32 a, int32 b, int32 c, int32 d, int32 z, int32 x) {
 	_scriptVars[CURRENT_MUSIC] = 0;
-	_music->fadeDown();
+	_sound->fadeMusicDown(1);
 	return SCRIPT_CONT;
 }
 
@@ -1846,7 +1862,7 @@ void Logic::startPositions(uint32 pos) {
 }
 
 bool Logic::canShowDebugTextNumber() {
-	return _speechRunning || _textRunning;
+	return SwordEngine::_systemVars.speechRunning || SwordEngine::_systemVars.textRunning;
 }
 
 void Logic::plotRouteGrid(Object *megaObject) {

@@ -36,7 +36,6 @@
 #include "sword1/control.h"
 #include "sword1/logic.h"
 #include "sword1/mouse.h"
-#include "sword1/music.h"
 #include "sword1/objectman.h"
 #include "sword1/resman.h"
 #include "sword1/sound.h"
@@ -176,22 +175,13 @@ const Button Control::volumeButtons[25] = {
 
 };
 
-static int volToBalance(int volL, int volR) {
-	if (volL + volR == 0) {
-		return 50;
-	} else {
-		return (100 * volL / (volL + volR));
-	}
-}
-
-Control::Control(SwordEngine *vm, Common::SaveFileManager *saveFileMan, ResMan *pResMan, ObjectMan *pObjMan, OSystem *system, Mouse *pMouse, Sound *pSound, Music *pMusic, Screen *pScreen, Logic *pLogic) {
+Control::Control(SwordEngine *vm, Common::SaveFileManager *saveFileMan, ResMan *pResMan, ObjectMan *pObjMan, OSystem *system, Mouse *pMouse, Sound *pSound, Screen *pScreen, Logic *pLogic) {
 	_vm = vm;
 	_saveFileMan = saveFileMan;
 	_resMan = pResMan;
 	_objMan = pObjMan;
 	_system = system;
 	_mouse = pMouse;
-	_music = pMusic;
 	_sound = pSound;
 	_screen = pScreen;
 	_logic = pLogic;
@@ -247,20 +237,18 @@ void Control::getPlayerOptions() {
 
 	Logic::_scriptVars[CURRENT_MUSIC] = safeCurrentMusic;
 
-	_screen->startFadePaletteDown(1);
+	_vm->startFadePaletteDown(1);
 	_vm->waitForFade();
-	_sound->quitScreen();
+	_sound->clearAllFx();
 	_keyPressed.reset();
 
 	while (SwordEngine::_systemVars.snrStatus != SNR_BLANK && !Engine::shouldQuit()) {
 		delay(DEFAULT_FRAME_TIME / 2);
 
-		// TODO: audio
-		// SetCrossFadeIncrement();
+		_sound->setCrossFadeIncrement();
 
 		_mouse->animate();
-		// TODO: audio
-		// UpdateSampleStreaming(); // stream music
+		_sound->updateMusicStreaming();
 		saveRestoreScreen();
 	}
 
@@ -281,7 +269,7 @@ void Control::getPlayerOptions() {
 		_logic->fnStopMusic(nullptr, 0, 0, 0, 0, 0, 0, 0);
 	}
 
-	_screen->startFadePaletteDown(1);
+	_vm->startFadePaletteDown(1);
 	_vm->waitForFade();
 
 	_logic->fnNormalMouse(nullptr, 0, 0, 0, 0, 0, 0, 0);
@@ -290,8 +278,7 @@ void Control::getPlayerOptions() {
 	if (SwordEngine::_systemVars.saveGameFlag == SGF_SAVE) {
 		saveGame();
 	} else if (SwordEngine::_systemVars.saveGameFlag == SGF_QUIT) {
-		// TODO: audio
-		// FadeMusicDown(1);
+		_sound->fadeMusicDown(1);
 
 		Engine::quitGame();
 	}
@@ -386,7 +373,7 @@ void Control::saveRestoreScreen() {
 			break;
 		case SNR_MAINPANEL:
 			removeControlPanel();
-			setVolumes();
+			_sound->setVolumes();
 			break;
 		case SNR_SAVE:
 			removeSave();
@@ -403,7 +390,7 @@ void Control::saveRestoreScreen() {
 			break;
 		case SNR_VOLUME:
 			removeVolume();
-			setVolumes();
+			_sound->setVolumes();
 			break;
 		case SNR_DRIVEFULL:
 			removeConfirmation();
@@ -420,7 +407,7 @@ void Control::saveRestoreScreen() {
 				initialiseResources();
 			}
 
-			//GetVolumes();
+			_sound->getVolumes();
 			initialiseControlPanel();
 			break;
 		case SNR_SAVE:
@@ -445,7 +432,7 @@ void Control::saveRestoreScreen() {
 			initialiseSpeed();
 			break;
 		case SNR_VOLUME:
-			//GetVolumes();
+			_sound->getVolumes();
 			initialiseVolume();
 			break;
 		case SNR_DRIVEFULL:
@@ -467,7 +454,7 @@ void Control::saveRestoreScreen() {
 
 		if (_newPal) {
 			_newPal = false;
-			_screen->startFadePaletteUp(1);
+			_vm->startFadePaletteUp(1);
 		}
 
 		break;
@@ -966,10 +953,6 @@ void Control::removeConfirmation() {
 }
 
 void Control::renderVolumeLight(int32 i) {
-	// TODO: This function has been mangled to accomodate the current
-	// audio engine, which will partly get rewritten in the immediate
-	// future :)
-
 	uint8 *src, *dst;
 	uint8 vol[2] = { 0, 0 };
 	int32 x;
@@ -977,22 +960,19 @@ void Control::renderVolumeLight(int32 i) {
 	Sprite *srVlight;
 
 	switch (i) {
-	case 0: //music
-		_music->giveVolume(&vol[0], &vol[1]);
-		//vol[0] = volMusic[0];
-		//vol[1] = volMusic[1];
+	case 0:
+		vol[0] = _sound->_volMusic[0];
+		vol[1] = _sound->_volMusic[1];
 		x = 158;
 		break;
-	case 1: //speech
-		_sound->giveSpeechVol(&vol[0], &vol[1]);
-		//vol[0] = volSpeech[0];
-		//vol[1] = volSpeech[1];
+	case 1:
+		vol[0] = _sound->_volSpeech[0];
+		vol[1] = _sound->_volSpeech[1];
 		x = 291;
 		break;
-	case 2: //fx
-		_sound->giveSfxVol(&vol[0], &vol[1]);
-		//vol[0] = volFX[0];
-		//vol[1] = volFX[1];
+	case 2:
+		vol[0] = _sound->_volFX[0];
+		vol[1] = _sound->_volFX[1];
 		x = 424;
 		break;
 	default:
@@ -1003,7 +983,7 @@ void Control::renderVolumeLight(int32 i) {
 	srVlight = (Sprite *)_resMan->fetchRes(SR_VLIGHT);
 
 	// Render left light
-	f = (FrameHeader *)((uint8 *)srVlight + _resMan->getUint32(srVlight->spriteOffset[vol[0] >> 4]));
+	f = (FrameHeader *)((uint8 *)srVlight + _resMan->getUint32(srVlight->spriteOffset[vol[0]]));
 	src = (uint8 *)f + sizeof(FrameHeader);
 	dst = _screenBuf + x + 211 * SCREEN_WIDTH;
 
@@ -1018,7 +998,7 @@ void Control::renderVolumeLight(int32 i) {
 	}
 
 	// Render right light
-	f = (FrameHeader *)((uint8 *)srVlight + _resMan->getUint32(srVlight->spriteOffset[vol[1] >> 4]));
+	f = (FrameHeader *)((uint8 *)srVlight + _resMan->getUint32(srVlight->spriteOffset[vol[1]]));
 	src = (uint8 *)f + sizeof(FrameHeader);
 	dst = _screenBuf + x + 32 + 211 * SCREEN_WIDTH;
 
@@ -1033,125 +1013,42 @@ void Control::renderVolumeLight(int32 i) {
 	}
 }
 
-void Control::setVolumes() {
-	// TODO: This function has been mangled to accomodate the current
-	// audio engine, which will partly get rewritten in the immediate
-	// future :)
-
-	uint8 volL, volR;
-	_music->giveVolume(&volL, &volR);
-	int vol = (int)((volR + volL) / 2);
-	int volBalance = volToBalance(volL, volR);
-	if (vol != ConfMan.getInt("music_volume"))
-		ConfMan.setInt("music_volume", vol);
-	if (volBalance != ConfMan.getInt("music_balance"))
-		ConfMan.setInt("music_balance", volBalance);
-
-	_sound->giveSpeechVol(&volL, &volR);
-	vol = (int)((volR + volL) / 2);
-	volBalance = volToBalance(volL, volR);
-	if (vol != ConfMan.getInt("speech_volume"))
-		ConfMan.setInt("speech_volume", vol);
-	if (volBalance != ConfMan.getInt("speech_balance"))
-		ConfMan.setInt("speech_balance", volBalance);
-
-	_sound->giveSfxVol(&volL, &volR);
-	vol = (int)((volR + volL) / 2);
-	volBalance = volToBalance(volL, volR);
-	if (vol != ConfMan.getInt("sfx_volume"))
-		ConfMan.setInt("sfx_volume", vol);
-	if (volBalance != ConfMan.getInt("sfx_balance"))
-		ConfMan.setInt("sfx_balance", volBalance);
-
-	if (SwordEngine::_systemVars.showText != ConfMan.getBool("subtitles"))
-		ConfMan.setBool("subtitles", SwordEngine::_systemVars.showText);
-	ConfMan.flushToDisk();
-}
-
 void Control::volUp(int32 i, int32 j) {
-	// TODO: This function has been mangled to accomodate the current
-	// audio engine, which will partly get rewritten in the immediate
-	// future :)
-
-	uint32 vol[2] = { 0, 0 };
+	uint32 *vol = nullptr;
 
 	switch (i) {
 	case 0:
-		_music->giveVolume((uint8 *)&vol[0], (uint8 *)&vol[1]);
-		//vol = &volMusic[j];
+		vol = &_sound->_volMusic[j];
 		break;
 	case 1:
-		_sound->giveSpeechVol((uint8 *)&vol[0], (uint8 *)&vol[1]);
-		//vol = &volSpeech[j];
+		vol = &_sound->_volSpeech[j];
 		break;
 	case 2:
-		_sound->giveSfxVol((uint8 *)&vol[0], (uint8 *)&vol[1]);
-		//vol = &volFX[j];
+		vol = &_sound->_volFX[j];
 		break;
 	}
 
-	if ((vol[j] >> 4) < 16)
-		vol[j] += 1 << 4;
-
-	vol[j] = CLIP<uint32>(vol[j], 0, 255);
-
-	switch (i) {
-	case 0:
-		_music->setVolume((uint8)vol[0], (uint8)vol[1]);
-		//vol = &volMusic[j];
-		break;
-	case 1:
-		_sound->setSpeechVol((uint8)vol[0], (uint8)vol[1]);
-		//vol = &volSpeech[j];
-		break;
-	case 2:
-		_sound->setSfxVol((uint8)vol[0], (uint8)vol[1]);
-		//vol = &volFX[j];
-		break;
-	}
+	if (vol && *vol < 16)
+		*vol += 1;
 }
 
 void Control::volDown(int32 i, int32 j) {
-	// TODO: This function has been mangled to accomodate the current
-	// audio engine, which will partly get rewritten in the immediate
-	// future :)
-
-	uint32 vol[2] = {0, 0};
+	uint32 *vol = nullptr;
 
 	switch (i) {
 	case 0:
-		_music->giveVolume((uint8 *)&vol[0], (uint8 *)&vol[1]);
-		//vol = &volMusic[j];
+		vol = &_sound->_volMusic[j];
 		break;
 	case 1:
-		_sound->giveSpeechVol((uint8 *)&vol[0], (uint8 *)&vol[1]);
-		//vol = &volSpeech[j];
+		vol = &_sound->_volSpeech[j];
 		break;
 	case 2:
-		_sound->giveSfxVol((uint8 *)&vol[0], (uint8 *)&vol[1]);
-		//vol = &volFX[j];
+		vol = &_sound->_volFX[j];
 		break;
 	}
 
-	if (vol[j] > 1 << 4)
-		vol[j] -= 1 << 4;
-
-	vol[j] = CLIP<uint32>(vol[j], 0, 255);
-
-	switch (i) {
-	case 0:
-		_music->setVolume((uint8)vol[0], (uint8)vol[1]);
-		//vol = &volMusic[j];
-		break;
-	case 1:
-		_sound->setSpeechVol((uint8)vol[0], (uint8)vol[1]);
-		//vol = &volSpeech[j];
-		break;
-	case 2:
-		_sound->setSfxVol((uint8)vol[0], (uint8)vol[1]);
-		//vol = &volFX[j];
-		break;
-	}
+	if (vol && *vol > 0)
+		*vol -= 1;
 }
 
 void Control::renderVolumeDisc(int32 i, int32 j) {
@@ -2077,7 +1974,7 @@ void Control::removeSave() {
 		_resMan->resClose(SR_REDFONT);
 	}
 
-	setVolumes();
+	_sound->setVolumes();
 }
 
 bool Control::restoreGame() {
@@ -2488,7 +2385,7 @@ void Control::removeRestore() {
 		_resMan->resClose(SR_REDFONT);
 	}
 
-	setVolumes();
+	_sound->setVolumes();
 }
 
 void Control::initialiseControlPanel() {

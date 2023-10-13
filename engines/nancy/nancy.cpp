@@ -126,7 +126,8 @@ bool NancyEngine::canSaveGameStateCurrently() {
 	// TODO also disable during secondary movie
 	return State::Scene::hasInstance() &&
 			NancySceneState._state == State::Scene::kRun &&
-			NancySceneState.getActiveConversation() == nullptr;
+			NancySceneState.getActiveConversation() == nullptr &&
+			!NancySceneState.isRunningAd();
 }
 
 void NancyEngine::secondChance() {
@@ -261,16 +262,20 @@ Common::Error NancyEngine::run() {
 		}
 	}
 
+	bool graphicsWereSuppressed = false;
+
 	// Main loop
-	while (!shouldQuit()) {
+	while (true) {
+		_input->processEvents();
+		if (shouldQuit()) {
+			break;
+		}
+
 		uint32 frameEndTime = _system->getMillis() + 16;
 
-		bool graphicsWereSuppressed = _graphicsManager->_isSuppressed;
 		if (!graphicsWereSuppressed) {
 			_cursorManager->setCursorType(CursorManager::kNormalArrow);
 		}
-
-		_input->processEvents();
 
 		State::State *s;
 
@@ -288,6 +293,8 @@ Common::Error NancyEngine::run() {
 			s->process();
 		}
 
+		graphicsWereSuppressed = _graphicsManager->_isSuppressed;
+
 		_graphicsManager->draw();
 
 		if (_gameFlow.changingState) {
@@ -295,7 +302,7 @@ Common::Error NancyEngine::run() {
 
 			s = getStateObject(_gameFlow.prevState);
 			if (s) {
-				if(s->onStateExit(_gameFlow.prevState)) {
+				if (s->onStateExit(_gameFlow.prevState)) {
 					destroyState(_gameFlow.prevState);
 				}
 			}
@@ -450,7 +457,7 @@ void NancyEngine::bootGameEngine() {
 	delete iff;
 
 	// Load convo texts and autotext
-	const BSUM *bsum = (const BSUM *)getEngineData("BSUM");
+	auto *bsum = GetEngineData(BSUM);
 	if (bsum && bsum->conversationTextsFilename.size() && bsum->autotextFilename.size())  {
 		iff = new IFF(bsum->conversationTextsFilename);
 		if (!iff->load()) {
@@ -559,7 +566,7 @@ void NancyEngine::destroyState(NancyState::NancyState state) const {
 }
 
 void NancyEngine::preloadCals() {
-	const PCAL *pcal = (const PCAL *)getEngineData("PCAL");
+	auto *pcal = GetEngineData(PCAL);
 	if (!pcal) {
 		// CALs only appeared in nancy2 so a PCAL chunk may not exist
 		return;
@@ -613,7 +620,7 @@ void NancyEngine::readDatFile() {
 }
 
 Common::Error NancyEngine::synchronize(Common::Serializer &ser) {
-	const BSUM *bootSummary = (const BSUM *)getEngineData("BSUM");
+	auto *bootSummary = GetEngineData(BSUM);
 	assert(bootSummary);
 
 	// Sync boot summary header, which includes full game title
