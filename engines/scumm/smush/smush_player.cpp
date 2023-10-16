@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#define FORBIDDEN_SYMBOL_EXCEPTION_printf
 
 #include "common/config-manager.h"
 #include "common/file.h"
@@ -1186,6 +1187,9 @@ void SmushPlayer::unpause() {
 
 void SmushPlayer::play(const char *filename, int32 speed, int32 offset, int32 startFrame) {
 	// Verify the specified file exists
+
+printf("\tSmushPlayer::play - start\n");
+
 	ScummFile f(_vm);
 	_vm->openFile(f, filename);
 	if (!f.isOpen()) {

@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
+#define FORBIDDEN_SYMBOL_EXCEPTION_printf
 #include "common/config-manager.h"
 #include "common/system.h"
 
@@ -1064,10 +1064,12 @@ void ScummEngine_v8::o8_systemOps() {
 
 void ScummEngine_v8::o8_startVideo() {
 	int len = resStrLen(_scriptPointer);
-
+printf("\no8_startVideo - _scriptPointer: %s (%d)\n",_scriptPointer,len);
+printf("o8_startVideo - play start\n",_scriptPointer,len);
 	_splayer->play((const char*)_scriptPointer, 12);
-
+printf("o8_startVideo - play done\n",_scriptPointer,len);
 	_scriptPointer += len + 1;
+printf("o8_startVideo - _scriptPointer: %p\n",_scriptPointer, resStrLen(_scriptPointer));
 }
 
 void ScummEngine_v8::o8_kernelSetFunctions() {
