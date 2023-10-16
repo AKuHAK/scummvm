@@ -484,8 +484,6 @@ endif
 
 ifeq ($(platform), wiiu)
    DEFINES += -Os
-else ifneq (,$(findstring $(platform), ios osx))
-   DEFINES += -O1
 else ifneq (,$(findstring $(platform), msvc genode))
    DEFINES += -O2
 else

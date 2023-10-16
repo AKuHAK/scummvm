@@ -1189,15 +1189,16 @@ void SmushPlayer::play(const char *filename, int32 speed, int32 offset, int32 st
 	// Verify the specified file exists
 
 printf("\tSmushPlayer::play - start\n");
-
 	ScummFile f(_vm);
+printf("\tSmushPlayer::play - 1\n");
 	_vm->openFile(f, filename);
+printf("\tSmushPlayer::play - 2\n");
 	if (!f.isOpen()) {
 		warning("SmushPlayer::play() File not found %s", filename);
 		return;
 	}
+printf("\tSmushPlayer::play - 3\n");
 	f.close();
-
 	_updateNeeded = false;
 	_warpNeeded = false;
 	_palDirtyMin = 256;
@@ -1205,15 +1206,20 @@ printf("\tSmushPlayer::play - start\n");
 
 	// Hide mouse
 	bool oldMouseState = CursorMan.showMouse(false);
+printf("\tSmushPlayer::play - 4\n");
 
 	// Load the video
 	_seekFile = filename;
 	_seekPos = offset;
 	_seekFrame = startFrame;
 	_base = 0;
+printf("\tSmushPlayer::play - 5\n");
 
 	setupAnim(filename);
+printf("\tSmushPlayer::play - 6\n");
+
 	init(speed);
+printf("\tSmushPlayer::play - 7\n");
 
 	_startTime = _vm->_system->getMillis();
 	_startFrame = startFrame;
@@ -1229,49 +1235,59 @@ printf("\tSmushPlayer::play - start\n");
 	} else {
 		_imuseDigital->floodMusicBuffer();
 	}
+printf("\tSmushPlayer::play - 8\n");
 
 	int skipped = 0;
-
+int test1=0;
 	for (;;) {
 		uint32 now, elapsed;
 		bool skipFrame = false;
-
+printf("\tSmushPlayer::play - for #%d\n",test1);
 		if (_insanity) {
+printf("\tSmushPlayer::play - for if 1 cond 1 a\n");
 			// Seeking makes a mess of trying to sync the audio to
 			// the sound. Synt to time instead.
 			now = _vm->_system->getMillis() - _pauseTime;
 			elapsed = now - _startTime;
 		} else if (_vm->_mixer->isSoundHandleActive(*_compressedFileSoundHandle)) {
+printf("\tSmushPlayer::play - for if 1 cond 2 a\n");
 			// Compressed SMUSH files.
 			elapsed = _vm->_mixer->getSoundElapsedTime(*_compressedFileSoundHandle);
 		} else if (_vm->_mixer->isSoundHandleActive(*_IACTchannel)) {
+printf("\tSmushPlayer::play - for if 1 cond 3 a\n");
 			// Curse of Monkey Island SMUSH files.
 			elapsed = _vm->_mixer->getSoundElapsedTime(*_IACTchannel);
 		} else {
+printf("\tSmushPlayer::play - for if 1 cond 4 a\n");
 			// For other SMUSH files, we don't necessarily have any
 			// one channel to sync against, so we have to use
 			// elapsed real time.
 			now = _vm->_system->getMillis() - _pauseTime;
 			elapsed = now - _startTime;
 		}
+printf("\tSmushPlayer::play - for 9\n");
 
 		if (elapsed >= ((_frame - _startFrame) * 1000) / _speed) {
+printf("\tSmushPlayer::play - for if 2 cond 1 a\n");
 			if (elapsed >= ((_frame + 1) * 1000) / _speed)
 				skipFrame = true;
 			else
 				skipFrame = false;
 			timerCallback();
 		}
-
+printf("\tSmushPlayer::play - for 10\n");
 		_vm->scummLoop_handleSound();
-
+printf("\tSmushPlayer::play - for 11\n");
 		if (_warpNeeded) {
 			_vm->_system->warpMouse(_warpX, _warpY);
 			_warpNeeded = false;
 		}
+printf("\tSmushPlayer::play - for 12\n");
 		_vm->parseEvents();
+printf("\tSmushPlayer::play - for 13\n");
 		_vm->processInput();
 		if (_palDirtyMax >= _palDirtyMin) {
+printf("\tSmushPlayer::play - for if 3 cond 1 a\n");
 			_vm->_system->getPaletteManager()->setPalette(_pal + _palDirtyMin * 3, _palDirtyMin, _palDirtyMax - _palDirtyMin + 1);
 
 			_palDirtyMax = -1;
@@ -1279,14 +1295,18 @@ printf("\tSmushPlayer::play - start\n");
 			skipFrame = false;
 		}
 		if (skipFrame) {
+printf("\tSmushPlayer::play - for if 4 cond 1 a\n");
 			if (++skipped > 10) {
 				skipFrame = false;
 				skipped = 0;
 			}
-		} else
-			skipped = 0;
+		} else{
+printf("\tSmushPlayer::play - for if 5 cond 2 a\n");
+			skipped = 0;}
 		if (_updateNeeded) {
+printf("\tSmushPlayer::play - for if 6 cond 1 a\n");
 			if (!skipFrame) {
+printf("\tSmushPlayer::play - for if 6 if 1 cond 1 a\n");
 				// WORKAROUND for bug #2415: "FT DEMO: assertion triggered
 				// when playing movie". Some frames there are 384 x 224
 				int w = MIN(_width, _vm->_screenWidth);
@@ -1299,6 +1319,7 @@ printf("\tSmushPlayer::play - start\n");
 		}
 		if (_endOfFile)
 			break;
+printf("\tSmushPlayer::play - for 14\n");
 		if (_vm->shouldQuit() || _vm->_saveLoadFlag || _vm->_smushVideoShouldFinish) {
 			_vm->_mixer->stopHandle(*_compressedFileSoundHandle);
 			_vm->_mixer->stopHandle(*_IACTchannel);
@@ -1308,13 +1329,16 @@ printf("\tSmushPlayer::play - start\n");
 			_imuseDigital->stopSMUSHAudio(); // For DIG & COMI
 			break;
 		}
+printf("\tSmushPlayer::play - for 15\n");
 		_vm->_system->delayMillis(10);
+printf("\tSmushPlayer::play - for 16\n");
 	}
-
+printf("\tSmushPlayer::play - 17\n");
 	release();
-
+printf("\tSmushPlayer::play - 18\n");
 	// Reset mouse state
 	CursorMan.showMouse(oldMouseState);
+printf("\tSmushPlayer::play - 19\n");
 }
 
 void SmushPlayer::initAudio(int samplerate, int32 maxChunkSize) {
