@@ -402,10 +402,21 @@ const Graphics::Surface &OSystem_libretro::getScreen() {
 }
 
 void OSystem_libretro::setPalette(const byte *colors, uint start, uint num) {
-
+logMessage(LogMessageType::kInfo,"setPalette start\n");
 char test[256]={0};
-Common::sprintf_s(test,256,"setPalette colors: %p, *colors: %d, start: %d, num: %d\n",colors,*colors,start,num);
+Common::sprintf_s(test,256,"setPalette num: %d\n",num);
 logMessage(LogMessageType::kInfo,test);
+Common::sprintf_s(test,256,"setPalette start: %d\n",start);
+logMessage(LogMessageType::kInfo,test);
+if (colors){
+Common::sprintf_s(test,256,"setPalette colors: %p\n",colors);
+logMessage(LogMessageType::kInfo,test);
+Common::sprintf_s(test,256,"setPalette *colors: %d\n",*colors);
+logMessage(LogMessageType::kInfo,test);
+}else{
+logMessage(LogMessageType::kInfo,"setPalette color null\n");
+}
+
 	_gamePalette.set(colors, start, num);
 }
 
