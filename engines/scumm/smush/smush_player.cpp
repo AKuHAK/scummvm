@@ -1303,14 +1303,7 @@ g_system->logMessage(LogMessageType::kInfo,test);
 }else{
 g_system->logMessage(LogMessageType::kInfo,"_pal null\n");
 }
-if (*(_pal + _palDirtyMin * 3)){
-Common::sprintf_s(test,256,"_pal + _palDirtyMin * 3: %p\n",_pal + _palDirtyMin * 3);
-g_system->logMessage(LogMessageType::kInfo,test);
-Common::sprintf_s(test,256,"*(_pal + _palDirtyMin * 3): %d\n",*(_pal + _palDirtyMin * 3));
-g_system->logMessage(LogMessageType::kInfo,test);
-}else{
-g_system->logMessage(LogMessageType::kInfo,"(_pal + _palDirtyMin * 3) null\n");
-}
+
 			_vm->_system->getPaletteManager()->setPalette(_pal + _palDirtyMin * 3, _palDirtyMin, _palDirtyMax - _palDirtyMin + 1);
 
 			_palDirtyMax = -1;
