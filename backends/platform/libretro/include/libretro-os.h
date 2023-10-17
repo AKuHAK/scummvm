@@ -49,7 +49,7 @@ public:
 
 class LibretroPalette {
 public:
-	unsigned char _colors[256 * 3];
+	byte _colors[256 * 3];
 	LibretroPalette(void);
 	~LibretroPalette(void) {};
 	void set(const byte *colors, uint start, uint num);

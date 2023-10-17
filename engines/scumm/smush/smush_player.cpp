@@ -1188,8 +1188,6 @@ void SmushPlayer::unpause() {
 void SmushPlayer::play(const char *filename, int32 speed, int32 offset, int32 startFrame) {
 	// Verify the specified file exists
 
-g_system->logMessage(LogMessageType::kInfo, "ciao\n");
-
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - start\n");
 	ScummFile f(_vm);
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - 1\n");

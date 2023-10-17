@@ -203,10 +203,12 @@ LibretroPalette::LibretroPalette() {
 }
 
 void LibretroPalette::set(const byte *colors, uint start, uint num) {
+assert(start + num <= 256);
 	memcpy(_colors + start * 3, colors, num * 3);
 }
 
 void LibretroPalette::get(byte *colors, uint start, uint num) const {
+assert(start + num <= 256);
 	memcpy(colors, _colors + start * 3, num * 3);
 }
 
@@ -400,6 +402,10 @@ const Graphics::Surface &OSystem_libretro::getScreen() {
 }
 
 void OSystem_libretro::setPalette(const byte *colors, uint start, uint num) {
+
+char test[256]={0};
+Common::sprintf_s(test,256,"setPalette colors: %p, *colors: %d, start: %d, num: %d\n",colors,*colors,start,num);
+logMessage(LogMessageType::kInfo,test);
 	_gamePalette.set(colors, start, num);
 }
 
