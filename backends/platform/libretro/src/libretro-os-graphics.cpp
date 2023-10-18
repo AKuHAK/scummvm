@@ -402,20 +402,11 @@ const Graphics::Surface &OSystem_libretro::getScreen() {
 }
 
 void OSystem_libretro::setPalette(const byte *colors, uint start, uint num) {
-
-if (~((unsigned int)255) & start) {
-colors-=3*start;
-start=0;
-}
-
-if (~((unsigned int)255) & num)
-	num=256;
-
 logMessage(LogMessageType::kInfo,"setPalette start\n");
 char test[256]={0};
 Common::sprintf_s(test,256,"setPalette num: %d\n",num);
 logMessage(LogMessageType::kInfo,test);
-Common::sprintf_s(test,256,"setPalette start: %d\n",start);
+Common::sprintf_s(test,256,"setPalette start: %d (%u)\n",start,start);
 logMessage(LogMessageType::kInfo,test);
 if (colors){
 Common::sprintf_s(test,256,"setPalette colors: %p\n",colors);
@@ -426,6 +417,33 @@ logMessage(LogMessageType::kInfo,test);
 logMessage(LogMessageType::kInfo,"setPalette color null\n");
 }
 
+bool exit =  false;
+
+if (~((unsigned int)255) & start) {
+colors-=3*start;
+start=0;
+exit=true;
+}
+
+if (~((unsigned int)255) & num){
+	num=256;
+exit=true;
+}
+
+Common::sprintf_s(test,256,"setPalette num: %d\n",num);
+logMessage(LogMessageType::kInfo,test);
+Common::sprintf_s(test,256,"setPalette start: %d (%u)\n",start,start);
+logMessage(LogMessageType::kInfo,test);
+if (colors){
+Common::sprintf_s(test,256,"setPalette colors: %p\n",colors);
+logMessage(LogMessageType::kInfo,test);
+Common::sprintf_s(test,256,"setPalette *colors: %d\n",*colors);
+logMessage(LogMessageType::kInfo,test);
+}else{
+logMessage(LogMessageType::kInfo,"setPalette color null\n");
+}
+
+if (exit) return;
 	_gamePalette.set(colors, start, num);
 }
 
