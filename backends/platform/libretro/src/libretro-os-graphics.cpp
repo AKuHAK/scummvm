@@ -403,12 +403,12 @@ const Graphics::Surface &OSystem_libretro::getScreen() {
 
 void OSystem_libretro::setPalette(const byte *colors, uint start, uint num) {
 
-if (start < 0) {
+if (~((unsigned int)255) & start) {
 colors-=3*start;
 start=0;
 }
 
-if (num>256)
+if (~((unsigned int)255) & num)
 	num=256;
 
 logMessage(LogMessageType::kInfo,"setPalette start\n");
