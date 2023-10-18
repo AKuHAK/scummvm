@@ -411,8 +411,6 @@ logMessage(LogMessageType::kInfo,test);
 if (colors){
 Common::sprintf_s(test,256,"setPalette colors: %p\n",colors);
 logMessage(LogMessageType::kInfo,test);
-Common::sprintf_s(test,256,"setPalette *colors: %d\n",*colors);
-logMessage(LogMessageType::kInfo,test);
 }else{
 logMessage(LogMessageType::kInfo,"setPalette color null\n");
 }
@@ -425,7 +423,7 @@ start=0;
 exit=true;
 }
 
-if (~((unsigned int)255) & num){
+if (num>256){
 	num=256;
 exit=true;
 }
@@ -437,8 +435,8 @@ logMessage(LogMessageType::kInfo,test);
 if (colors){
 Common::sprintf_s(test,256,"setPalette colors: %p\n",colors);
 logMessage(LogMessageType::kInfo,test);
-Common::sprintf_s(test,256,"setPalette *colors: %d\n",*colors);
-logMessage(LogMessageType::kInfo,test);
+//Common::sprintf_s(test,256,"setPalette *colors: %d\n",*colors);
+//logMessage(LogMessageType::kInfo,test);
 }else{
 logMessage(LogMessageType::kInfo,"setPalette color null\n");
 }
