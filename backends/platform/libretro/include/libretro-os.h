@@ -82,6 +82,7 @@ private:
 	static Common::List<Common::Event> _events;
 
 public:
+	const byte * _prevColors;
 	Audio::MixerImpl *_mixer;
 	Graphics::Surface _screen;
 	Graphics::Surface _gameScreen;

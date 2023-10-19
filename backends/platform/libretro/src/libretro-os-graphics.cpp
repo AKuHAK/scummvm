@@ -418,14 +418,13 @@ logMessage(LogMessageType::kInfo,"setPalette color null\n");
 bool exit =  false;
 
 if (~((unsigned int)255) & start) {
-colors-=3*start;
+colors=_prevColors;
 start=0;
-exit=true;
-}
+}else
+_prevColors=colors;
 
 if (num>256){
 	num=256;
-exit=true;
 }
 
 Common::sprintf_s(test,256,"setPalette num: %d\n",num);
@@ -441,7 +440,7 @@ logMessage(LogMessageType::kInfo,test);
 logMessage(LogMessageType::kInfo,"setPalette color null\n");
 }
 
-if (exit) return;
+if (!colors) return;
 	_gamePalette.set(colors, start, num);
 }
 

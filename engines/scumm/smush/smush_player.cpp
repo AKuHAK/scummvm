@@ -1212,6 +1212,7 @@ void SmushPlayer::unpause() {
 
 void SmushPlayer::play(const char *filename, int32 speed, int32 offset, int32 startFrame) {
 	// Verify the specified file exists
+char test[256]={0};
 
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - start\n");
 	ScummFile f(_vm);
@@ -1261,6 +1262,8 @@ g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - 7\n");
 		_imuseDigital->floodMusicBuffer();
 	}
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - 8\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 
 	int skipped = 0;
 int test1=0;
@@ -1268,22 +1271,32 @@ int test1=0;
 		uint32 now, elapsed;
 		bool skipFrame = false;
 g_system->logMessage(LogMessageType::kInfo,"SmushPlayer::play - for start\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		if (_insanity) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 1 cond 1 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			// Seeking makes a mess of trying to sync the audio to
 			// the sound. Synt to time instead.
 			now = _vm->_system->getMillis() - _pauseTime;
 			elapsed = now - _startTime;
 		} else if (_vm->_mixer->isSoundHandleActive(*_compressedFileSoundHandle)) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 1 cond 2 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			// Compressed SMUSH files.
 			elapsed = _vm->_mixer->getSoundElapsedTime(*_compressedFileSoundHandle);
 		} else if (_vm->_mixer->isSoundHandleActive(*_IACTchannel)) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 1 cond 3 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			// Curse of Monkey Island SMUSH files.
 			elapsed = _vm->_mixer->getSoundElapsedTime(*_IACTchannel);
 		} else {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 1 cond 4 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			// For other SMUSH files, we don't necessarily have any
 			// one channel to sync against, so we have to use
 			// elapsed real time.
@@ -1291,9 +1304,13 @@ g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 1 cond 
 			elapsed = now - _startTime;
 		}
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 9\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 
 		if (elapsed >= ((_frame - _startFrame) * 1000) / _speed) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 2 cond 1 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			if (elapsed >= ((_frame + 1) * 1000) / _speed)
 				skipFrame = true;
 			else
@@ -1301,33 +1318,34 @@ g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 2 cond 
 			timerCallback();
 		}
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 10\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		_vm->scummLoop_handleSound();
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 11\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		if (_warpNeeded) {
 			_vm->_system->warpMouse(_warpX, _warpY);
 			_warpNeeded = false;
 		}
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 12\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		_vm->parseEvents();
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 13\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		_vm->processInput();
 		if (_palDirtyMax >= _palDirtyMin) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 3 cond 1 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 
 
-char test[256]={0};
-Common::sprintf_s(test,256,"_palDirtyMin: %d\n",_palDirtyMin);
-g_system->logMessage(LogMessageType::kInfo,test);
-Common::sprintf_s(test,256,"_palDirtyMax: %d\n",_palDirtyMax);
-g_system->logMessage(LogMessageType::kInfo,test);
-if (_pal){
 Common::sprintf_s(test,256,"_pal: %p\n",_pal);
 g_system->logMessage(LogMessageType::kInfo,test);
-Common::sprintf_s(test,256,"*_pal: %d\n",*_pal);
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
 g_system->logMessage(LogMessageType::kInfo,test);
-}else{
-g_system->logMessage(LogMessageType::kInfo,"_pal null\n");
-}
 
 			_vm->_system->getPaletteManager()->setPalette(_pal + _palDirtyMin * 3, _palDirtyMin, _palDirtyMax - _palDirtyMin + 1);
 
@@ -1337,17 +1355,25 @@ g_system->logMessage(LogMessageType::kInfo,"_pal null\n");
 		}
 		if (skipFrame) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 4 cond 1 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			if (++skipped > 10) {
 				skipFrame = false;
 				skipped = 0;
 			}
 		} else{
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 5 cond 2 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			skipped = 0;}
 		if (_updateNeeded) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 6 cond 1 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			if (!skipFrame) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 6 if 1 cond 1 a\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 				// WORKAROUND for bug #2415: "FT DEMO: assertion triggered
 				// when playing movie". Some frames there are 384 x 224
 				int w = MIN(_width, _vm->_screenWidth);
@@ -1361,6 +1387,8 @@ g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 6 if 1 
 		if (_endOfFile)
 			break;
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 14\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		if (_vm->shouldQuit() || _vm->_saveLoadFlag || _vm->_smushVideoShouldFinish) {
 			_vm->_mixer->stopHandle(*_compressedFileSoundHandle);
 			_vm->_mixer->stopHandle(*_IACTchannel);
@@ -1371,16 +1399,26 @@ g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 14\n");
 			break;
 		}
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 15\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		_vm->_system->delayMillis(10);
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for 16\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 	test1++;
 	}
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - 17\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 	release();
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - 18\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 	// Reset mouse state
 	CursorMan.showMouse(oldMouseState);
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - 19\n");
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 }
 
 void SmushPlayer::initAudio(int samplerate, int32 maxChunkSize) {
