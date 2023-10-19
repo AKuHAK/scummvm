@@ -703,6 +703,9 @@ static byte delta_color(byte org_color, int16 delta_color) {
 void SmushPlayer::handleDeltaPalette(int32 subSize, Common::SeekableReadStream &b) {
 	debugC(DEBUG_SMUSH, "SmushPlayer::handleDeltaPalette()");
 
+char test[256]={0};
+Common::sprintf_s(test,256,"\tSmushPlayer::handleDeltaPalette\n");
+g_system->logMessage(LogMessageType::kInfo,test);
 	if (subSize == 0x300 * 3 + 4) {
 
 		b.readUint16LE();
@@ -731,7 +734,9 @@ void SmushPlayer::handleDeltaPalette(int32 subSize, Common::SeekableReadStream &
 void SmushPlayer::handleNewPalette(int32 subSize, Common::SeekableReadStream &b) {
 	debugC(DEBUG_SMUSH, "SmushPlayer::handleNewPalette()");
 	assert(subSize >= 0x300);
-
+char test[256]={0};
+Common::sprintf_s(test,256,"\tSmushPlayer::handleNewPalette()\n");
+g_system->logMessage(LogMessageType::kInfo,test);
 	if (_skipPalette)
 		return;
 
@@ -858,6 +863,8 @@ void SmushPlayer::handleFrameObject(int32 subSize, Common::SeekableReadStream &b
 
 void SmushPlayer::handleFrame(int32 frameSize, Common::SeekableReadStream &b) {
 	debugC(DEBUG_SMUSH, "SmushPlayer::handleFrame(%d)", _frame);
+char test[256]={0};
+
 	uint8 *audioChunk = nullptr;
 	_skipNext = false;
 
@@ -866,6 +873,7 @@ void SmushPlayer::handleFrame(int32 frameSize, Common::SeekableReadStream &b) {
 	}
 
 	while (frameSize > 0) {
+
 		const uint32 subType = b.readUint32BE();
 		const int32 subSize = b.readUint32BE();
 		const int32 subOffset = b.pos();
@@ -915,6 +923,8 @@ void SmushPlayer::handleFrame(int32 frameSize, Common::SeekableReadStream &b) {
 			error("Unknown frame subChunk found : %s, %d", tag2str(subType), subSize);
 		}
 
+Common::sprintf_s(test,256,"\t\thandleFrame subType: %d\n",subType);
+g_system->logMessage(LogMessageType::kInfo,test);
 		frameSize -= subSize + 8;
 		b.seek(subOffset + subSize, SEEK_SET);
 		if (subSize & 1) {
@@ -967,6 +977,9 @@ void SmushPlayer::handleAnimHeader(int32 subSize, Common::SeekableReadStream &b)
 			memcpy(_pal, palettePtr, sizeof(_pal));
 			setDirtyColors(0, 255);
 		}
+char test[256]={0};
+Common::sprintf_s(test,256,"\thandleAnimHeader - sizeof(_pal):%d, sizeof(_pal):%d\n",sizeof(_pal),sizeof(byte));
+g_system->logMessage(LogMessageType::kInfo,test);
 
 		free(headerContent);
 	}
@@ -1091,11 +1104,17 @@ void SmushPlayer::parseNextFrame() {
 }
 
 void SmushPlayer::setPalette(const byte *palette) {
+char test[256]={0};
+Common::sprintf_s(test,256,"\tsetPalette - *palette: %p\n",palette);
+g_system->logMessage(LogMessageType::kInfo,test);
 	memcpy(_pal, palette, 0x300);
 	setDirtyColors(0, 255);
 }
 
 void SmushPlayer::setPaletteValue(int n, byte r, byte g, byte b) {
+char test[256]={0};
+Common::sprintf_s(test,256,"\tsetPaletteValue - n: %d, r:%d g:%d, b:%d\n",n,r,g,b);
+g_system->logMessage(LogMessageType::kInfo,test);
 	_pal[n * 3 + 0] = r;
 	_pal[n * 3 + 1] = g;
 	_pal[n * 3 + 2] = b;
@@ -1103,10 +1122,16 @@ void SmushPlayer::setPaletteValue(int n, byte r, byte g, byte b) {
 }
 
 void SmushPlayer::setDirtyColors(int min, int max) {
-	if (_palDirtyMin > min)
+char test[256]={0};
+Common::sprintf_s(test,256,"\tsetDirtyColors - _palDirtyMin: %d, _palDirtyMax: %d, min: %d, max: %d\n",_palDirtyMin, _palDirtyMax, min, max);
+g_system->logMessage(LogMessageType::kInfo,test);
+
+	if (_palDirtyMin > min){
 		_palDirtyMin = min;
-	if (_palDirtyMax < max)
+	}
+	if (_palDirtyMax < max){
 		_palDirtyMax = max;
+	}
 }
 
 void SmushPlayer::warpMouse(int x, int y, int buttons) {
