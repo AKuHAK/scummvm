@@ -442,14 +442,16 @@ logMessage(LogMessageType::kInfo,"setPalette color null\n");
 
 if (!colors) return;
 
+if (_palmin && _palmax){
 Common::sprintf_s(test,256,"setPalette _palmin: %d, _palmax: %d\n",*_palmin,*_palmax);
 logMessage(LogMessageType::kInfo,test);
-
+}
 	_gamePalette.set(colors, start, num);
 
+if (_palmin && _palmax){
 Common::sprintf_s(test,256,"setPalette _palmin: %d, _palmax: %d\n",*_palmin,*_palmax);
 logMessage(LogMessageType::kInfo,test);
-
+}
 }
 
 void OSystem_libretro::grabPalette(byte *colors, uint start, uint num) const {
