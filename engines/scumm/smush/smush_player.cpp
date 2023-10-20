@@ -19,6 +19,9 @@
  *
  */
 #define FORBIDDEN_SYMBOL_EXCEPTION_printf
+#include "common/inttypes.h"
+
+#include "backends/platform/libretro/include/libretro-os.h"
 
 #include "common/config-manager.h"
 #include "common/file.h"
@@ -1214,6 +1217,11 @@ void SmushPlayer::play(const char *filename, int32 speed, int32 offset, int32 st
 	// Verify the specified file exists
 char test[256]={0};
 
+dynamic_cast<OSystem_libretro *>(g_system)->_palmin=&_palDirtyMin;
+dynamic_cast<OSystem_libretro *>(g_system)->_palmax=&_palDirtyMax;
+
+
+
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - start\n");
 	ScummFile f(_vm);
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - 1\n");
@@ -1348,10 +1356,17 @@ Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,
 g_system->logMessage(LogMessageType::kInfo,test);
 
 			_vm->_system->getPaletteManager()->setPalette(_pal + _palDirtyMin * 3, _palDirtyMin, _palDirtyMax - _palDirtyMin + 1);
-
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			_palDirtyMax = -1;
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			_palDirtyMin = 256;
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 			skipFrame = false;
+Common::sprintf_s(test,256,"\t_palDirtyMin: %u _palDirtyMax: %u\n",_palDirtyMin,_palDirtyMax);
+g_system->logMessage(LogMessageType::kInfo,test);
 		}
 		if (skipFrame) {
 g_system->logMessage(LogMessageType::kInfo,"\tSmushPlayer::play - for if 4 cond 1 a\n");

@@ -49,6 +49,8 @@ public:
 
 class LibretroPalette {
 public:
+	int * _palmin;
+	int * _palmax;
 	byte _colors[256 * 3];
 	LibretroPalette(void);
 	~LibretroPalette(void) {};
@@ -82,6 +84,9 @@ private:
 	static Common::List<Common::Event> _events;
 
 public:
+
+	int * _palmin;
+	int * _palmax;
 	const byte * _prevColors;
 	Audio::MixerImpl *_mixer;
 	Graphics::Surface _screen;
