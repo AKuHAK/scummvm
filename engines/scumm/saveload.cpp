@@ -27,6 +27,7 @@
 
 #include "scumm/actor.h"
 #include "scumm/charset.h"
+#include "scumm/gfx_mac.h"
 #include "scumm/imuse_digi/dimuse_engine.h"
 #include "scumm/imuse/imuse.h"
 #include "scumm/players/player_towns.h"
@@ -67,7 +68,7 @@ struct SaveInfoSection {
 
 #define SaveInfoSectionSize (4+4+4 + 4+4 + 4+2)
 
-#define CURRENT_VER 109
+#define CURRENT_VER 110
 #define INFOSECTION_VERSION 2
 
 #pragma mark -
@@ -864,6 +865,9 @@ bool ScummEngine::loadState(int slot, bool compat, Common::String &filename) {
 	if (_macScreen)
 		_macScreen->fillRect(Common::Rect(_macScreen->w, _macScreen->h), 0);
 	clearTextSurface();
+
+	if (_macIndy3Gui)
+		_macIndy3Gui->resetAfterLoad();
 
 	_lastCodePtr = nullptr;
 	_drawObjectQueNr = 0;
@@ -2060,7 +2064,7 @@ void ScummEngine_v5::saveLoadWithSerializer(Common::Serializer &s) {
 	// invisible after loading.
 
 	if (s.isLoading() && _game.platform == Common::kPlatformMacintosh) {
-		if ((_game.id == GID_LOOM && !_macCursorFile.empty()) || (_game.id == GID_INDY3 && _macScreen)) {
+		if ((_game.id == GID_LOOM && !_macCursorFile.empty()) || _macIndy3Gui) {
 			setBuiltinCursor(0);
 		}
 	}

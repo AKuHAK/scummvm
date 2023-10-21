@@ -2589,24 +2589,6 @@ void ScummEngine_v5::o5_setVarRange() {
 		setResult(b);
 		_resultVarNumber++;
 	} while (--a);
-
-	// Macintosh version of indy3ega used different interface, so adjust values.
-	if (_game.id == GID_INDY3 && _game.platform == Common::kPlatformMacintosh) {
-		VAR(68) = 0;
-		VAR(69) = 0;
-		VAR(70) = 168;
-		VAR(71) = 0;
-		VAR(72) = 168;
-		VAR(73) = 0;
-		VAR(74) = 168;
-		VAR(75) = 0;
-		VAR(76) = 176;
-		VAR(77) = 176;
-		VAR(78) = 184;
-		VAR(79) = 184;
-		VAR(80) = 192;
-		VAR(81) = 192;
-	}
 }
 
 void ScummEngine_v5::o5_startMusic() {
@@ -2947,42 +2929,7 @@ void ScummEngine_v5::o5_verbOps() {
 		case 5:		// SO_VERB_AT
 			vs->curRect.left = getVarOrDirectWord(PARAM_1);
 			vs->curRect.top = getVarOrDirectWord(PARAM_2);
-			// Macintosh version of indy3ega used different interface, so adjust values.
-			if ((_game.platform == Common::kPlatformMacintosh) && (_game.id == GID_INDY3)) {
-				switch (verb) {
-				case 1:
-				case 2:
-				case 9:
-					vs->curRect.left += 16;
-					break;
-				case 10:
-				case 11:
-				case 12:
-					vs->curRect.left += 36;
-					break;
-				case 4:
-				case 5:
-				case 8:
-					vs->curRect.left += 60;
-					break;
-				case 13:
-				case 32:
-				case 33:
-				case 34:
-					vs->curRect.left += 90;
-					break;
-				case 107:
-					vs->curRect.left -= 54;
-					vs->curRect.top += 16;
-					break;
-				case 108:
-					vs->curRect.left -= 54;
-					vs->curRect.top += 8;
-					break;
-				default:
-					break;
-				}
-			} else if (_game.platform == Common::kPlatformFMTowns && ConfMan.getBool("trim_fmtowns_to_200_pixels")) {
+			if (_game.platform == Common::kPlatformFMTowns && ConfMan.getBool("trim_fmtowns_to_200_pixels")) {
 				if (_game.id == GID_ZAK && verb == 116)
 					// WORKAROUND: FM-TOWNS Zak used the extra 40 pixels at the bottom to increase the inventory to 10 items
 					// if we trim to 200 pixels, we need to move the 'down arrow' (verb 116) to higher location
@@ -2991,25 +2938,7 @@ void ScummEngine_v5::o5_verbOps() {
 			vs->origLeft = vs->curRect.left;
 			break;
 		case 6:		// SO_VERB_ON
-			// It seems that the Mac version of Indiana Jones and
-			// the Last Crusade treats the entire inventory as a
-			// single verb, or at least that's my guess as far as
-			// script 12 is concerned. In the 256-color DOS
-			// version (I don't have the EGA version), the script
-			// enables all inventory verbs, and possibly the
-			// inventory arrows. Well, that's what the hard-coded
-			// inventory script does, so this should be fine.
-			//
-			// This fixes a problem where if you offer an object
-			// to someone and then press "Never mind", the next
-			// time you try you see only one inventory object.
-			//
-			// I don't know if it has to be limited to this
-			// particular script, but that's what I'll do for now.
-			if (_game.id == GID_INDY3 && _game.platform == Common::kPlatformMacintosh && verb == 101 && vm.slot[_currentScript].number == 12) {
-				inventoryScriptIndy3Mac();
-			} else
-				vs->curmode = 1;
+			vs->curmode = 1;
 			break;
 		case 7:		// SO_VERB_OFF
 			vs->curmode = 0;
@@ -3059,6 +2988,7 @@ void ScummEngine_v5::o5_verbOps() {
 			break;
 		case 20:	// SO_VERB_NAME_STR
 			ptr = getResourceAddress(rtString, getVarOrDirectWord(PARAM_1));
+
 			if (!ptr)
 				_res->nukeResource(rtVerb, slot);
 			else {

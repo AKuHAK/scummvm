@@ -105,6 +105,11 @@ class Logic;
 #define SP_OVERLAP   2
 #define TEXTBUTTONID 7
 
+#define PSX_CREDITS_SPACING (-3)
+#define PSX_CREDITS_MIDDLE  450
+#define PSX_CREDITS_OFFSET  150
+#define PSX_NUM_CREDITS     14
+
 struct Button {
 	int32 x1;
 	int32 y1;
@@ -126,6 +131,7 @@ public:
 	void checkForOldSaveGames();
 	bool isPanelShown();
 	const uint8 *getPauseString();
+	void psxEndCredits();
 
 	void setSaveDescription(int slot, const char *desc) {
 		Common::strcpy_s((char *)_fileDescriptions[slot], sizeof(_fileDescriptions[slot]), desc);
@@ -198,12 +204,19 @@ private:
 
 	int displayMessage(const char *altButton, MSVC_PRINTF const char *message, ...) GCC_PRINTF(3, 4);
 
+	// PSX Credits functions
+	int32 getCreditsFontHeight(uint8 *font);
+	int32 getCreditsStringLength(uint8 *str, uint8 *font);
+	void renderCreditsTextSprite(uint8 *data, uint8 *dst, int16 x, int16 y, int16 width, int16 height);
+	void createCreditsTextSprite(uint8 *data, int32 pitch, uint8 *str, uint8 *font);
+
 	Common::MemoryWriteStreamDynamic *_tempThumbnail;
 	static const uint8 _languageStrings[8 * 20][43];
 	static const uint8 _akellaLanguageStrings[20][43];
 	static const uint8 _mediaHouseLanguageStrings[20][43];
 	uint8 _customStrings[20][43];
 	const uint8(*_lStrings)[43];
+	const uint8 _psxPauseStrings[3][7] = { "Paused", "Pause", "Pausa" };
 	SwordEngine *_vm;
 	Common::SaveFileManager *_saveFileMan;
 	ObjectMan *_objMan;
@@ -239,7 +252,7 @@ private:
 	int32 _scroll = 0;
 	int32 _scrollCount = 0;
 
-	uint8 *_restoreBuf;
+	uint8 *_restoreBuf = nullptr;
 	uint32 _selectedSavegame = 0;
 	uint8 _numButtons = 0;
 	uint8 _selectedButton = 0;

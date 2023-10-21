@@ -95,6 +95,10 @@ void Logic::initialize() {
 	SwordEngine::_systemVars.speechFinished = true;
 }
 
+void Logic::setControlPanelObject(Control *control) {
+	_control = control;
+}
+
 void Logic::newScreen(uint32 screen) {
 	Object *compact = (Object *)_objMan->fetchObject(PLAYER);
 
@@ -853,6 +857,16 @@ int Logic::fnMegaSet(Object *cpt, int32 id, int32 walk_data, int32 spr, int32 e,
 
 int Logic::fnAnim(Object *cpt, int32 id, int32 cdt, int32 spr, int32 e, int32 f, int32 z, int32 x) {
 	AnimSet *animTab;
+	// PATCH for an (almost) softlock in Marib: if we spam click the cat
+	// while it's on the table, we can accidentally activate the cat_ran_off
+	// script variable, because of a very short window of time in which the cat
+	// is jumping on the shelf and it's still clickable.
+	//
+	// This is part 1: we deactivate the cat hotspot as soon as the script
+	// run the "jump on the shelf" animation".
+	if (cdt == CAT3CDT && spr == CAT3) {
+		fnMouseOff(cpt, id, 0, 0, 0, 0, 0, 0);
+	}
 
 	if (cdt && (!spr)) {
 		animTab = (AnimSet *)((uint8 *)_resMan->openFetchRes(cdt) + sizeof(Header));
@@ -919,6 +933,17 @@ int Logic::fnFullAnim(Object *cpt, int32 id, int32 anim, int32 graphic, int32 e,
 }
 
 int Logic::fnFullSetFrame(Object *cpt, int32 id, int32 cdt, int32 spr, int32 frameNo, int32 f, int32 z, int32 x) {
+	// PATCH for an (almost) softlock in Marib: if we spam click the cat
+	// while it's on the table, we can accidentally activate the cat_ran_off
+	// script variable, because of a very short window of time in which the cat
+	// is jumping on the shelf and it's still clickable.
+	//
+	// This is part 2: we reactivate the cat hotspot as soon as the
+	// scripts call for the beginning the idling cycle.
+	if (cdt == CAT4CDT && spr == CAT4 && frameNo == 0) {
+		fnMouseOn(cpt, id, 0, 0, 0, 0, 0, 0);
+	}
+
 	uint8 *data = (uint8 *)_resMan->openFetchRes(cdt) + sizeof(Header);
 
 	if (frameNo == LAST_FRAME)
@@ -984,21 +1009,26 @@ int Logic::fnPlaySequence(Object *cpt, int32 id, int32 sequenceId, int32 d, int3
 	// meantime, we don't want any looping sound effects still playing.
 	_sound->clearAllFx();
 
-	MoviePlayer *player = makeMoviePlayer(sequenceId, _vm, _textMan, _resMan, _sound, _system);
-	if (player) {
-		_screen->clearScreen();
-		if (player->load(sequenceId))
-			player->play();
-		delete player;
+	if (SwordEngine::isPsx() && sequenceId == 19) {
+		_control->psxEndCredits();
+	} else {
+		MoviePlayer *player = makeMoviePlayer(sequenceId, _vm, _textMan, _resMan, _sound, _system);
+		if (player) {
+			_screen->clearScreen();
+			if (player->load(sequenceId))
+				player->play();
+			delete player;
 
-		// In some instances, when you start a video when the palette is still fading
-		// and the video is finished earlier, another palette fade(-out) is performed with the
-		// wrong palette. This happens when traveling to Spain or Ireland. It couldn't happen
-		// in the original, as it asked for the CD before loading the scene.
-		// Let's fix this by forcing a black fade palette on the next fade out. If a fade-in
-		// is then scheduled, we will clear the flag without doing anything different from the usual.
-		_screen->setNextFadeOutToBlack();
+			// In some instances, when you start a video when the palette is still fading
+			// and the video is finished earlier, another palette fade(-out) is performed with the
+			// wrong palette. This happens when traveling to Spain or Ireland. It couldn't happen
+			// in the original, as it asked for the CD before loading the scene.
+			// Let's fix this by forcing a black fade palette on the next fade out. If a fade-in
+			// is then scheduled, we will clear the flag without doing anything different from the usual.
+			_screen->setNextFadeOutToBlack();
+		}
 	}
+
 	return SCRIPT_CONT;
 }
 
@@ -1219,7 +1249,7 @@ int Logic::fnISpeak(Object *cpt, int32 id, int32 cdt, int32 textNo, int32 spr, i
 		int textMargin = SwordEngine::_systemVars.isDemo ? 5 : 3; // distance kept from edges of screen
 
 		if (SwordEngine::isPsx())
-			textMargin = 33;
+			textMargin = 34;
 
 		int aboveHead = (SwordEngine::_systemVars.isDemo || SwordEngine::isPsx()) ? 10 : 20; // distance kept above talking sprite
 		uint16 textX, textY;
@@ -1761,16 +1791,16 @@ int Logic::fnBlack(Object *cpt, int32 id, int32 a, int32 b, int32 c, int32 d, in
 }
 
 void Logic::startPosCallFn(uint8 fnId, uint32 param1, uint32 param2, uint32 param3) {
-	Object *obj = NULL;
+	Object *obj = nullptr;
 	switch (fnId) {
 	case opcPlaySequence:
-		fnPlaySequence(NULL, 0, param1, 0, 0, 0, 0, 0);
+		fnPlaySequence(nullptr, 0, param1, 0, 0, 0, 0, 0);
 		break;
 	case opcAddObject:
-		fnAddObject(NULL, 0, param1, 0, 0, 0, 0, 0);
+		fnAddObject(nullptr, 0, param1, 0, 0, 0, 0, 0);
 		break;
 	case opcRemoveObject:
-		fnRemoveObject(NULL, 0, param1, 0, 0, 0, 0, 0);
+		fnRemoveObject(nullptr, 0, param1, 0, 0, 0, 0, 0);
 		break;
 	case opcMegaSet:
 		obj = _objMan->fetchObject(param1);
@@ -1843,7 +1873,7 @@ void Logic::startPositions(uint32 pos) {
 		spainVisit2 = true;
 		pos -= 900;
 	}
-	if ((pos > 80) || (_startData[pos] == NULL))
+	if ((pos > 80) || (_startData[pos] == nullptr))
 		error("Starting in Section %d is not supported", pos);
 
 	Logic::_scriptVars[CHANGE_STANCE] = STAND;

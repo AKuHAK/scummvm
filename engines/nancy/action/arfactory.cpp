@@ -30,8 +30,10 @@
 #include "engines/nancy/action/secondaryvideo.h"
 #include "engines/nancy/action/secondarymovie.h"
 
+#include "engines/nancy/action/puzzle/assemblypuzzle.h"
 #include "engines/nancy/action/puzzle/bombpuzzle.h"
 #include "engines/nancy/action/puzzle/collisionpuzzle.h"
+#include "engines/nancy/action/puzzle/cubepuzzle.h"
 #include "engines/nancy/action/puzzle/leverpuzzle.h"
 #include "engines/nancy/action/puzzle/mazechasepuzzle.h"
 #include "engines/nancy/action/puzzle/mouselightpuzzle.h"
@@ -143,7 +145,7 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 	case 56:
 		if (g_nancy->getGameType() <= kGameTypeNancy6) {
 			return new ConversationVideo();
-		} else if (g_nancy->getGameType() >= kGameTypeNancy7) {
+		} else {
 			return new OverlayAnimTerse();
 		}
 		return nullptr;
@@ -311,6 +313,10 @@ ActionRecord *ActionManager::createActionRecord(uint16 type, Common::SeekableRea
 		return new MouseLightPuzzle();
 	case 220:
 		return new TwoDialPuzzle();
+	case 222:
+		return new AssemblyPuzzle();
+	case 223:
+		return new CubePuzzle();
 	case 224:
 		return new OrderingPuzzle(OrderingPuzzle::kKeypadTerse);
 	default:

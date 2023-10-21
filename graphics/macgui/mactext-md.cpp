@@ -155,7 +155,26 @@ void render_table_cell(Common::SDDataBuffer *ob, const Common::SDDataBuffer *tex
 	if (!text)
 		return;
 
-	Common::String res = Common::String::format("\001\016Tc%02x" "%s" "\001\016TC", flags, Common::String((const char *)text->data , text->size).c_str());
+	TextAlign align;
+
+	switch (flags) {
+	case Common::MKD_TABLE_ALIGN_R:
+		align = kTextAlignRight;
+		break;
+	case Common::MKD_TABLE_ALIGN_CENTER:
+		align = kTextAlignCenter;
+		break;
+	case Common::MKD_TABLE_ALIGN_L:
+	default:
+		align = kTextAlignLeft;
+	}
+
+	Common::String res = Common::String((const char *)text->data, text->size);
+
+	if (flags & Common::MKD_TABLE_HEADER)
+		res = Common::String::format("\001\016+%02x00" "%s" "\001\016-%02x00", kMacFontBold, res.c_str(), kMacFontBold);
+
+	res = Common::String::format("\001\016Tc%02x" "%s" "\001\016TC", align, res.c_str());
 
 	sd_bufput(ob, res.c_str(), res.size());
 

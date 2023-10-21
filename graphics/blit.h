@@ -99,7 +99,6 @@ bool keyBlit(byte *dst, const byte *src,
  * @return			true if conversion completes successfully,
  *					false if there is an error.
  *
- * @note Blitting to a 3Bpp destination is not supported
  * @note This can convert a surface in place, regardless of the
  *       source and destination format, as long as there is enough
  *       space for the destination. The dstPitch / srcPitch ratio
@@ -127,7 +126,6 @@ bool crossBlit(byte *dst, const byte *src,
  * @return			true if conversion completes successfully,
  *					false if there is an error.
  *
- * @note Blitting to a 3Bpp destination is not supported
  * @note This can convert a surface in place, regardless of the
  *       source and destination format, as long as there is enough
  *       space for the destination. The dstPitch / srcPitch ratio
@@ -233,7 +231,10 @@ private:
 	typedef void(*BlitFunc)(Args &, const TSpriteBlendMode &, const AlphaType &);
 	static BlitFunc blitFunc;
 	friend class ::BlendBlitUnfilteredTestSuite;
-	friend class BlendBlitImpl;
+	friend class BlendBlitImpl_Default;
+	friend class BlendBlitImpl_NEON;
+	friend class BlendBlitImpl_SSE2;
+	friend class BlendBlitImpl_AVX2;
 
 public:
 	static const int SCALE_THRESHOLD = 0x100;

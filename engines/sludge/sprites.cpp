@@ -265,6 +265,11 @@ bool GraphicsManager::loadSpriteBank(int fileNum, SpriteBank &loadhere, bool isF
 
 // pasteSpriteToBackDrop uses the colour specified by the setPasteColour (or setPasteColor)
 void GraphicsManager::pasteSpriteToBackDrop(int x1, int y1, Sprite &single, const SpritePalette &fontPal) {
+	if (!single.surface.w || !single.surface.h) {
+		// Skip surfaces with a 0 width/height (e.g. the space character on Out of Order) to avoid crashes in the blitting code.
+		return;
+	}
+
 	// kill zBuffer
 	if (_zBuffer->originalNum >= 0 && _zBuffer->sprites) {
 		int num = _zBuffer->originalNum;
@@ -282,6 +287,11 @@ void GraphicsManager::pasteSpriteToBackDrop(int x1, int y1, Sprite &single, cons
 // burnSpriteToBackDrop adds text in the colour specified by setBurnColour
 // using the differing brightness levels of the font to achieve an anti-aliasing effect.
 void GraphicsManager::burnSpriteToBackDrop(int x1, int y1, Sprite &single, const SpritePalette &fontPal) {
+	if (!single.surface.w || !single.surface.h) {
+		// Skip surfaces with a 0 width/height (e.g. the space character on Out of Order) to avoid crashes in the blitting code.
+		return;
+	}
+
 	// kill zBuffer
 	if (_zBuffer->originalNum >= 0 && _zBuffer->sprites) {
 		int num = _zBuffer->originalNum;
@@ -297,6 +307,11 @@ void GraphicsManager::burnSpriteToBackDrop(int x1, int y1, Sprite &single, const
 }
 
 void GraphicsManager::fontSprite(bool flip, int x, int y, Sprite &single, const SpritePalette &fontPal) {
+	if (!single.surface.w || !single.surface.h) {
+		// Skip surfaces with a 0 width/height (e.g. the space character on Out of Order) to avoid crashes in the blitting code.
+		return;
+	}
+
 	float x1 = (float)x - (float)single.xhot / _cameraZoom;
 	float y1 = (float)y - (float)single.yhot / _cameraZoom;
 

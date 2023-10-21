@@ -27,6 +27,7 @@
 
 #include "scumm/debugger.h"
 #include "scumm/dialogs.h"
+#include "scumm/gfx_mac.h"
 #include "scumm/insane/insane.h"
 #include "scumm/imuse/imuse.h"
 #include "scumm/imuse_digi/dimuse_engine.h"
@@ -104,6 +105,10 @@ void ScummEngine_v80he::parseEvent(Common::Event event) {
 #endif
 
 void ScummEngine::parseEvent(Common::Event event) {
+	// Handle Mac Indy3 events before scaling the mouse coordinates.
+	if (_macIndy3Gui && _macIndy3Gui->isVerbGuiActive())
+		_macIndy3Gui->handleEvent(event);
+
 	switch (event.type) {
 	case Common::EVENT_CUSTOM_ENGINE_ACTION_START:
 		if (event.customType >= kScummActionCount) {

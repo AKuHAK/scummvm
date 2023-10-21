@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ScummVM 2.3.0git\n"
 "Report-Msgid-Bugs-To: scummvm-devel@lists.scummvm.org\n"
-"POT-Creation-Date: 2023-10-12 21:54+0000\n"
+"POT-Creation-Date: 2023-10-17 16:03+0000\n"
 "PO-Revision-Date: 2023-10-13 08:41+0000\n"
 "Last-Translator: VAN-Gluon <van.gluonp@gmail.com>\n"
 "Language-Team: Japanese <https://translations.scummvm.org/projects/scummvm/"
@@ -278,7 +278,7 @@ msgstr "すでに別のストレージが使用されています。切断しま
 #: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/grim/grim.cpp:360
 #: engines/kyra/gui/saveload_eob.cpp:598 engines/kyra/gui/saveload_eob.cpp:631
 #: engines/parallaction/metaengine.cpp:145
-#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3847
+#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3855
 #: engines/toon/toon.cpp:1531
 msgid "Yes"
 msgstr "はい"
@@ -291,7 +291,7 @@ msgstr "はい"
 #: engines/director/lingo/xlibs/jitdraw3.cpp:139 engines/grim/grim.cpp:360
 #: engines/kyra/gui/saveload_eob.cpp:598 engines/kyra/gui/saveload_eob.cpp:631
 #: engines/parallaction/metaengine.cpp:151
-#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3847
+#: engines/sci/graphics/controls32.cpp:929 engines/scumm/scumm.cpp:3855
 #: engines/toon/toon.cpp:1531
 msgid "No"
 msgstr "いいえ"
@@ -319,13 +319,12 @@ msgstr "JSONコードの内容が不正です。"
 #: engines/groovie/script.cpp:660 engines/mtropolis/mtropolis.cpp:115
 #: engines/mtropolis/mtropolis.cpp:125 engines/parallaction/saveload.cpp:270
 #: engines/saga/music.cpp:102 engines/sci/engine/kgraphics.cpp:75
-#: engines/sci/graphics/controls32.cpp:926 engines/scumm/scumm.cpp:1164
-#: engines/scumm/scumm.cpp:1190 engines/scumm/scumm.cpp:1212
-#: engines/scumm/scumm.cpp:1565 engines/scumm/scumm.cpp:2038
-#: engines/scumm/scumm.cpp:2054 engines/sky/compact.cpp:140
+#: engines/sci/graphics/controls32.cpp:926 engines/scumm/scumm.cpp:1214
+#: engines/scumm/scumm.cpp:1567 engines/scumm/scumm.cpp:2042
+#: engines/scumm/scumm.cpp:2058 engines/sky/compact.cpp:140
 #: engines/sword1/animation.cpp:532 engines/sword1/animation.cpp:563
 #: engines/sword1/animation.cpp:571 engines/sword1/control.cpp:2797
-#: engines/sword1/logic.cpp:1702 engines/sword2/animation.cpp:426
+#: engines/sword1/logic.cpp:1732 engines/sword2/animation.cpp:426
 #: engines/sword2/animation.cpp:456 engines/sword2/animation.cpp:466
 #: engines/vcruise/vcruise.cpp:92 engines/vcruise/vcruise.cpp:102
 #: engines/zvision/file/save_manager.cpp:225
@@ -4889,85 +4888,7 @@ msgstr "クリックモード"
 msgid "Keyboard"
 msgstr "キーボード"
 
-#: backends/platform/sdl/sdl.cpp:1014
-msgid ""
-"## Keyboard shortcuts\n"
-"\n"
-"ScummVM supports various in-game keyboard and mouse shortcuts, and since "
-"version 2.2.0 these can be manually configured in the **Keymaps tab**, or in "
-"the **configuration file**.\n"
-"\n"
-"For game-specific controls, see the [wiki entry](https://wiki.scummvm.org/"
-"index.php?title=Category:Supported_Games) for the game you are playing.\n"
-"\n"
-"Default shortcuts are shown in the table.\n"
-"\n"
-"| Shortcut      | Description\n"
-"| --------------------------------\n"
-"| `Ctrl+F5` -- Displays the Global Main Menu\n"
-msgstr ""
-"## キーボードショートカット\n"
-"\n"
-"ScummVMは様々なゲーム内キーボードおよびマウスショートカットをサポートしてお"
-"り、バージョン 2.2.0 以降は「キーマップ」または設定ファイルで設定できます。\n"
-"\n"
-"ゲーム固有の操作については、プレイしているゲームの [wiki](https://wiki."
-"scummvm.org/index.php?title=Category:Supported_Games) を参照してください。\n"
-"\n"
-"デフォルトのショートカットを表に示します。\n"
-"\n"
-"| ショートカット      | 詳細\n"
-"| --------------------------------\n"
-"| `Ctrl+F5` -- グローバルメインメニューを表示\n"
-
-#: backends/platform/sdl/sdl.cpp:1026
-msgid "| `Cmd+q`    -- Quit (macOS)\n"
-msgstr "| `Cmd+q`    -- 終了(macOS)\n"
-
-#: backends/platform/sdl/sdl.cpp:1028
-msgid "| `Alt+F4`  -- Quit (Windows)\n"
-msgstr "| `Alt+F4`  -- 終了(Windows)\n"
-
-#: backends/platform/sdl/sdl.cpp:1030
-msgid "| `Ctrl+q`  -- Quit (Linux/Unix)\n"
-msgstr "| `Ctrl+q`  -- 終了(Linux/Unix)\n"
-
-#: backends/platform/sdl/sdl.cpp:1031
-msgid "| `Ctrl+z`  -- Quit (other platforms)\n"
-msgstr "| `Ctrl+z`  -- 終了(その他OS)\n"
-
-#: backends/platform/sdl/sdl.cpp:1034
-msgid ""
-"| `Ctrl+u`  -- Mutes all sounds\n"
-"| `Ctrl+m`  -- Toggles mouse capture\n"
-"| `Ctrl+Alt` and `9` or `0` -- Cycles forwards/backwards between graphics "
-"filters\n"
-"| `Ctrl+Alt` and `+` or `-` -- Increases/decreases the scale factor\n"
-"| `Ctrl+Alt+a` -- Toggles aspect ratio correction on/off\n"
-"| `Ctrl+Alt+f` -- Toggles between nearest neighbor and bilinear "
-"interpolation (graphics filtering on/off)\n"
-"| `Ctrl+Alt+s` -- Cycles through stretch modes\n"
-"| `Alt+Enter`   -- Toggles full screen/windowed mode\n"
-"| `Alt+s`          -- Takes a screenshot\n"
-"| `Ctrl+F7`       -- Opens virtual keyboard (if enabled). This can also be "
-"opened with a long press of the middle mouse button or wheel.\n"
-"| `Ctrl+Alt+d` -- Opens the ScummVM debugger\n"
-msgstr ""
-"| `Ctrl+u`  -- すべてのサウンドをミュート\n"
-"| `Ctrl+m`  -- マウスキャプチャーを切り替え\n"
-"| `Ctrl+Alt` and `9` or `0` -- グラフィックフィルターを切り替え\n"
-"| `Ctrl+Alt` and `+` or `-` -- スケールファクターを増減\n"
-"| `Ctrl+Alt+a` -- アスペクト比補正のON/OFFを切り替え\n"
-"| `Ctrl+Alt+f` -- 最近傍補間/バイリニア補間の切り替え(フィルタリングのON/"
-"OFF)\n"
-"| `Ctrl+Alt+s` -- ストレッチモードを切り替え\n"
-"| `Alt+Enter`   -- フルスクリーン/ウィンドウモードの切り替え\n"
-"| `Alt+s`          -- スクリーンショットを撮る\n"
-"| `Ctrl+F7`       -- 仮想キーボードを開く(有効な場合)。マウスの中ボタン、また"
-"はホイール長押しでも対応可能。\n"
-"| `Ctrl+Alt+d` -- ScummVMデバッガーを開く\n"
-
-#: backends/platform/sdl/sdl.cpp:1048
+#: backends/platform/sdl/sdl.cpp:1013
 msgid ""
 "## Keyboard shortcuts\n"
 "\n"
@@ -4998,23 +4919,23 @@ msgstr ""
 "| --------------|------------------\n"
 "| `Ctrl+F5` | グローバルメインメニューを表示\n"
 
-#: backends/platform/sdl/sdl.cpp:1060
+#: backends/platform/sdl/sdl.cpp:1025
 msgid "| `Cmd+q`    | Quit (macOS)\n"
 msgstr "| `Cmd+q`    | 終了(macOS)\n"
 
-#: backends/platform/sdl/sdl.cpp:1062
+#: backends/platform/sdl/sdl.cpp:1027
 msgid "| `Alt+F4`  | Quit (Windows)\n"
 msgstr "| `Alt+F4`  | 終了(Windows)\n"
 
-#: backends/platform/sdl/sdl.cpp:1064
+#: backends/platform/sdl/sdl.cpp:1029
 msgid "| `Ctrl+q`  | Quit (Linux/Unix)\n"
 msgstr "| `Ctrl+q`  | 終了(Linux/Unix)\n"
 
-#: backends/platform/sdl/sdl.cpp:1065
+#: backends/platform/sdl/sdl.cpp:1030
 msgid "| `Ctrl+z`  | Quit (other platforms)\n"
 msgstr "| `Ctrl+z`  | 終了(その他OS)\n"
 
-#: backends/platform/sdl/sdl.cpp:1068
+#: backends/platform/sdl/sdl.cpp:1033
 msgid ""
 "| `Ctrl+u`  | Mutes all sounds\n"
 "| `Ctrl+m`  | Toggles mouse capture\n"
@@ -5495,7 +5416,7 @@ msgid "Quick load or save game isn't supported in this location"
 msgstr ""
 "このロケーションでは、セーブまたはクイックロードはサポートされていません"
 
-#: engines/agos/saveload.cpp:161 engines/scumm/scumm.cpp:2846
+#: engines/agos/saveload.cpp:161 engines/scumm/scumm.cpp:2854
 #, c-format
 msgid ""
 "Failed to load saved game from file:\n"
@@ -5506,7 +5427,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: engines/agos/saveload.cpp:196 engines/scumm/scumm.cpp:2833
+#: engines/agos/saveload.cpp:196 engines/scumm/scumm.cpp:2841
 #, c-format
 msgid ""
 "Failed to save game to file:\n"
@@ -5517,7 +5438,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: engines/agos/saveload.cpp:204 engines/scumm/scumm.cpp:2866
+#: engines/agos/saveload.cpp:204 engines/scumm/scumm.cpp:2874
 #, c-format
 msgid ""
 "Successfully saved game in file:\n"
@@ -5776,8 +5697,8 @@ msgstr "ファンの翻訳者は、ScummVMに翻訳が組み込まれる事を�
 #: engines/mohawk/detection_tables.h:2526
 #: engines/mohawk/detection_tables.h:3628
 #: engines/mohawk/detection_tables.h:3643 engines/myst3/detection.cpp:142
-#: engines/saga/detection_tables.h:46 engines/sci/detection_tables.h:5283
-#: engines/sci/detection_tables.h:5291 engines/stark/detection.cpp:319
+#: engines/saga/detection_tables.h:46 engines/sci/detection_tables.h:5292
+#: engines/sci/detection_tables.h:5300 engines/stark/detection.cpp:319
 #: engines/teenagent/detection.cpp:117 engines/toltecs/detection.cpp:210
 #: engines/trecision/detection.cpp:201 engines/zvision/detection_tables.h:129
 msgid "Missing game code"
@@ -8243,11 +8164,11 @@ msgstr "Casio MT-540"
 msgid "Casio CT-460 / CSM-1"
 msgstr "Casio CT-460 / CSM-1"
 
-#: engines/sci/detection_tables.h:4519
+#: engines/sci/detection_tables.h:4528
 msgid "This demo uses an unimplemented version of Robot videos"
 msgstr "本デモでは、未実装版のRobot動画を使用しています"
 
-#: engines/sci/detection_tables.h:4574
+#: engines/sci/detection_tables.h:4583
 msgid "Incomplete game detected. You have to copy data from all the CDs."
 msgstr ""
 "不完全なゲームが検出されました。全てのCDからデータをコピーする必要がありま"
@@ -8459,7 +8380,7 @@ msgid "Your Name:"
 msgstr "ユーザー名："
 
 #. I18N: Button, start hosting online multiplayer game
-#: engines/scumm/dialog-createsession.cpp:49 engines/scumm/scumm.cpp:3853
+#: engines/scumm/dialog-createsession.cpp:49 engines/scumm/scumm.cpp:3861
 msgid "Host"
 msgstr "ホスト"
 
@@ -8469,7 +8390,7 @@ msgid "Querying games..."
 msgstr "ゲームに照会中..."
 
 #. I18N: Join online multiplayer game
-#: engines/scumm/dialog-sessionselector.cpp:64 engines/scumm/scumm.cpp:3853
+#: engines/scumm/dialog-sessionselector.cpp:64 engines/scumm/scumm.cpp:3861
 msgid "Join"
 msgstr "参加"
 
@@ -9160,19 +9081,19 @@ msgstr "右へ飛ぶ"
 msgid "Fly to lower right"
 msgstr "右へ降下"
 
-#: engines/scumm/input.cpp:1304
+#: engines/scumm/input.cpp:1309
 msgid "Snap scroll on"
 msgstr "スナップスクロールをオン"
 
-#: engines/scumm/input.cpp:1306
+#: engines/scumm/input.cpp:1311
 msgid "Snap scroll off"
 msgstr "スナップスクロールをオフ"
 
-#: engines/scumm/input.cpp:1319
+#: engines/scumm/input.cpp:1324
 msgid "Music volume: "
 msgstr "音楽の音量： "
 
-#: engines/scumm/input.cpp:1336
+#: engines/scumm/input.cpp:1341
 msgid "Subtitle speed: "
 msgstr "字幕の速度： "
 
@@ -9314,7 +9235,7 @@ msgstr "武器を切り替え"
 msgid "Win the bike fight cheat"
 msgstr "バイク戦闘を省略"
 
-#: engines/scumm/scumm.cpp:290
+#: engines/scumm/scumm.cpp:292
 msgid ""
 "You have enabled 'aspect ratio correction'. However, FM-TOWNS' natural "
 "resolution is 320x240, which doesn't allow aspect ratio correction.\n"
@@ -9326,23 +9247,16 @@ msgstr ""
 "アスペクト比の補正は、[エンジン]タブで解像度を320x200にトリミングすることで実"
 "現できます。"
 
-#: engines/scumm/scumm.cpp:1163
-msgid ""
-"Could not find the 'Indy' Macintosh executable. High-resolution fonts will\n"
-"be disabled."
+#: engines/scumm/scumm.cpp:1169
+msgid "This game requires the 'Indy' Macintosh executable for its fonts."
 msgstr ""
-"「Indy」のMacintosh用実行ファイルが見つかりません。\n"
-"高解像度のフォントは使用できません。"
 
-#: engines/scumm/scumm.cpp:1189
+#: engines/scumm/scumm.cpp:1193
 msgid ""
-"Could not find the 'Loom' Macintosh executable. Music and high-resolution\n"
-"versions of font and cursor will be disabled."
+"This game requires the 'Loom' Macintosh executable for its music and fonts."
 msgstr ""
-"Macintosh用実行ファイル「Loom」が見つかりません。\n"
-"音楽、高解像度のフォントやカーソルは使えなくなります。"
 
-#: engines/scumm/scumm.cpp:1211
+#: engines/scumm/scumm.cpp:1213
 msgid ""
 "Could not find the 'Monkey Island' Macintosh executable to read the\n"
 "instruments from. Music will be disabled."
@@ -9351,7 +9265,7 @@ msgstr ""
 "ん。\n"
 "音楽は無効になります。"
 
-#: engines/scumm/scumm.cpp:1562
+#: engines/scumm/scumm.cpp:1564
 msgid ""
 "Audio files compressed with ScummVM Tools were detected; *.BUN/*.SOU\n"
 "compression is not supported anymore for this game, audio will be disabled.\n"
@@ -9361,7 +9275,7 @@ msgstr ""
 "このゲームではサポートされていないため、オーディオは無効になります。\n"
 "オリジナルのメディアから、圧縮せずにコピーしてください。"
 
-#: engines/scumm/scumm.cpp:2036
+#: engines/scumm/scumm.cpp:2040
 #, c-format
 msgid ""
 "Native MIDI support requires the Roland Upgrade from LucasArts,\n"
@@ -9370,7 +9284,7 @@ msgstr ""
 "ネイティブMIDIのサポートには、LucasArts提供のthe Roland Upgradeが必要です。\n"
 "しかし%sがありません。代わりにAdLibを使用します。"
 
-#: engines/scumm/scumm.cpp:2052
+#: engines/scumm/scumm.cpp:2056
 msgid ""
 "This particular version of Monkey Island 1 is known to miss some\n"
 "required resources for MT-32. Using AdLib instead."
@@ -9378,7 +9292,7 @@ msgstr ""
 "このMonkey Island 1の特定のバージョンは、MT-32に必要な\n"
 "リソースが欠落しています。AdLibを代用します。"
 
-#: engines/scumm/scumm.cpp:3742
+#: engines/scumm/scumm.cpp:3750
 msgid ""
 "Usually, Maniac Mansion would start now. But for that to work, the game "
 "files for Maniac Mansion have to be in the 'Maniac' directory inside the "
@@ -9388,7 +9302,7 @@ msgstr ""
 "ディレクトリーの「Maniac」フォルダー内にゲームファイルを配置し、ゲームが"
 "ScummVMに追加されていなければなりません。"
 
-#: engines/scumm/scumm.cpp:3853
+#: engines/scumm/scumm.cpp:3861
 msgid "Would you like to host or join a network play session?"
 msgstr "セッションを開催、または参加しますか?"
 
@@ -9645,7 +9559,7 @@ msgstr "古いフォーマットのデータを残す"
 msgid "Keep the new one"
 msgstr "新しいフォーマットのデータを残す"
 
-#: engines/sword1/logic.cpp:1702
+#: engines/sword1/logic.cpp:1732
 msgid "This is the end of the Broken Sword 1 Demo"
 msgstr "Broken Sword 1のデモはここで終了です"
 
@@ -10909,6 +10823,96 @@ msgstr ""
 "Arialが必要です。LiberationFontsを使用する場合、LiberationMono、"
 "LiberationSans、LiberationSerifが必要です。GNUFreeFontを使用する場合、"
 "FreeMono、FreeSans、FreeSerifが必要です。"
+
+#~ msgid ""
+#~ "Could not find the 'Indy' Macintosh executable. High-resolution fonts "
+#~ "will\n"
+#~ "be disabled."
+#~ msgstr ""
+#~ "「Indy」のMacintosh用実行ファイルが見つかりません。\n"
+#~ "高解像度のフォントは使用できません。"
+
+#~ msgid ""
+#~ "Could not find the 'Loom' Macintosh executable. Music and high-"
+#~ "resolution\n"
+#~ "versions of font and cursor will be disabled."
+#~ msgstr ""
+#~ "Macintosh用実行ファイル「Loom」が見つかりません。\n"
+#~ "音楽、高解像度のフォントやカーソルは使えなくなります。"
+
+#~ msgid ""
+#~ "## Keyboard shortcuts\n"
+#~ "\n"
+#~ "ScummVM supports various in-game keyboard and mouse shortcuts, and since "
+#~ "version 2.2.0 these can be manually configured in the **Keymaps tab**, or "
+#~ "in the **configuration file**.\n"
+#~ "\n"
+#~ "For game-specific controls, see the [wiki entry](https://wiki.scummvm.org/"
+#~ "index.php?title=Category:Supported_Games) for the game you are playing.\n"
+#~ "\n"
+#~ "Default shortcuts are shown in the table.\n"
+#~ "\n"
+#~ "| Shortcut      | Description\n"
+#~ "| --------------------------------\n"
+#~ "| `Ctrl+F5` -- Displays the Global Main Menu\n"
+#~ msgstr ""
+#~ "## キーボードショートカット\n"
+#~ "\n"
+#~ "ScummVMは様々なゲーム内キーボードおよびマウスショートカットをサポートして"
+#~ "おり、バージョン 2.2.0 以降は「キーマップ」または設定ファイルで設定できま"
+#~ "す。\n"
+#~ "\n"
+#~ "ゲーム固有の操作については、プレイしているゲームの [wiki](https://wiki."
+#~ "scummvm.org/index.php?title=Category:Supported_Games) を参照してくださ"
+#~ "い。\n"
+#~ "\n"
+#~ "デフォルトのショートカットを表に示します。\n"
+#~ "\n"
+#~ "| ショートカット      | 詳細\n"
+#~ "| --------------------------------\n"
+#~ "| `Ctrl+F5` -- グローバルメインメニューを表示\n"
+
+#~ msgid "| `Cmd+q`    -- Quit (macOS)\n"
+#~ msgstr "| `Cmd+q`    -- 終了(macOS)\n"
+
+#~ msgid "| `Alt+F4`  -- Quit (Windows)\n"
+#~ msgstr "| `Alt+F4`  -- 終了(Windows)\n"
+
+#~ msgid "| `Ctrl+q`  -- Quit (Linux/Unix)\n"
+#~ msgstr "| `Ctrl+q`  -- 終了(Linux/Unix)\n"
+
+#~ msgid "| `Ctrl+z`  -- Quit (other platforms)\n"
+#~ msgstr "| `Ctrl+z`  -- 終了(その他OS)\n"
+
+#~ msgid ""
+#~ "| `Ctrl+u`  -- Mutes all sounds\n"
+#~ "| `Ctrl+m`  -- Toggles mouse capture\n"
+#~ "| `Ctrl+Alt` and `9` or `0` -- Cycles forwards/backwards between graphics "
+#~ "filters\n"
+#~ "| `Ctrl+Alt` and `+` or `-` -- Increases/decreases the scale factor\n"
+#~ "| `Ctrl+Alt+a` -- Toggles aspect ratio correction on/off\n"
+#~ "| `Ctrl+Alt+f` -- Toggles between nearest neighbor and bilinear "
+#~ "interpolation (graphics filtering on/off)\n"
+#~ "| `Ctrl+Alt+s` -- Cycles through stretch modes\n"
+#~ "| `Alt+Enter`   -- Toggles full screen/windowed mode\n"
+#~ "| `Alt+s`          -- Takes a screenshot\n"
+#~ "| `Ctrl+F7`       -- Opens virtual keyboard (if enabled). This can also "
+#~ "be opened with a long press of the middle mouse button or wheel.\n"
+#~ "| `Ctrl+Alt+d` -- Opens the ScummVM debugger\n"
+#~ msgstr ""
+#~ "| `Ctrl+u`  -- すべてのサウンドをミュート\n"
+#~ "| `Ctrl+m`  -- マウスキャプチャーを切り替え\n"
+#~ "| `Ctrl+Alt` and `9` or `0` -- グラフィックフィルターを切り替え\n"
+#~ "| `Ctrl+Alt` and `+` or `-` -- スケールファクターを増減\n"
+#~ "| `Ctrl+Alt+a` -- アスペクト比補正のON/OFFを切り替え\n"
+#~ "| `Ctrl+Alt+f` -- 最近傍補間/バイリニア補間の切り替え(フィルタリングのON/"
+#~ "OFF)\n"
+#~ "| `Ctrl+Alt+s` -- ストレッチモードを切り替え\n"
+#~ "| `Alt+Enter`   -- フルスクリーン/ウィンドウモードの切り替え\n"
+#~ "| `Alt+s`          -- スクリーンショットを撮る\n"
+#~ "| `Ctrl+F7`       -- 仮想キーボードを開く(有効な場合)。マウスの中ボタン、"
+#~ "またはホイール長押しでも対応可能。\n"
+#~ "| `Ctrl+Alt+d` -- ScummVMデバッガーを開く\n"
 
 #~ msgid "Controls Help"
 #~ msgstr "操作ヘルプ"

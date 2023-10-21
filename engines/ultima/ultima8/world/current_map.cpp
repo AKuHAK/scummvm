@@ -435,7 +435,7 @@ static inline bool ChunkOnScreen(int32 cx, int32 cy, int32 sleft, int32 stop, in
 	const bool top_clear = cytop >= sbot;
 	const bool bot_clear = cybot <= stop;
 
-	const bool clear = right_clear | left_clear | top_clear | bot_clear;
+	const bool clear = right_clear || left_clear || top_clear || bot_clear;
 
 	return !clear;
 }
@@ -570,7 +570,7 @@ void CurrentMap::areaSearch(UCList *itemlist, const uint8 *loopscript,
 		check->getFootpadWorld(xd, yd, zd);
 	}
 
-	const Rect searchrange(x - xd - range, y - yd - range, x + range, y + range);
+	const Box searchrange(x + range, y + range, 0, xd + range * 2, yd + range * 2, INT_MAX_VALUE);
 
 	int minx = ((x - xd - range) / _mapChunkSize) - 1;
 	int maxx = ((x + range) / _mapChunkSize) + 1;
@@ -598,30 +598,22 @@ void CurrentMap::areaSearch(UCList *itemlist, const uint8 *loopscript,
 				if (item->hasExtFlags(Item::EXT_SPRITE))
 					continue;
 
-				// check if item is in range?
-				int32 ix, iy, iz;
-				item->getLocation(ix, iy, iz);
+				// check if item is in range
+				const Box ib = item->getWorldBox();
+				if (searchrange.overlapsXY(ib)) {
+					// check item against loopscript
+					if (item->checkLoopScript(loopscript, scriptsize)) {
+						assert(itemlist->getElementSize() == 2);
+						itemlist->appenduint16(item->getObjId());
+					}
 
-				int32 ixd, iyd, izd;
-				item->getFootpadWorld(ixd, iyd, izd);
-
-				const Rect itemrect(ix - ixd, iy - iyd, ix, iy);
-
-				if (!itemrect.intersects(searchrange))
-					continue;
-
-				// check item against loopscript
-				if (item->checkLoopScript(loopscript, scriptsize)) {
-					assert(itemlist->getElementSize() == 2);
-					itemlist->appenduint16(item->getObjId());
-				}
-
-				if (recurse) {
-					// recurse into child-containers
-					const Container *container = dynamic_cast<const Container *>(item);
-					if (container)
-						container->containerSearch(itemlist, loopscript,
-						                           scriptsize, recurse);
+					if (recurse) {
+						// recurse into child-containers
+						const Container *container = dynamic_cast<const Container *>(item);
+						if (container)
+							container->containerSearch(itemlist, loopscript,
+													   scriptsize, recurse);
+					}
 				}
 			}
 		}
@@ -631,25 +623,16 @@ void CurrentMap::areaSearch(UCList *itemlist, const uint8 *loopscript,
 void CurrentMap::surfaceSearch(UCList *itemlist, const uint8 *loopscript,
 							   uint32 scriptsize, const Item *check,
 							   bool above, bool below, bool recurse) const {
-	int32 origin[3];
-	int32 dims[3];
-	check->getLocationAbsolute(origin[0], origin[1], origin[2]);
-	check->getFootpadWorld(dims[0], dims[1], dims[2]);
-	surfaceSearch(itemlist, loopscript, scriptsize, check->getObjId(),
-	              origin, dims, above, below, recurse);
-}
+	int32 x, y, z;
+	int32 xd, yd, zd;
+	check->getLocationAbsolute(x, y, z);
+	check->getFootpadWorld(xd, yd, zd);
+	const Box searchrange(x, y, z, xd, yd, zd);
 
-void CurrentMap::surfaceSearch(UCList *itemlist, const uint8 *loopscript,
-							   uint32 scriptsize, ObjId check,
-							   int32 origin[3], int32 dims[3],
-							   bool above, bool below, bool recurse) const {
-	const Rect searchrange(origin[0] - dims[0], origin[1] - dims[1],
-	                       origin[0], origin[1]);
-
-	int minx = ((origin[0] - dims[0]) / _mapChunkSize) - 1;
-	int maxx = ((origin[0]) / _mapChunkSize) + 1;
-	int miny = ((origin[1] - dims[1]) / _mapChunkSize) - 1;
-	int maxy = ((origin[1]) / _mapChunkSize) + 1;
+	int minx = ((x - xd) / _mapChunkSize) - 1;
+	int maxx = (x / _mapChunkSize) + 1;
+	int miny = ((y - yd) / _mapChunkSize) - 1;
+	int maxy = (y / _mapChunkSize) + 1;
 	clipMapChunks(minx, maxx, miny, maxy);
 
 	for (int cy = miny; cy <= maxy; cy++) {
@@ -660,45 +643,37 @@ void CurrentMap::surfaceSearch(UCList *itemlist, const uint8 *loopscript,
 
 				const Item *item = *iter;
 
-				if (item->getObjId() == check)
+				if (item->getObjId() == check->getObjId())
 					continue;
 				if (item->hasExtFlags(Item::EXT_SPRITE))
 					continue;
 
 				// check if item is in range?
-				int32 ix, iy, iz;
-				item->getLocation(ix, iy, iz);
-				int32 ixd, iyd, izd;
-				item->getFootpadWorld(ixd, iyd, izd);
+				const Box ib = item->getWorldBox();
+				if (searchrange.overlapsXY(ib)) {
+					bool ok = false;
 
-				const Rect itemrect(ix - ixd, iy - iyd, ix, iy);
+					if (above && ib._z == (searchrange._z + searchrange._zd)) {
+						ok = true;
+						// Only recursive if tops aren't same (i.e. NOT flat)
+						if (recurse && (ib._zd + ib._z != searchrange._z + searchrange._zd))
+							surfaceSearch(itemlist, loopscript, scriptsize, item, true, false, true);
+					}
 
-				if (!itemrect.intersects(searchrange))
-					continue;
+					if (below && searchrange._z == (ib._z + ib._zd)) {
+						ok = true;
+						// Only recursive if bottoms aren't same (i.e. NOT flat)
+						if (recurse && (ib._z != searchrange._z))
+							surfaceSearch(itemlist, loopscript, scriptsize, item, false, true, true);
+					}
 
-				bool ok = false;
-
-				if (above && iz == (origin[2] + dims[2])) {
-					ok = true;
-					// Only recursive if tops aren't same (i.e. NOT flat)
-					if (recurse && (izd + iz != origin[2] + dims[2]))
-						surfaceSearch(itemlist, loopscript, scriptsize, item, true, false, true);
-				}
-
-				if (below && origin[2] == (iz + izd)) {
-					ok = true;
-					// Only recursive if bottoms aren't same (i.e. NOT flat)
-					if (recurse && (izd != dims[2]))
-						surfaceSearch(itemlist, loopscript, scriptsize, item, false, true, true);
-				}
-
-				if (!ok)
-					continue;
-
-				// check item against loopscript
-				if (item->checkLoopScript(loopscript, scriptsize)) {
-					assert(itemlist->getElementSize() == 2);
-					itemlist->appenduint16(item->getObjId());
+					if (ok) {
+						// check item against loopscript
+						if (item->checkLoopScript(loopscript, scriptsize)) {
+							assert(itemlist->getElementSize() == 2);
+							itemlist->appenduint16(item->getObjId());
+						}
+					}
 				}
 			}
 		}
@@ -788,9 +763,7 @@ PositionInfo CurrentMap::getPositionInfo(const Box &target, const Box &start, ui
 					}
 				}
 
-				// check xy overlap
-				if (target._x > ib._x - ib._xd && target._x - target._xd < ib._x &&
-					target._y > ib._y - ib._yd && target._y - target._yd < ib._y) {
+				if (target.overlapsXY(ib)) {
 					// check support
 					if (si->_flags & supportmask && ib._z + ib._zd > supportz && ib._z + ib._zd <= target._z) {
 						supportz = ib._z + ib._zd;
@@ -803,10 +776,10 @@ PositionInfo CurrentMap::getPositionInfo(const Box &target, const Box &start, ui
 					}
 				}
 
-				// check xy center
-				if (midx >= ib._x - ib._xd && midx <= ib._x && midy >= ib._y - ib._yd && midy <= ib._y) {
+				// check bottom center
+				if (ib.isBelow(midx, midy, target._z)) {
 					// check land
-					if (si->_flags & landmask && ib._z + ib._zd > landz && ib._z + ib._zd <= target._z) {
+					if (si->_flags & landmask && ib._z + ib._zd > landz) {
 						info.land = item;
 						landz = ib._z + ib._zd;
 					}
@@ -817,7 +790,13 @@ PositionInfo CurrentMap::getPositionInfo(const Box &target, const Box &start, ui
 
 	info.valid = info.blocker == nullptr;
 	// Partial support allowed if land is close
-	info.supported = supportz == target._z && landz + 8 >= target._z;
+	if (supportz == target._z && landz + 8 >= target._z)
+		info.supported = true;
+
+	// Mark supported at minimum z
+	if (target._z <= 0)
+		info.supported = true;
+
 	return info;
 }
 
