@@ -18,9 +18,8 @@ OBJS_MODULES := $(addprefix $(SCUMMVM_PATH)/, $(foreach MODULE,$(MODULES),$(MODU
 	$(CORE_PATH)/android-fs-factory.o
 
 #TODO:
-# -O2 or higher causes segmentation fault with some engines (e.g. hopkins)
 # -Fortify triggers abort with some engines (e.g. sword25)
-COREFLAGS := $(DEFINES) -DUSE_CXX11 -O1 -U_FORTIFY_SOURCE
+COREFLAGS := $(DEFINES) -DUSE_CXX11 -U_FORTIFY_SOURCE
 
 ifeq ($(TARGET_ARCH),arm)
   COREFLAGS += -D_ARM_ASSEM_
